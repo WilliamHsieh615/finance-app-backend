@@ -1,6 +1,6 @@
 # FinFun：方方記帳，讓理財變有趣
 
-    USE finance_app
+    USE finance_app;
     
     -- 使用者表
     CREATE TABLE users (
@@ -23,8 +23,8 @@
         note VARCHAR(255),                                 -- 備註
         cycle_day TINYINT NULL,                            -- 結帳日 (1~31，僅使用信用卡時顯示此欄位)
         due_day TINYINT NULL,                              -- 付款日 (1~31，僅使用信用卡時顯示此欄位)
-        created_date DATETIME NOT NULL,		                 -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,		                 -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,		               -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,		               -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
@@ -34,8 +34,8 @@
         user_id BIGINT NOT NULL,
         name VARCHAR(50) NOT NULL,                         -- 大分類名稱
         type ENUM('income','expense','transfer') NOT NULL, -- 分類類型
-        created_date DATETIME NOT NULL,		                 -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,		                 -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,		               -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,		               -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
@@ -46,8 +46,8 @@
         category_group_id BIGINT NOT NULL,                 -- (對應大分類)
         name VARCHAR(50) NOT NULL,                         -- 小分類名稱
         type ENUM('income','expense','transfer') NOT NULL, -- (冗餘，協助報表快速查找，後端應由注意是否有與大分類)
-        created_date DATETIME NOT NULL,		                 -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,		                 -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,		               -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,		               -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE
     );
@@ -58,7 +58,7 @@
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
         name VARCHAR(100) NOT NULL,                        -- 商店 / 公司名稱
-        type VARCHAR(50) NOT NULL,		                     -- 商店 / 公司類型
+        type VARCHAR(50) NOT NULL,		                   -- 商店 / 公司類型
         created_date DATETIME NOT NULL,	                   -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL,	                   -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -87,8 +87,8 @@
         amount DECIMAL(15,2) NOT NULL,
         note VARCHAR(255),
         transaction_date DATETIME NOT NULL,                 -- 交易時間 (由後端寫入)
-        created_date DATETIME NOT NULL,		                  -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,		                  -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,		                -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,		                -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
@@ -107,11 +107,11 @@
         counterparty_type_id BIGINT NULL,
         amount DECIMAL(15,2) NOT NULL,
         note VARCHAR(255),
-        recurrence_rule VARCHAR(50) NOT NULL, -- 週期規則(如 一月一次、每日一次 等等，應由後端設定)
+        recurrence_rule VARCHAR(50) NOT NULL,               -- 週期規則(如 一月一次、每日一次 等等，應由後端設定)
         start_date DATETIME NOT NULL,                       -- 開始時間 (由後端寫入)
         end_date DATETIME,                                  -- 結束時間 (由後端寫入)
-        created_date DATETIME NOT NULL,		                  -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,		                  -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,		                -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,		                -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
