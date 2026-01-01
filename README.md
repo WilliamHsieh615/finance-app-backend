@@ -12,12 +12,29 @@
         updated_date DATETIME NOT NULL                     -- 更新時間 (由後端寫入)
     );
 
+    -- 國別表
+    CREATE TABLE countries (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        code CHAR(2) NOT NULL UNIQUE,                      -- TW / US / JP (ISO 3166-1)
+        name VARCHAR(50) NOT NULL                          -- 台灣 / 美國 / 日本
+    );
+
+    -- 貨幣表
+    CREATE TABLE currencies (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        country_id BIGINT NOT NULL,
+        code CHAR(3) NOT NULL UNIQUE,                      -- TWD / USD / JPY
+        name VARCHAR(50) NOT NULL,                         -- 新台幣 / 美元
+        symbol VARCHAR(10),                                -- NT$ / $
+        FOREIGN KEY (country_id) REFERENCES countries(id)
+    );
+
     -- 帳本表
     CREATE TABLE ledgers (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
         name VARCHAR(100) NOT NULL,                         -- 帳本名稱
-        type VARCHAR(50) NOT NULL,                          -- 帳本類型 (如 收支帳、投資帳、負債帳、應收帳款、固定資產帳、庫存帳、自訂帳，由後端定義，不使用 ENUM，方便未來擴充)
+        type VARCHAR(50) NOT NULL,                          -- 帳本類型 (如 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳，由後端定義，不使用 ENUM，方便未來擴充)
         note VARCHAR(255),                                  -- 備註
         created_date DATETIME NOT NULL,
         updated_date DATETIME NOT NULL,
@@ -38,27 +55,40 @@
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    -- 帳戶種類表
+    CREATE TABLE account_types (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        ledger_type VARCHAR(50) NOT NULL,                   -- income / investment / debt / asset / inventory
+        code VARCHAR(50) NOT NULL,                          -- cash / bank / stock / bond / loan / insurance
+        name VARCHAR(50) NOT NULL,                          -- 帳戶性質（如：
+                                                               收支帳下的現金、信用卡、銀行，
+                                                               投資帳下的股票、基金、債券、外幣、虛擬貨幣、貴金屬、定存、保險，
+                                                               負債帳下的房貸、信貸、車貸，
+                                                               應收帳下的借出款，
+                                                               固定資產帳下的房貸產、汽車、機車、家電、3C
+                                                               存貨帳下的生活用品或是備品
+        note VARCHAR(255)
+    );
+
     -- 帳戶表
     CREATE TABLE accounts (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
         ledger_id BIGINT NOT NULL,
-        name VARCHAR(50) NOT NULL,                         -- 帳戶名稱
-        type VARCHAR(50) NOT NULL,                         -- 帳戶性質（如：
-                                                              收支帳下的現金、信用卡、銀行，
-                                                              投資帳下的股票、基金、債券、外幣、虛擬貨幣、貴金屬、定存、保險，
-                                                              負債帳下的房貸、信貸、車貸，
-                                                              應收帳下的借出款，
-                                                              固定資產帳下的房貸產、汽車、機車、家電、3C
-                                                              存貨帳下的生活用品或是備品
-                                                              由後端定義，不使用 ENUM，方便未來擴充）
+        account_type_id BIGINT NOT NULL,
+        currency_id BIGINT NOT NULL,
+
+        name VARCHAR(100) NOT NULL,
         balance DECIMAL(15,2) DEFAULT 0,                   -- 初始餘額
-        currency CHAR(3) DEFAULT 'TWD',                    -- 幣別 (應獨立成一個資料表)
         note VARCHAR(255),                                 -- 備註
+        
         created_date DATETIME NOT NULL,		               -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL,		               -- 更新時間 (由後端寫入)
+        
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
+        FOREIGN KEY (account_type_id) REFERENCES account_types(id),
+        FOREIGN KEY (currency_id) REFERENCES currencies(id)
     );
 
     -- 帳戶表子表 (收支帳 → 信用卡)
@@ -71,23 +101,41 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
     );
 
+    -- 金融機構表
+    CREATE TABLE financial_institutions (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        user_id BIGINT NOT NULL,
+        name VARCHAR(100) NOT NULL,                        -- 國泰世華 / 富邦 / IB / Binance
+        type VARCHAR(50) NOT NULL,                         -- bank / broker / insurance / exchange / platform
+        country_id BIGINT,
+        note VARCHAR(255),
+        created_date DATETIME NOT NULL,
+        updated_date DATETIME NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (country_id) REFERENCES countries(id)
+    );
+
     -- 帳戶表子表 (投資帳 → 股票、基金、債券、外幣、貴金屬）
     CREATE TABLE investment_accounts (
         account_id BIGINT PRIMARY KEY,
-        investment_type VARCHAR(50) NOT NULL,              -- stock / fund / bond / forex / crypto / gold
+        institution_id BIGINT,
         broker VARCHAR(100),                               -- 券商 / 平台
+        market VARCHAR(50),                                -- 投資的市場(如 台灣 美國 日本 中國 歐州 亞洲 新興國家 開發中國家 等等)
         risk_level TINYINT,                                -- 風險等級（1~5，可選）
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (institution_id) REFERENCES financial_institutions(id)
     );
 
     -- 帳戶表子表 (投資帳 → 定存、保險）
     CREATE TABLE term_investment_accounts (
         account_id BIGINT PRIMARY KEY,
+        institution_id BIGINT,
         interest_rate DECIMAL(5,2),                        -- 利率 %
         start_date DATE NOT NULL,                          -- 開始日
         end_date DATE NOT NULL,                            -- 到期日
         payout_type VARCHAR(50),                           -- 配息類型 (到期 / 定期配息)
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (institution_id) REFERENCES financial_institutions(id)
     );
 
     -- 帳戶表子表 (負債帳 → 房貸、車貸、信貸）
@@ -182,19 +230,39 @@
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
     );
 
+    -- 帳本交易類型表
+    CREATE TABLE transaction_types (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        ledger_id BIGINT NOT NULL,
+        code VARCHAR(50) NOT NULL,                         -- internal code (buy, sell, interest)
+        name VARCHAR(50) NOT NULL,                         -- 交易類型名稱 (如：
+                                                              income / expense / buy / sell / interest / depreciation / in /
+                                                              投資
+                                                              負債活動 (principal / interest / fee)
+                                                              應收帳款活動 (lend / receive / interest)
+                                                              固定資產活動 (depreciation / repair / revalue)
+                                                              存貨 (in / out / adjust)
+        direction TINYINT NOT NULL,                        -- 正向 / 負向
+        affects_balance BOOLEAN DEFAULT TRUE,
+        note VARCHAR(255),
+        created_date DATETIME NOT NULL,
+        updated_date DATETIME NOT NULL,
+        UNIQUE (ledger_id, code),
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
+    );
+
+
     -- 交易表
     CREATE TABLE transactions (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
         ledger_id BIGINT NOT NULL,
         account_id BIGINT NOT NULL,
-
-        ledger_type VARCHAR(50) NOT NULL,                   -- (冗餘，協助報表快速查找帳戶類型 income / investment / debt / asset / inventory / custom)
-        transaction_type VARCHAR(50) NOT NULL,              -- 交易類型 (income / expense / buy / sell / interest / depreciation / in / out …，不使用 ENUM，方便未來擴充)
-
+        transaction_type_id BIGINT NOT NULL,
+        
         price DECIMAL(15,2) NULL,                           -- 價格
         quantity DECIMAL(15,4) NULL,                        -- 數量
-        amount DECIMAL(15,2) NOT NULL,                      -- 合計
+        amount DECIMAL(15,2) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
 
         transaction_date DATETIME NOT NULL,                 -- 交易日
         note VARCHAR(255),
@@ -204,7 +272,8 @@
 
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
-        FOREIGN KEY (account_id) REFERENCES accounts(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id),
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id)
     );
 
     -- 交易表子表 (單筆收支)
@@ -212,7 +281,7 @@
         transaction_id BIGINT PRIMARY KEY,
         category_id BIGINT NOT NULL,
         merchant_id BIGINT NULL,
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
     );
@@ -221,10 +290,7 @@
     CREATE TABLE investment_transaction_details (
         transaction_id BIGINT PRIMARY KEY,
         
-        asset_type VARCHAR(50) NOT NULL,                    -- 投資商品總類 (股票、基金、債券、外幣、虛擬貨幣、貴金屬、定存、保險、其他，不使用 ENUM，方便未來擴充)
         asset_code VARCHAR(100) NOT NULL,                   -- 投資商品代號或名稱 (2330、AAPL、USDJPY)
-        market VARCHAR(50) NOT NULL,                        -- 投資的市場(如 台股 美股 日股 A股 歐股 等等)
-        action VARCHAR(50) NOT NULL,                        -- 投資活動 (買、賣、配息或配股，不使用 ENUM，方便未來擴充)
         
         fee DECIMAL(15,2) NOT NULL DEFAULT 0,               -- 手續費
         tax DECIMAL(15,2) DEFAULT 0,                        -- 稅額
@@ -232,41 +298,7 @@
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
     );
 
-    -- 交易表子表 (單筆負債)
-    CREATE TABLE debt_transaction_details (
-        transaction_id BIGINT PRIMARY KEY,
-
-        action VARCHAR(50) NOT NULL,                        -- 負債活動 (principal / interest / fee)
-
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
-    );
-
-    -- 交易表子表 (單筆應收帳款)
-    CREATE TABLE receivable_transactions_details (
-        transaction_id BIGINT PRIMARY KEY,
-
-        action VARCHAR(50) NOT NULL,                        -- 應收帳款活動 (lend / receive / interest)
-
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
-    );
-
-    -- 交易表子表 (單筆固定資產)
-    CREATE TABLE fixed_asset_transaction_details (
-        transaction_id BIGINT PRIMARY KEY,
-
-        action VARCHAR(50) NOT NULL,                        -- 固定資產活動 (depreciation / repair / revalue)
-
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
-    );
-
-    -- 交易表子表 (單筆存貨)
-    CREATE TABLE inventory_transaction_details (
-        transaction_id BIGINT PRIMARY KEY,
-
-        action VARCHAR(50) NOT NULL,                        -- 存貨 (in / out / adjust)
-
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
-    );
+    -- 交易表子表 (單筆負債)、交易表子表 (單筆應收帳款)、交易表子表 (單筆固定資產)、交易表子表 (單筆存貨) 不需要存在
 
     
 
