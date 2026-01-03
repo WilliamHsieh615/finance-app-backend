@@ -121,34 +121,55 @@
     CREATE TABLE financial_institutions (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
-        name VARCHAR(100) NOT NULL,                        -- 國泰世華 / 富邦 / IB / Binance
-        type VARCHAR(50) NOT NULL,                         -- bank / broker / insurance / exchange / platform
         country_id BIGINT,
+        name VARCHAR(100) NOT NULL,                        -- 金融機構名稱 (例如：國泰世華、富邦、IB、Binance)
+        type VARCHAR(50) NOT NULL,                         -- 金融機構類型 (銀行 bank、券商 broker、保險公司 insurance、交易所 exchange、平台 plat)
         note VARCHAR(255),
-        created_date DATETIME NOT NULL,
-        updated_date DATETIME NOT NULL,
+        created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                    -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id)
+    );
+
+    -- 投資市場
+    CREATE TABLE markets (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(30) NOT NULL UNIQUE,                  -- 市場代號 (TW、US、JP、CN、EU、EM、EMERGING、DEVELOPED、ASIA_TIGERS)
+        name VARCHAR(50) NOT NULL,                         -- 市場名稱 (台灣、美國、日本、中國、歐洲、新興市場、開發中國家、亞洲四小龍)
+        market_type VARCHAR(30) NOT NULL,                  -- 市場種類 (地理 geographic、經濟 economic、金融 financial、政治 politics)
+        note VARCHAR(255)
+    );
+
+    -- 市場國別關聯表
+    CREATE TABLE market_countries (
+        market_id BIGINT NOT NULL,
+        country_id BIGINT NOT NULL,
+        PRIMARY KEY (market_id, country_id),
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE,
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
     );
 
     -- 帳戶表子表 (投資帳 → 股票、基金、債券、外幣、貴金屬）
     CREATE TABLE investment_accounts (
         account_id BIGINT PRIMARY KEY,
         financial_institution_id BIGINT,
-        market VARCHAR(50),                                -- 投資的市場(如 台灣 美國 日本 中國 歐州 亞洲 新興國家 開發中國家 等等)
+        market_id BIGINT,
         risk_level TINYINT,                                -- 風險等級（1~5，可選）
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
+        FOREIGN KEY (market_id) REFERENCES markets(id)
     );
 
     -- 帳戶表子表 (投資帳 → 定存、保險）
     CREATE TABLE term_investment_accounts (
         account_id BIGINT PRIMARY KEY,
         financial_institution_id BIGINT,
+        interest_type VARCHAR(20) NOT NULL,                -- 固定 fixed / 流動 floating
         interest_rate DECIMAL(5,2),                        -- 利率 %
         start_date DATE NOT NULL,                          -- 開始日
         end_date DATE NOT NULL,                            -- 到期日
-        payout_type VARCHAR(50),                           -- 配息類型 (到期 / 定期配息)
+        early_termination_allowed BOOLEAN,                 -- 提前贖回
+        payout_frequency VARCHAR(50),                      -- 配息類型 (到期 maturity / 定期配息 月配 monthly、年配 yearly)
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
     );
