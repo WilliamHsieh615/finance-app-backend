@@ -15,30 +15,42 @@
     -- 國別表
     CREATE TABLE countries (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code CHAR(2) NOT NULL UNIQUE,                      -- TW / US / JP (ISO 3166-1)
-        name VARCHAR(50) NOT NULL                          -- 台灣 / 美國 / 日本
+        code CHAR(2) NOT NULL UNIQUE,                      -- ISO 3166-1國別碼 (TW、US、JP...)
+        name VARCHAR(50) NOT NULL                          -- 國籍名稱 (台灣、美國、日本...)
     );
 
     -- 貨幣表
     CREATE TABLE currencies (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         country_id BIGINT NOT NULL,
-        code CHAR(3) NOT NULL UNIQUE,                      -- TWD / USD / JPY
-        name VARCHAR(50) NOT NULL,                         -- 新台幣 / 美元
-        symbol VARCHAR(10),                                -- NT$ / $
+        code CHAR(3) NOT NULL UNIQUE,                      -- 貨幣碼 (TWD、USD、JPY...)
+        name VARCHAR(50) NOT NULL,                         -- 貨幣名稱 (新台幣、美元、日幣...)
+        symbol VARCHAR(10),                                -- 貨幣符號 (NT$、$、¥、€、£、₩、₽...)
         FOREIGN KEY (country_id) REFERENCES countries(id)
     );
+
+    -- 帳本種類表
+    CREATE TABLE ledger_types (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(50) NOT NULL UNIQUE,                  -- cashflow、investment、debt、receivable、fixed_asset、inventory
+        name VARCHAR(50) NOT NULL                          -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
+    );
+
 
     -- 帳本表
     CREATE TABLE ledgers (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
+        ledger_type_id BIGINT NOT NULL,
+        
         name VARCHAR(100) NOT NULL,                         -- 帳本名稱
-        type VARCHAR(50) NOT NULL,                          -- 帳本類型 (如 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳，由後端定義，不使用 ENUM，方便未來擴充)
         note VARCHAR(255),                                  -- 備註
-        created_date DATETIME NOT NULL,
-        updated_date DATETIME NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        
+        created_date DATETIME NOT NULL,                     -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                     -- 更新時間 (由後端寫入)
+        
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id)
     );
 
     -- 帳本成員表 (可設定多人共同維護一個帳戶)
@@ -47,9 +59,9 @@
         user_id BIGINT NOT NULL,
         ledger_id BIGINT NOT NULL,
         role VARCHAR(50) NOT NULL,                          -- 權限設定 (如 owner、admin、editor、viewer，由後端定義，不使用 ENUM，方便未來擴充）
-        joined_date DATETIME NOT NULL,
-        created_date DATETIME NOT NULL,
-        updated_date DATETIME NOT NULL,
+        joined_date DATETIME NOT NULL,                      -- 加入時間
+        created_date DATETIME NOT NULL,                     -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                     -- 更新時間 (由後端寫入)
         UNIQUE KEY uk_ledger_user (ledger_id, user_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -58,7 +70,8 @@
     -- 帳戶種類表
     CREATE TABLE account_types (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        ledger_type VARCHAR(50) NOT NULL,                   -- income / investment / debt / asset / inventory
+        ledger_type_id BIGINT NOT NULL,
+        
         code VARCHAR(50) NOT NULL,                          -- cash / bank / stock / bond / loan / insurance
         name VARCHAR(50) NOT NULL,                          -- 帳戶性質（如：
                                                                收支帳下的現金、信用卡、銀行，
@@ -68,6 +81,9 @@
                                                                固定資產帳下的房貸產、汽車、機車、家電、3C
                                                                存貨帳下的生活用品或是備品
         note VARCHAR(255)
+
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
+        UNIQUE (ledger_type_id, code)
     );
 
     -- 帳戶表
@@ -118,28 +134,27 @@
     -- 帳戶表子表 (投資帳 → 股票、基金、債券、外幣、貴金屬）
     CREATE TABLE investment_accounts (
         account_id BIGINT PRIMARY KEY,
-        institution_id BIGINT,
-        broker VARCHAR(100),                               -- 券商 / 平台
+        financial_institution_id BIGINT,
         market VARCHAR(50),                                -- 投資的市場(如 台灣 美國 日本 中國 歐州 亞洲 新興國家 開發中國家 等等)
         risk_level TINYINT,                                -- 風險等級（1~5，可選）
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (institution_id) REFERENCES financial_institutions(id)
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
     );
 
     -- 帳戶表子表 (投資帳 → 定存、保險）
     CREATE TABLE term_investment_accounts (
         account_id BIGINT PRIMARY KEY,
-        institution_id BIGINT,
+        financial_institution_id BIGINT,
         interest_rate DECIMAL(5,2),                        -- 利率 %
         start_date DATE NOT NULL,                          -- 開始日
         end_date DATE NOT NULL,                            -- 到期日
         payout_type VARCHAR(50),                           -- 配息類型 (到期 / 定期配息)
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (institution_id) REFERENCES financial_institutions(id)
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
     );
 
     -- 帳戶表子表 (負債帳 → 房貸、車貸、信貸）
-    CREATE TABLE loan_accounts (
+    CREATE TABLE debt_accounts (
         account_id BIGINT PRIMARY KEY,
         repayment_type VARCHAR(50) NOT NULL,               -- 還款類型 (年繳、月繳、週繳、日繳，不使用 ENUM，方便未來擴充)
         total_amount DECIMAL(15,2) NOT NULL,               -- 總金額
@@ -277,7 +292,7 @@
     );
 
     -- 交易表子表 (單筆收支)
-    CREATE TABLE income_transaction_details (
+    CREATE TABLE cashflow_transaction_details (
         transaction_id BIGINT PRIMARY KEY,
         category_id BIGINT NOT NULL,
         merchant_id BIGINT NULL,
@@ -330,7 +345,7 @@
     
 
     -- 收支單筆重複帳目表
-    CREATE TABLE income_recurring_transactions (
+    CREATE TABLE cashflow_recurring_transactions (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
         ledger_id BIGINT NOT NULL,
