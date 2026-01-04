@@ -748,9 +748,9 @@
         account_id BIGINT NOT NULL,
         investment_product_id BIGINT NOT NULL,
 
-        quantity DECIMAL(20,8) NOT NULL,                  -- 持有數量
-        avg_cost DECIMAL(15,4) NOT NULL,                  -- 平均成本
-        market_value DECIMAL(15,2),                       -- 市值 (快照時計算)
+        quantity DECIMAL(25,10) NOT NULL,                  -- 持有數量
+        avg_cost DECIMAL(25,10) NOT NULL,                  -- 平均成本
+        market_value DECIMAL(25,10),                       -- 市值 (快照時計算)
 
         snapshot_date DATE NOT NULL,                      -- 快照日期
         created_date DATETIME NOT NULL,
