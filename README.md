@@ -616,13 +616,13 @@
         account_id BIGINT NOT NULL,
         transaction_type_id BIGINT NOT NULL,
         
-        price DECIMAL(15,2) NULL,                           -- 價格
-        quantity DECIMAL(15,4) NULL,                        -- 數量
-        amount DECIMAL(15,2) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
+        price DECIMAL(25,10) NULL,                           -- 價格
+        quantity DECIMAL(25,10) NULL,                        -- 數量
+        amount DECIMAL(25,10) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
 
         original_currency_id BIGINT NULL,                   -- 原始交易幣別 (外幣交易使用)
-        original_amount DECIMAL(15,2) NULL,                 -- 原始交易金額 (外幣交易使用)
-        exchange_rate_used DECIMAL(15,8) NULL,              -- 當下換算匯率 (外幣交易使用)
+        original_amount DECIMAL(25,10) NULL,                 -- 原始交易金額 (外幣交易使用)
+        exchange_rate_used DECIMAL(25,10) NULL,              -- 當下換算匯率 (外幣交易使用)
 
         transaction_date DATETIME NOT NULL,                 -- 交易日
         note VARCHAR(255),
@@ -675,13 +675,13 @@
         account_id BIGINT NOT NULL,
         transaction_type_id BIGINT NOT NULL,
 
-        price DECIMAL(15,2) NULL,                           -- 價格
-        quantity DECIMAL(15,4) NULL,                        -- 數量
-        amount DECIMAL(15,2) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
+        price DECIMAL(25,10) NULL,                           -- 價格
+        quantity DECIMAL(25,10) NULL,                        -- 數量
+        amount DECIMAL(25,10) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
 
         original_currency_id BIGINT NULL,                   -- 原始交易幣別 (外幣交易使用)
-        original_amount DECIMAL(15,2) NULL,                 -- 原始交易金額 (外幣交易使用)
-        exchange_rate_used DECIMAL(15,8) NULL,              -- 當下換算匯率 (外幣交易使用)
+        original_amount DECIMAL(25,10) NULL,                 -- 原始交易金額 (外幣交易使用)
+        exchange_rate_used DECIMAL(25,10) NULL,              -- 當下換算匯率 (外幣交易使用)
 
         recurrence_frequency_id BIGINT NOT NULL,            -- 週期規則(如 一月一次、每日一次 等等，應由後端設定)
         start_date DATE NOT NULL,
