@@ -107,6 +107,15 @@
         FOREIGN KEY (currency_id) REFERENCES currencies(id)
     );
 
+    -- 帳戶表子表 (收支帳 → 帳戶)
+    CREATE TABLE credit_card_accounts (
+        account_id BIGINT PRIMARY KEY,
+        financial_institution_id BIGINT,
+        interest_rate DECIMAL(5,2),                        -- 利率 %
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
+    );
+
     -- 帳戶表子表 (收支帳 → 信用卡)
     CREATE TABLE credit_card_accounts (
         account_id BIGINT PRIMARY KEY,
@@ -168,8 +177,10 @@
         interest_rate DECIMAL(5,2),                        -- 利率 %
         start_date DATE NOT NULL,                          -- 開始日
         end_date DATE NOT NULL,                            -- 到期日
-        early_termination_allowed BOOLEAN,                 -- 提前贖回
+        early_termination_allowed BOOLEAN,                 -- 是否可提前贖回
         payout_frequency VARCHAR(50),                      -- 配息類型 (到期 maturity / 定期配息 月配 monthly、年配 yearly)
+        penalty_rate DECIMAL(5,2),                         -- 違約利率
+        status VARCHAR(20) NOT NULL,                       -- 狀態
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
     );
@@ -224,6 +235,83 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
     );
 
+    -- 投資產品種類表
+    CREATE TABLE investment_product_types (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(30) NOT NULL UNIQUE,      -- stock / etf / fund / bond / crypto / forex / commodity / futures / option
+        name VARCHAR(50) NOT NULL,             -- 股票 / ETF / 基金 / 債券 / 虛擬貨幣 / 外匯 / 貴金屬 / 期貨 / 選擇權
+        is_derivative BOOLEAN DEFAULT FALSE,   -- 是否為衍生性商品
+        note VARCHAR(255)
+    );
+
+    -- 投資產品表
+    CREATE TABLE investment_products (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        product_type_id BIGINT NOT NULL,
+        market_id BIGINT,                         -- 所屬市場 (美股、台股、幣圈)
+        currency_id BIGINT NOT NULL,              -- 報價幣別 (USD / TWD)
+
+        code VARCHAR(50) NOT NULL,                -- 商品代碼 (AAPL, AMD, TSLA, BTC, 0050)
+        name VARCHAR(100) NOT NULL,               -- 商品名稱 (Apple Inc.)
+
+        isin VARCHAR(20),                         -- ISIN（股票/債券用，可為 NULL）
+        exchange VARCHAR(50),                     -- NASDAQ / NYSE / TSE / BINANCE
+        is_active BOOLEAN DEFAULT TRUE,            -- 是否仍可交易
+        note VARCHAR(255),
+
+        created_date DATETIME NOT NULL,
+        updated_date DATETIME NOT NULL,
+
+        UNIQUE (code, market_id),
+        FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id),
+        FOREIGN KEY (market_id) REFERENCES markets(id),
+        FOREIGN KEY (currency_id) REFERENCES currencies(id)
+    );
+
+    -- 投資產品表子表 (基金)
+    CREATE TABLE fund_products (
+        investment_product_id BIGINT PRIMARY KEY,
+        fund_company VARCHAR(100),
+        expense_ratio DECIMAL(5,2),
+        dividend_frequency VARCHAR(30),
+        fund_type VARCHAR(30),
+        FOREIGN KEY (investment_product_id)
+        REFERENCES investment_products(id) ON DELETE CASCADE
+    );
+
+    -- 投資產品表子表 (債券)
+    CREATE TABLE bond_products (
+        investment_product_id BIGINT PRIMARY KEY,
+
+        issuer VARCHAR(100),             -- 發行機構
+        coupon_rate DECIMAL(5,2),        -- 票面利率
+        coupon_frequency VARCHAR(20),    -- annual / semiannual
+        maturity_date DATE NOT NULL,     -- 到期日
+        face_value DECIMAL(15,2),        -- 面額
+        bond_type VARCHAR(30),           -- government / corporate / municipal
+
+        FOREIGN KEY (investment_product_id)
+        REFERENCES investment_products(id) ON DELETE CASCADE
+    );
+
+    -- 投資產品表子表 (期貨)
+    CREATE TABLE derivative_products (
+        investment_product_id BIGINT PRIMARY KEY,
+        contract_size DECIMAL(15,2),
+        expiration_date DATE NOT NULL,
+        FOREIGN KEY (investment_product_id)
+        REFERENCES investment_products(id) ON DELETE CASCADE
+    );
+
+    -- 投資產品表子表 (選擇權)
+    CREATE TABLE option_products (
+        investment_product_id BIGINT PRIMARY KEY,
+        strike_price DECIMAL(15,2),
+        option_type VARCHAR(10), -- call / put
+        FOREIGN KEY (investment_product_id)
+        REFERENCES derivative_products(investment_product_id)
+    );
+
     -- 大分類表
     CREATE TABLE category_groups (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -266,7 +354,7 @@
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
     );
 
-    -- 帳本交易類型表
+    -- 交易類型表
     CREATE TABLE transaction_types (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         ledger_id BIGINT NOT NULL,
@@ -322,16 +410,20 @@
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
     );
 
+    
+
+
     -- 交易表子表 (單筆投資)
     CREATE TABLE investment_transaction_details (
         transaction_id BIGINT PRIMARY KEY,
         
-        asset_code VARCHAR(100) NOT NULL,                   -- 投資商品代號或名稱 (2330、AAPL、USDJPY)
+        investment_product_id BIGINT NOT NULL,
         
         fee DECIMAL(15,2) NOT NULL DEFAULT 0,               -- 手續費
         tax DECIMAL(15,2) DEFAULT 0,                        -- 稅額
 
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
     );
 
     -- 交易表子表 (單筆負債)、交易表子表 (單筆應收帳款)、交易表子表 (單筆固定資產)、交易表子表 (單筆存貨) 不需要存在
