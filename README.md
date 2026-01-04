@@ -33,11 +33,11 @@
     CREATE TABLE exchange_rates (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
-        base_currency_id BIGINT NOT NULL,     -- 基準幣別 (USD)
-        quote_currency_id BIGINT NOT NULL,    -- 報價幣別 (TWD)
+        base_currency_id BIGINT NOT NULL,                  -- 基準幣別 (USD)
+        quote_currency_id BIGINT NOT NULL,                 -- 報價幣別 (TWD)
 
-        rate DECIMAL(15,8) NOT NULL,           -- 匯率 (1 USD = ? TWD)
-        rate_date DATE NOT NULL,               -- 匯率日期
+        rate DECIMAL(15,8) NOT NULL,                       -- 匯率 (1 USD = 30 TWD)
+        rate_date DATE NOT NULL,                           -- 匯率日期
 
         created_date DATETIME NOT NULL,
 
