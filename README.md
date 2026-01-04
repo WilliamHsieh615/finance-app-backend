@@ -165,14 +165,14 @@
         
         code VARCHAR(50) NOT NULL,
         name VARCHAR(50) NOT NULL,                          -- 帳戶性質（如：
-                                                               收支帳下的現金 cash、銀行 bank、信用卡 credit_card ，
-                                                               投資帳下的股票 stock、基金 fund、債券 bond、外幣 forex、虛擬貨幣 crypto、
-                                                                        貴金屬 gold/silver、定存 fixed_deposits、保險 insurance、
-                                                                        期貨 futures、選擇權 option，
-                                                               負債帳下的房貸 mortgage、信貸 personal_loan、車貸 auto_loan，
-                                                               應收帳下的借出款 lent，
-                                                               固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
-                                                               存貨帳下的生活用品或是備品
+                                                            -- 收支帳下的現金 cash、銀行 bank、信用卡 credit_card ，
+                                                            -- 投資帳下的股票 stock、基金 fund、債券 bond、外幣 forex、虛擬貨幣 crypto、
+                                                            --          貴金屬 gold/silver、定存 fixed_deposits、保險 insurance、
+                                                            --          期貨 futures、選擇權 option，
+                                                            -- 負債帳下的房貸 mortgage、信貸 personal_loan、車貸 auto_loan，
+                                                            -- 應收帳下的借出款 lent，
+                                                            -- 固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
+                                                            -- 存貨帳下的生活用品或是備品
         note VARCHAR(255),
 
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
@@ -592,12 +592,12 @@
         ledger_id BIGINT NOT NULL,
         code VARCHAR(50) NOT NULL,                         -- internal code (buy, sell, interest)
         name VARCHAR(50) NOT NULL,                         -- 交易類型名稱 (如：
-                                                              income / expense / buy / sell / interest / depreciation / in /
-                                                              投資
-                                                              負債活動 (principal / interest / fee)
-                                                              應收帳款活動 (lend / receive / interest)
-                                                              固定資產活動 (depreciation / repair / revalue)
-                                                              存貨 (in / out / adjust)
+                                                           -- income / expense / buy / sell / interest / depreciation / in /
+                                                           -- 投資
+                                                           -- 負債活動 (principal / interest / fee)
+                                                           -- 應收帳款活動 (lend / receive / interest)
+                                                           -- 固定資產活動 (depreciation / repair / revalue)
+                                                           -- 存貨 (in / out / adjust)
         direction TINYINT NOT NULL,                        -- 正向 / 負向
         affects_balance BOOLEAN DEFAULT TRUE,
         note VARCHAR(255),
@@ -752,7 +752,7 @@
         avg_cost DECIMAL(25,10) NOT NULL,                  -- 平均成本
         market_value DECIMAL(25,10),                       -- 市值 (快照時計算)
 
-        snapshot_date DATE NOT NULL,                      -- 快照日期
+        snapshot_date DATE NOT NULL,                       -- 快照日期
         created_date DATETIME NOT NULL,
 
         UNIQUE (account_id, investment_product_id, snapshot_date),
