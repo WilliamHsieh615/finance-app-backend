@@ -39,7 +39,8 @@
         rate DECIMAL(15,8) NOT NULL,                       -- 匯率 (1 USD = 30 TWD)
         rate_date DATE NOT NULL,                           -- 匯率日期
 
-        created_date DATETIME NOT NULL,
+        created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL                     -- 更新時間 (由後端寫入)
 
         UNIQUE (base_currency_id, quote_currency_id, rate_date),
 
@@ -145,10 +146,13 @@
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
         ledger_id BIGINT NOT NULL,
+        
         role VARCHAR(50) NOT NULL,                          -- 權限設定 (如 owner、admin、editor、viewer，由後端定義，不使用 ENUM，方便未來擴充）
         joined_date DATETIME NOT NULL,                      -- 加入時間
+        
         created_date DATETIME NOT NULL,                     -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL,                     -- 更新時間 (由後端寫入)
+        
         UNIQUE KEY uk_ledger_user (ledger_id, user_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -209,10 +213,12 @@
     CREATE TABLE credit_card_accounts (
         account_id BIGINT PRIMARY KEY,
         financial_institution_id BIGINT,
+        
         cycle_day TINYINT NOT NULL,                        -- 結帳日 (1~31)
         due_day TINYINT NOT NULL,                          -- 繳款日 (1~31)
         credit_limit DECIMAL(15,2),                        -- 信用額度
-        annual_fee DECIMAL(15,2),                          -- 年費                   
+        annual_fee DECIMAL(15,2),                          -- 年費
+        
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
     );
@@ -431,8 +437,8 @@
         unit_id BIGINT,                                    -- 商品單位 (口、股、張)
         note VARCHAR(255),
 
-        created_date DATETIME NOT NULL,
-        updated_date DATETIME NOT NULL,
+        created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                    -- 更新時間 (由後端寫入)
 
         UNIQUE (code, market_id),
         FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id),
