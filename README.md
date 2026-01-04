@@ -40,7 +40,7 @@
         rate_date DATE NOT NULL,                           -- 匯率日期
 
         created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL                     -- 更新時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                    -- 更新時間 (由後端寫入)
 
         UNIQUE (base_currency_id, quote_currency_id, rate_date),
 
@@ -173,7 +173,7 @@
                                                                應收帳下的借出款 lent，
                                                                固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
                                                                存貨帳下的生活用品或是備品
-        note VARCHAR(255)
+        note VARCHAR(255),
 
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
         UNIQUE (ledger_type_id, code)
@@ -531,7 +531,7 @@
 
     -- 分類類型表
     CREATE TABLE category_types (
-        id SMALLINT PRIMARY KEY,
+        id BIGINT PRIMARY KEY,
         code VARCHAR(20) NOT NULL UNIQUE,                 -- income、expense、transfer
         name VARCHAR(50) NOT NULL                         -- 收入、支出、轉帳
     );
@@ -620,6 +620,10 @@
         quantity DECIMAL(15,4) NULL,                        -- 數量
         amount DECIMAL(15,2) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
 
+        original_currency_id BIGINT NULL,                   -- 原始交易幣別 (外幣交易使用)
+        original_amount DECIMAL(15,2) NULL,                 -- 原始交易金額 (外幣交易使用)
+        exchange_rate_used DECIMAL(15,8) NULL,              -- 當下換算匯率 (外幣交易使用)
+
         transaction_date DATETIME NOT NULL,                 -- 交易日
         note VARCHAR(255),
 
@@ -629,7 +633,8 @@
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
         FOREIGN KEY (account_id) REFERENCES accounts(id),
-        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id)
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id)
     );
 
     -- 交易表子表 (收支)
@@ -674,6 +679,10 @@
         quantity DECIMAL(15,4) NULL,                        -- 數量
         amount DECIMAL(15,2) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
 
+        original_currency_id BIGINT NULL,                   -- 原始交易幣別 (外幣交易使用)
+        original_amount DECIMAL(15,2) NULL,                 -- 原始交易金額 (外幣交易使用)
+        exchange_rate_used DECIMAL(15,8) NULL,              -- 當下換算匯率 (外幣交易使用)
+
         recurrence_frequency_id BIGINT NOT NULL,            -- 週期規則(如 一月一次、每日一次 等等，應由後端設定)
         start_date DATE NOT NULL,
         end_date DATE,
@@ -688,6 +697,7 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id),
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
         FOREIGN KEY (recurrence_frequency_id) REFERENCES frequencies(id),
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id)
     );
 
 
