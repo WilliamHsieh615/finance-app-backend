@@ -785,4 +785,18 @@
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
     );
 
+    -- 登入紀錄表
+    CREATE TABLE login_history (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        user_id BIGINT,
+        email VARCHAR(255) NOT NULL,
+        
+        login_time DATETIME NOT NULL,
+        user_agent VARCHAR(255),
+        ip_address VARCHAR(45),
+        success BOOLEAN NOT NULL DEFAULT FALSE,
+
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+
 
