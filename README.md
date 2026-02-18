@@ -424,8 +424,9 @@
     CREATE TABLE timezones (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         code VARCHAR(50) NOT NULL UNIQUE,                  -- 時區代碼 (UTC)
+        iana_name VARCHAR(50) UNIQUE,                      -- IANA 時區名稱 (Asia/Taipei)
         name VARCHAR(100),                                 -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
-        utc_offset VARCHAR(6),                             -- 偏移 (+00:00、-05:00)
+        utc_offset TIME NOT NULL,                          -- 偏移 (+00:00、-05:00)
         note VARCHAR(255)
     );
 
@@ -676,8 +677,8 @@
         
         investment_product_id BIGINT NOT NULL,
         
-        fee DECIMAL(15,2) NOT NULL DEFAULT 0,                -- 手續費
-        tax DECIMAL(15,2) DEFAULT 0,                         -- 稅額
+        fee DECIMAL(15,2) NOT NULL DEFAULT 0,               -- 手續費
+        tax DECIMAL(15,2) DEFAULT 0,                        -- 稅額
 
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
