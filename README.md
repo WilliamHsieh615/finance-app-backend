@@ -12,6 +12,20 @@
         updated_date DATETIME NOT NULL                     -- 更新時間 (由後端寫入)
     );
 
+    -- 檔案表
+    CREATE TABLE files (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY, 
+        entity_type VARCHAR(50) NOT NULL,                  -- 使用在的表 users、ledgers、accounts、category_groups、categories、merchants
+        entity_id BIGINT NOT NULL,                         -- 對應表的id
+        file_role VARCHAR(50),                             -- avatar、logo、cover、receipt
+        file_url VARCHAR(255) NOT NULL, 
+        mime_type VARCHAR(100),                            -- 檔案類型 JPG、PNG、GIF、TXT 
+        file_size INT,                                     -- 檔案大小 
+        uploaded_by BIGINT,                                -- 誰上傳的檔案
+        created_date DATETIME NOT NULL, 
+        updated_date DATETIME NOT NULL 
+    );
+
     -- 國別表
     CREATE TABLE countries (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -289,10 +303,12 @@
     CREATE TABLE debtors (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
-        phone VARCHAR(100),
+        phone VARCHAR(50),
         email VARCHAR(100),
         address VARCHAR(255),
-        contact_info VARCHAR(255)
+        notes VARCHAR(255),
+        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
     -- 帳戶表子表 (應收帳款)
