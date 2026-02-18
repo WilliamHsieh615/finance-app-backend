@@ -17,7 +17,7 @@
         id BIGINT AUTO_INCREMENT PRIMARY KEY, 
         entity_type VARCHAR(50) NOT NULL,                  -- 使用在的表 users、ledgers、accounts、category_groups、categories、merchants
         entity_id BIGINT NOT NULL,                         -- 對應表的id
-        file_role VARCHAR(50),                             -- avatar、logo、cover、receipt
+        file_role VARCHAR(50),                             -- 檔案的角色 avatar、logo、cover、receipt
         file_url VARCHAR(255) NOT NULL, 
         mime_type VARCHAR(100),                            -- 檔案類型 JPG、PNG、GIF、TXT 
         file_size INT,                                     -- 檔案大小 
@@ -51,7 +51,7 @@
         base_currency_id BIGINT NOT NULL,                  -- 基準幣別 (USD)
         quote_currency_id BIGINT NOT NULL,                 -- 報價幣別 (TWD)
 
-        rate DECIMAL(12,6) NOT NULL,                       -- 匯率 (1 USD = 30 TWD)
+        rate DECIMAL(12,6) NOT NULL,                       -- 匯率 (例 1 USD = 30 TWD)
         rate_date DATE NOT NULL,                           -- 匯率日期
 
         created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
@@ -147,11 +147,11 @@
         user_id BIGINT NOT NULL,
         ledger_type_id BIGINT NOT NULL,
         
-        name VARCHAR(100) NOT NULL,                         -- 帳本名稱
-        note VARCHAR(255),                                  -- 備註
+        name VARCHAR(100) NOT NULL,                        -- 帳本名稱
+        note VARCHAR(255),                                 -- 備註
         
-        created_date DATETIME NOT NULL,                     -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,                     -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                    -- 更新時間 (由後端寫入)
         
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id)
@@ -163,11 +163,11 @@
         user_id BIGINT NOT NULL,
         ledger_id BIGINT NOT NULL,
         
-        role VARCHAR(50) NOT NULL,                          -- 權限設定 (如 owner、admin、editor、viewer，由後端定義，不使用 ENUM，方便未來擴充）
-        joined_date DATETIME NOT NULL,                      -- 加入時間
+        role VARCHAR(50) NOT NULL,                         -- 權限設定 (如 owner、admin、editor、viewer，由後端定義，不使用 ENUM，方便未來擴充）
+        joined_date DATETIME NOT NULL,                     -- 加入時間
         
-        created_date DATETIME NOT NULL,                     -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,                     -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                    -- 更新時間 (由後端寫入)
         
         UNIQUE KEY uk_ledger_user (ledger_id, user_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
@@ -180,15 +180,15 @@
         ledger_type_id BIGINT NOT NULL,
         
         code VARCHAR(50) NOT NULL,
-        name VARCHAR(50) NOT NULL,                          -- 帳戶性質（如：
-                                                            -- 收支帳下的現金 cash、銀行 bank、信用卡 credit_card ，
-                                                            -- 投資帳下的股票 stock、基金 fund、債券 bond、外幣 forex、虛擬貨幣 crypto、
-                                                            --          貴金屬 gold/silver、定存 fixed_deposits、保險 insurance、
-                                                            --          期貨 futures、選擇權 option，
-                                                            -- 負債帳下的房貸 mortgage、信貸 personal_loan、車貸 auto_loan，
-                                                            -- 應收帳下的借出款 lent，
-                                                            -- 固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
-                                                            -- 存貨帳下的生活用品或是備品
+        name VARCHAR(50) NOT NULL,                         -- 帳戶性質（如：
+                                                           -- 收支帳下的現金 cash、銀行 bank、信用卡 credit_card ，
+                                                           -- 投資帳下的股票 stock、基金 fund、債券 bond、外幣 forex、虛擬貨幣 crypto、
+                                                           --          貴金屬 gold/silver、定存 fixed_deposits、保險 insurance、
+                                                           --          期貨 futures、選擇權 option，
+                                                           -- 負債帳下的房貸 mortgage、信貸 personal_loan、車貸 auto_loan，
+                                                           -- 應收帳下的借出款 lent，
+                                                           -- 固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
+                                                           -- 存貨帳下的生活用品或是備品
         note VARCHAR(255),
 
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
@@ -317,12 +317,12 @@
         debtor_id BIGINT NOT NULL,
         repayment_frequency_id BIGINT NOT NULL,
         
-        interest_rate DECIMAL(5,2) NOT NULL,               -- 利率 %
-        cycle_day TINYINT NOT NULL,                        -- 結帳日 (1~31)
-        due_day TINYINT NOT NULL,                          -- 繳款日 (1~31)
+        interest_rate DECIMAL(5,2) NOT NULL,              -- 利率 %
+        cycle_day TINYINT NOT NULL,                       -- 結帳日 (1~31)
+        due_day TINYINT NOT NULL,                         -- 繳款日 (1~31)
         
-        start_date DATE NOT NULL,                          -- 開始日
-        end_date DATE NOT NULL,                            -- 到期日
+        start_date DATE NOT NULL,                         -- 開始日
+        end_date DATE NOT NULL,                           -- 到期日
         
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (debtor_id) REFERENCES debtors(id),
@@ -335,11 +335,11 @@
         account_id BIGINT NOT NULL,
         debtor_id BIGINT NOT NULL,
         
-        total_amount DECIMAL(15,2) NOT NULL,               -- 總金額
-        interest_rate DECIMAL(5,2),                        -- 利率 %
+        total_amount DECIMAL(15,2) NOT NULL,              -- 總金額
+        interest_rate DECIMAL(5,2),                       -- 利率 %
 
-        start_date DATE NOT NULL,                          -- 開始日
-        end_date DATE NOT NULL,                            -- 到期日
+        start_date DATE NOT NULL,                         -- 開始日
+        end_date DATE NOT NULL,                           -- 到期日
 
         created_date DATETIME NOT NULL,
 
@@ -350,16 +350,16 @@
     -- 固定資產分類表
     CREATE TABLE asset_categories (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(50) NOT NULL UNIQUE,                   -- 房屋 house、車輛 car、家電 appliance、3C electronics
-        name VARCHAR(50) NOT NULL,                          -- 名稱
+        code VARCHAR(50) NOT NULL UNIQUE,                  -- 房屋 house、車輛 car、家電 appliance、3C electronics
+        name VARCHAR(50) NOT NULL,                         -- 名稱
         note VARCHAR(255)
     );
 
     -- 折舊方法表
     CREATE TABLE depreciation_methods (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(50) NOT NULL UNIQUE,                   -- straight_line、declining_balance、double_declining、sum_of_years
-        name VARCHAR(50) NOT NULL,                          -- 直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法
+        code VARCHAR(50) NOT NULL UNIQUE,                  -- straight_line、declining_balance、double_declining、sum_of_years
+        name VARCHAR(50) NOT NULL,                         -- 直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法
         note VARCHAR(255)
     );
 
@@ -483,10 +483,10 @@
     CREATE TABLE fund_products (
         investment_product_id BIGINT PRIMARY KEY,
         
-        financial_institution_id BIGINT,                  -- 發行金融機構
-        expense_ratio DECIMAL(5,2),                       -- 總費用率
-        dividend_frequency_id BIGINT,                     -- 配息頻率
-        fund_type_id BIGINT,                              -- 基金類型
+        financial_institution_id BIGINT,                   -- 發行金融機構
+        expense_ratio DECIMAL(5,2),                        -- 總費用率
+        dividend_frequency_id BIGINT,                      -- 配息頻率
+        fund_type_id BIGINT,                               -- 基金類型
         
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
@@ -496,9 +496,9 @@
 
     CREATE TABLE bond_issuers (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(50) NOT NULL UNIQUE,                   -- 代碼
-        name VARCHAR(100) NOT NULL,                         -- 發行機構名稱
-        country_id BIGINT NOT NULL,                         -- 所屬國家
+        code VARCHAR(50) NOT NULL UNIQUE,                  -- 代碼
+        name VARCHAR(100) NOT NULL,                        -- 發行機構名稱
+        country_id BIGINT NOT NULL,                        -- 所屬國家
         note VARCHAR(255),
         FOREIGN KEY (country_id) REFERENCES countries(id)
     );
@@ -506,8 +506,8 @@
     -- 債券種類表
     CREATE TABLE bond_types (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(30) NOT NULL UNIQUE,                 -- government、corporate、municipal
-        name VARCHAR(50) NOT NULL,                        -- 政府債、公司債、市政債
+        code VARCHAR(30) NOT NULL UNIQUE,                  -- government、corporate、municipal
+        name VARCHAR(50) NOT NULL,                         -- 政府債、公司債、市政債
         note VARCHAR(255)
     );
 
@@ -515,12 +515,12 @@
     CREATE TABLE bond_products (
         investment_product_id BIGINT PRIMARY KEY,
 
-        bond_issuer_id BIGINT,                            -- 發行機構
-        coupon_rate DECIMAL(5,2),                         -- 票面利率
-        coupon_frequency_id BIGINT,                       -- 票面配息頻率
-        maturity_date DATE NOT NULL,                      -- 到期日
-        face_value DECIMAL(15,2),                         -- 面額
-        bond_type_id BIGINT,                              -- 債券種類
+        bond_issuer_id BIGINT,                             -- 發行機構
+        coupon_rate DECIMAL(5,2),                          -- 票面利率
+        coupon_frequency_id BIGINT,                        -- 票面配息頻率
+        maturity_date DATE NOT NULL,                       -- 到期日
+        face_value DECIMAL(15,2),                          -- 面額
+        bond_type_id BIGINT,                               -- 債券種類
 
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE,
         FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id),
@@ -531,22 +531,22 @@
     -- 投資產品表子表 (期貨)
     CREATE TABLE derivative_products (
         investment_product_id BIGINT PRIMARY KEY,
-        contract_size DECIMAL(15,2),                      -- 每張合約的標的數量
-        expiration_date DATE NOT NULL,                    -- 到期日
+        contract_size DECIMAL(15,2),                       -- 每張合約的標的數量
+        expiration_date DATE NOT NULL,                     -- 到期日
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE
     );
 
     -- 選擇權類型表
     CREATE TABLE option_types (
         id SMALLINT PRIMARY KEY,
-        code VARCHAR(10) NOT NULL UNIQUE,                 -- CALL、PUT
-        name VARCHAR(50) NOT NULL                         -- 買權 Call Option、賣權 Put Option
+        code VARCHAR(10) NOT NULL UNIQUE,                  -- CALL、PUT
+        name VARCHAR(50) NOT NULL                          -- 買權 Call Option、賣權 Put Option
     );
 
     -- 投資產品表子表 (選擇權)
     CREATE TABLE option_products (
         investment_product_id BIGINT PRIMARY KEY,
-        strike_price DECIMAL(15,2) NOT NULL,              -- 履約價
+        strike_price DECIMAL(15,2) NOT NULL,               -- 履約價
         option_type_id SMALLINT NOT NULL,
         FOREIGN KEY (investment_product_id) REFERENCES derivative_products(investment_product_id),
         FOREIGN KEY (option_type_id) REFERENCES option_types(id)
@@ -555,8 +555,8 @@
     -- 分類類型表
     CREATE TABLE category_types (
         id BIGINT PRIMARY KEY,
-        code VARCHAR(20) NOT NULL UNIQUE,                 -- income、expense、transfer
-        name VARCHAR(50) NOT NULL                         -- 收入、支出、轉帳
+        code VARCHAR(20) NOT NULL UNIQUE,                  -- income、expense、transfer
+        name VARCHAR(50) NOT NULL                          -- 收入、支出、轉帳
     );
     
     -- 大分類表
@@ -590,7 +590,7 @@
     -- 商店類型表
     CREATE TABLE merchant_types (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(50) NOT NULL UNIQUE,                  -- restaurant, supermarket, utility
+        code VARCHAR(50) NOT NULL UNIQUE,                  -- restaurant、supermarket、utility
         name VARCHAR(100) NOT NULL,                        -- 餐廳、超市、公共事業
         note VARCHAR(255)
     );
@@ -613,10 +613,10 @@
     CREATE TABLE transaction_types (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         ledger_id BIGINT NOT NULL,
-        code VARCHAR(50) NOT NULL,                         -- internal code (buy, sell, interest)
+        code VARCHAR(50) NOT NULL,                         -- 代號
         name VARCHAR(50) NOT NULL,                         -- 交易類型名稱 (如：
-                                                           -- income / expense / buy / sell / interest / depreciation / in /
-                                                           -- 投資
+                                                           -- 收支活動 (income / expense / buy / sell)
+                                                           -- 投資活動
                                                            -- 負債活動 (principal / interest / fee)
                                                            -- 應收帳款活動 (lend / receive / interest)
                                                            -- 固定資產活動 (depreciation / repair / revalue)
@@ -639,19 +639,19 @@
         account_id BIGINT NOT NULL,
         transaction_type_id BIGINT NOT NULL,
         
-        price DECIMAL(18,8) NULL,                           -- 價格
-        quantity DECIMAL(18,8) NULL,                        -- 數量
-        amount DECIMAL(18,8) NOT NULL,                      -- 合計 (實際影響帳戶餘額的金額)
+        price DECIMAL(18,8) NULL,                          -- 價格
+        quantity DECIMAL(18,8) NULL,                       -- 數量
+        amount DECIMAL(18,8) NOT NULL,                     -- 合計 (實際影響帳戶餘額的金額)
 
-        original_currency_id BIGINT NULL,                   -- 原始交易幣別 (外幣交易使用)
-        original_amount DECIMAL(18,8) NULL,                 -- 原始交易金額 (外幣交易使用)
-        exchange_rate_used DECIMAL(12,6) NULL,              -- 當下換算匯率 (外幣交易使用)
+        original_currency_id BIGINT NULL,                  -- 原始交易幣別 (外幣交易使用)
+        original_amount DECIMAL(18,8) NULL,                -- 原始交易金額 (外幣交易使用)
+        exchange_rate_used DECIMAL(12,6) NULL,             -- 當下換算匯率 (外幣交易使用)
 
-        transaction_date DATETIME NOT NULL,                 -- 交易日
+        transaction_date DATETIME NOT NULL,                -- 交易日
         note VARCHAR(255),
 
-        created_date DATETIME NOT NULL,                     -- 建立時間 (由後端寫入)
-        updated_date DATETIME NOT NULL,                     -- 更新時間 (由後端寫入)
+        created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
+        updated_date DATETIME NOT NULL,                    -- 更新時間 (由後端寫入)
 
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
@@ -676,8 +676,8 @@
         
         investment_product_id BIGINT NOT NULL,
         
-        fee DECIMAL(15,2) NOT NULL DEFAULT 0,               -- 手續費
-        tax DECIMAL(15,2) DEFAULT 0,                        -- 稅額
+        fee DECIMAL(15,2) NOT NULL DEFAULT 0,                -- 手續費
+        tax DECIMAL(15,2) DEFAULT 0,                         -- 稅額
 
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
@@ -686,7 +686,7 @@
     -- 交易表子表 (存貨)
     CREATE TABLE inventory_transaction_details (
         transaction_id BIGINT PRIMARY KEY,
-        expiry_date DATE,                                  -- 這批存貨的到期日
+        expiry_date DATE,                                   -- 這批存貨的到期日
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
     );
 
