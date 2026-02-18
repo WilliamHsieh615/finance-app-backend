@@ -423,10 +423,10 @@
     -- 時區表
     CREATE TABLE timezones (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(50) NOT NULL UNIQUE,                  -- 時區代碼 (UTC)
-        iana_name VARCHAR(50) UNIQUE,                      -- IANA 時區名稱 (Asia/Taipei)
+        code VARCHAR(50) NOT NULL UNIQUE,                  -- 時區代碼 (UTC、EST、CST)
+        iana_name VARCHAR(50) UNIQUE,                      -- IANA 時區名稱 (Etc/UTC、America/New_York、Asia/Taipei)
         name VARCHAR(100),                                 -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
-        utc_offset TIME NOT NULL,                          -- 偏移 (+00:00、-05:00)
+        utc_offset TIME NOT NULL,                          -- 偏移 (+00:00:00、-05:00:00、08:00:00)
         note VARCHAR(255)
     );
 
