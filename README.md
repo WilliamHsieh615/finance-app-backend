@@ -8,7 +8,6 @@
         name VARCHAR(100) NOT NULL,                        -- 使用者名稱
         email VARCHAR(100) NOT NULL UNIQUE,                -- 使用者電子郵件
         password VARCHAR(255) NOT NULL,                    -- 使用者密碼
-        image_url VARCHAR(255),
         created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL                     -- 更新時間 (由後端寫入)
     );
@@ -18,7 +17,7 @@
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         code CHAR(2) NOT NULL UNIQUE,                      -- ISO 3166-1國別碼 (TW、US、JP...)
         name VARCHAR(50) NOT NULL,                         -- 國籍名稱 (台灣、美國、日本...)
-        image_url VARCHAR(255)
+        image_url VARCHAR(255)                             -- 國旗
     );
 
     -- 貨幣表
@@ -75,7 +74,7 @@
         country_id BIGINT,
         name VARCHAR(100) NOT NULL,                        -- 金融機構名稱 (例如：國泰世華、富邦、IB、Binance)
         type VARCHAR(50) NOT NULL,                         -- 金融機構類型 (銀行 bank、券商 broker、保險公司 insurance、交易所 exchange、平台 plat)
-        image_url VARCHAR(255),
+        image_url VARCHAR(255),                            -- 金融機構logo
         note VARCHAR(255),
         created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL,                    -- 更新時間 (由後端寫入)
@@ -135,7 +134,6 @@
         ledger_type_id BIGINT NOT NULL,
         
         name VARCHAR(100) NOT NULL,                         -- 帳本名稱
-        image_url VARCHAR(255),
         note VARCHAR(255),                                  -- 備註
         
         created_date DATETIME NOT NULL,                     -- 建立時間 (由後端寫入)
@@ -192,7 +190,6 @@
         currency_id BIGINT NOT NULL,
 
         name VARCHAR(100) NOT NULL,
-        image_url VARCHAR(255),
         balance DECIMAL(15,2) DEFAULT 0,                   -- 初始餘額
         note VARCHAR(255),                                 -- 備註
         
@@ -292,6 +289,9 @@
     CREATE TABLE debtors (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
+        phone VARCHAR(100),
+        email VARCHAR(100),
+        address VARCHAR(255),
         contact_info VARCHAR(255)
     );
 
@@ -441,6 +441,7 @@
         is_active BOOLEAN DEFAULT TRUE,                    -- 是否仍可交易
 
         unit_id BIGINT,                                    -- 商品單位 (口、股、張)
+        image_url VARCHAR(255),
         note VARCHAR(255),
 
         created_date DATETIME NOT NULL,                    -- 建立時間 (由後端寫入)
@@ -549,7 +550,6 @@
         ledger_id BIGINT NOT NULL,
         name VARCHAR(50) NOT NULL,                         -- 大分類名稱
         category_type_id BIGINT NOT NULL,                  -- 分類類型
-        image_url VARCHAR(255),
         created_date DATETIME NOT NULL,		               -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL,		               -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -564,7 +564,6 @@
         ledger_id BIGINT NOT NULL,
         category_group_id BIGINT NOT NULL,                 -- (對應大分類)
         name VARCHAR(50) NOT NULL,                         -- 小分類名稱
-        image_url VARCHAR(255),
         created_date DATETIME NOT NULL,		               -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL,		               -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -577,7 +576,6 @@
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         code VARCHAR(50) NOT NULL UNIQUE,                  -- restaurant, supermarket, utility
         name VARCHAR(100) NOT NULL,                        -- 餐廳、超市、公共事業
-        image_url VARCHAR(255),
         note VARCHAR(255)
     );
 
@@ -588,7 +586,6 @@
         ledger_id BIGINT NOT NULL,
         merchant_type_id BIGINT NOT NULL,                  -- 商店 / 公司類型
         name VARCHAR(100) NOT NULL,                        -- 商店 / 公司名稱
-        image_url VARCHAR(255),
         created_date DATETIME NOT NULL,	                   -- 建立時間 (由後端寫入)
         updated_date DATETIME NOT NULL,	                   -- 更新時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
