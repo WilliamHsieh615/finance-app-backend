@@ -307,8 +307,8 @@
         email VARCHAR(100),
         address VARCHAR(255),
         notes VARCHAR(255),
-        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        created_date DATETIME NOT NULL,
+        updated_date DATETIME NOT NULL
     );
 
     -- 帳戶表子表 (應收帳款)
