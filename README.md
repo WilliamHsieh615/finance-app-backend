@@ -214,7 +214,7 @@
         currency_id               BIGINT        NOT NULL,
 
         name                      VARCHAR(100)  NOT NULL,
-        balance                   DECIMAL(18,8) NOT NULL,                        -- 初始餘額
+        initial_balance           DECIMAL(18,8) NOT NULL,                        -- 初始餘額
         note                      VARCHAR(255),                                  -- 備註
         
         created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
@@ -577,7 +577,7 @@
         created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
 
-        INDEX(product_id, price_date),
+        INDEX(investment_product_id, price_date),
 
         UNIQUE (investment_product_id, price_date),
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
@@ -710,6 +710,8 @@
         updated_date              DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
+        UNIQUE(transaction_id, related_transaction_id),
+
         FOREIGN KEY (transaction_id) REFERENCES transactions(id),
         FOREIGN KEY (related_transaction_id) REFERENCES transactions(id)
     );
@@ -788,6 +790,8 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
 
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
         FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id)
