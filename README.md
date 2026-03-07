@@ -12,6 +12,26 @@
         updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
     );
 
+    -- 角色表
+    CREATE TABLE roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(20)    NOT NULL UNIQUE,                 -- admin, staff, vip, user
+        name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、VIP、一般使用者
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+    );
+
+    -- 使用者與角色關聯表
+    CREATE TABLE user_has_roles (
+        user_id                          BIGINT         NOT NULL,
+        role_id                          BIGINT         NOT NULL,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        PRIMARY KEY (user_id, role_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+    );
+
     -- 檔案類型表
     CREATE TABLE file_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -828,9 +848,11 @@
         reason                           VARCHAR(255)  NOT NULL,                        -- 調整原因
         note                             VARCHAR(255),
 
+        created_by                       BIGINT        NOT NULL,                        -- 誰做的調整
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id)
     );
 
     -- 投資持倉快照 (增加效能用)
