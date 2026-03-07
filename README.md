@@ -90,6 +90,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
 
         UNIQUE (base_currency_id, quote_currency_id, rate_date),
+        INDEX idx_exchange_rate_lookup (base_currency_id, quote_currency_id),
         CHECK (base_currency_id <> quote_currency_id),
 
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id),
@@ -887,6 +888,7 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
 
         UNIQUE (account_id, investment_product_id, snapshot_date),
+        INDEX(account_id),
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
@@ -902,6 +904,8 @@
         user_agent                       VARCHAR(255),
         ip_address                       VARCHAR(45),
         success                          BOOLEAN       NOT NULL DEFAULT FALSE,
+
+        INDEX(user_id, login_time),
 
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     );
