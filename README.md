@@ -29,7 +29,7 @@
         file_role                 VARCHAR(50),                                    -- 檔案的角色 avatar、logo、cover、receipt
         file_url                  VARCHAR(255)   NOT NULL, 
         file_type_id              BIGINT         NOT NULL,                        -- 檔案類型 JPG、PNG、GIF、TXT 
-        file_size                 INT,                                            -- 檔案大小 
+        file_size                 BIGINT,                                         -- 檔案大小 
         created_date              DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date              DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         INDEX idx_files_entity (entity_type, entity_id),
@@ -577,6 +577,8 @@
         created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
 
+        INDEX(product_id, price_date),
+
         UNIQUE (investment_product_id, price_date),
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
     );
@@ -767,10 +769,6 @@
         created_date              DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        
-        INDEX (account_id, transaction_date),
-        INDEX (ledger_id, transaction_date),
-        INDEX (user_id, transaction_date),
 
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
