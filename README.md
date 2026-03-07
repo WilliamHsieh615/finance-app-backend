@@ -240,7 +240,8 @@
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        
+
+        UNIQUE(ledger_id, name),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (account_type_id) REFERENCES account_types(id),
@@ -635,6 +636,7 @@
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE(ledger_id, category_group_id, name),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE
@@ -658,6 +660,7 @@
         created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE(user_id, ledger_id, name),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
