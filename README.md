@@ -220,6 +220,7 @@
         
         created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
+        deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
@@ -580,6 +581,7 @@
         category_type_id          BIGINT        NOT NULL,                        -- 分類類型
         created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
+        deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (category_type_id) REFERENCES category_types(id)
@@ -594,6 +596,7 @@
         name                      VARCHAR(50)   NOT NULL,                        -- 小分類名稱
         created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
+        deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE
@@ -616,6 +619,7 @@
         name                      VARCHAR(100)  NOT NULL,                        -- 商店 / 公司名稱
         created_date              DATETIME      NOT NULL,	                     -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,	                     -- 更新時間 (由後端寫入)
+        deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
@@ -664,7 +668,12 @@
 
         created_date              DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
-
+        deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        
+        INDEX (account_id, transaction_date),
+        INDEX (ledger_id, transaction_date),
+        INDEX (user_id, transaction_date),
+        
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
         FOREIGN KEY (account_id) REFERENCES accounts(id),
