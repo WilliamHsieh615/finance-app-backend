@@ -103,7 +103,6 @@
         note                      VARCHAR(255),
         created_date              DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date              DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id)
     );
 
@@ -507,6 +506,7 @@
         FOREIGN KEY (fund_type_id) REFERENCES fund_types(id)
     );
 
+    -- 債券發行單位表
     CREATE TABLE bond_issuers (
         id                        BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                      VARCHAR(50)   NOT NULL UNIQUE,                 -- 代碼
@@ -551,7 +551,7 @@
 
     -- 選擇權類型表
     CREATE TABLE option_types (
-        id                        BIGINT        PRIMARY KEY,
+        id                        BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                      VARCHAR(10)   NOT NULL UNIQUE,                 -- CALL、PUT
         name                      VARCHAR(50)   NOT NULL                         -- 買權 Call Option、賣權 Put Option
     );
@@ -565,9 +565,25 @@
         FOREIGN KEY (option_type_id) REFERENCES option_types(id)
     );
 
+    -- 投資產品歷史價格表
+    CREATE TABLE investment_price_history (
+        id                        BIGINT        AUTO_INCREMENT PRIMARY KEY,
+
+        investment_product_id     BIGINT        NOT NULL,
+
+        price                     DECIMAL(18,8) NOT NULL,
+        price_date                DATE          NOT NULL,
+
+        created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
+        updated_date              DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
+
+        UNIQUE (investment_product_id, price_date),
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
+    );
+
     -- 分類類型表
     CREATE TABLE category_types (
-        id                        BIGINT        PRIMARY KEY,
+        id                        BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                      VARCHAR(20)   NOT NULL UNIQUE,                 -- income、expense、transfer
         name                      VARCHAR(50)   NOT NULL                         -- 收入、支出、轉帳
     );
@@ -681,6 +697,21 @@
         FOREIGN KEY (original_currency_id) REFERENCES currencies(id)
     );
 
+    -- 交易關聯表 (不同交易之間的關聯)
+    CREATE TABLE transaction_links (
+        id                        BIGINT        AUTO_INCREMENT PRIMARY KEY,
+
+        transaction_id            BIGINT        NOT NULL,
+        related_transaction_id    BIGINT        NOT NULL,
+
+        created_date              DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date              DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id),
+        FOREIGN KEY (related_transaction_id) REFERENCES transactions(id)
+    );
+
     -- 交易表子表 (收支)
     CREATE TABLE cashflow_transaction_details (
         transaction_id            BIGINT        PRIMARY KEY,
@@ -735,6 +766,11 @@
 
         created_date              DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date              DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date              DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        
+        INDEX (account_id, transaction_date),
+        INDEX (ledger_id, transaction_date),
+        INDEX (user_id, transaction_date),
 
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
@@ -744,6 +780,20 @@
         FOREIGN KEY (original_currency_id) REFERENCES currencies(id)
     );
 
+    -- 重複交易關聯表 (不同交易之間的關聯)
+    CREATE TABLE recurring_transaction_links (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+
+        recurring_transaction_id         BIGINT        NOT NULL,
+        related_recurring_transaction_id BIGINT        NOT NULL,
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
+        FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id)
+    );
 
     -- 重複交易子表 (收支)
     CREATE TABLE cashflow_recurring_transaction_details (
@@ -754,7 +804,6 @@
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
     );
-
     
     -- 重複交易子表 (投資)
     CREATE TABLE investment_recurring_transaction_details (
