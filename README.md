@@ -241,7 +241,7 @@
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
         
-        cycle_day                        TINYINT       NOT NULL,		                 -- 結帳日 (1~31)
+        cycle_day                        TINYINT       NOT NULL,		                -- 結帳日 (1~31)
         due_day                          TINYINT       NOT NULL,                        -- 繳款日 (1~31)
         credit_limit                     DECIMAL(18,8) NULL,                            -- 信用額度
         annual_fee                       DECIMAL(18,8) NULL,                            -- 年費
@@ -415,7 +415,7 @@
         quantity                         DECIMAL(18,8) NOT NULL,                        -- 目前數量
         warning_level                    DECIMAL(18,8) NULL,                            -- 低於提醒
         cost_method_id                   BIGINT        NULL,
-        expiry_date DATE,                                                        -- 有效期限
+        expiry_date                      DATE,                                          -- 有效期限
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (inventory_category_id) REFERENCES inventory_categories(id),
         FOREIGN KEY (cost_method_id) REFERENCES cost_methods(id),
@@ -597,8 +597,8 @@
         ledger_id                        BIGINT        NOT NULL,
         name                             VARCHAR(50)   NOT NULL,                        -- 大分類名稱
         category_type_id                 BIGINT        NOT NULL,                        -- 分類類型
-        created_date                     DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
+        created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
@@ -610,10 +610,10 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT        NOT NULL,
         ledger_id                        BIGINT        NOT NULL,
-        category_group_id                BIGINT        NOT NULL,		                 -- (對應大分類)
+        category_group_id                BIGINT        NOT NULL,		                -- (對應大分類)
         name                             VARCHAR(50)   NOT NULL,                        -- 小分類名稱
-        created_date                     DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
+        created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
@@ -635,8 +635,8 @@
         ledger_id                        BIGINT        NOT NULL,
         merchant_type_id                 BIGINT        NOT NULL,                        -- 商店 / 公司類型
         name                             VARCHAR(100)  NOT NULL,                        -- 商店 / 公司名稱
-        created_date                     DATETIME      NOT NULL,	                     -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,	                     -- 更新時間 (由後端寫入)
+        created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
@@ -647,7 +647,7 @@
     CREATE TABLE transaction_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
-        code                             VARCHAR(50)   NOT NULL,	                     -- 代號
+        code                             VARCHAR(50)   NOT NULL,	                    -- 代號
         name                             VARCHAR(50)   NOT NULL,                        -- 交易類型名稱 (如：
                                                                                         -- 收支活動 (income / expense / buy / sell)
                                                                                         -- 投資活動
@@ -658,8 +658,8 @@
         direction                        TINYINT       NOT NULL,                        -- 正向 / 負向
         affects_balance                  BOOLEAN       DEFAULT TRUE,
         note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,	                     -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,	                     -- 更新時間 (由後端寫入)
+        created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         UNIQUE (ledger_id, code),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
     );
