@@ -214,7 +214,7 @@
         currency_id               BIGINT        NOT NULL,
 
         name                      VARCHAR(100)  NOT NULL,
-        initial_balance           DECIMAL(18,8) NOT NULL,                        -- 初始餘額
+        initial_balance           DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 初始餘額
         note                      VARCHAR(255),                                  -- 備註
         
         created_date              DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
@@ -675,7 +675,7 @@
         
         price                     DECIMAL(18,8) NULL,                            -- 價格
         quantity                  DECIMAL(18,8) NULL,                            -- 數量
-        amount                    DECIMAL(18,8) NOT NULL,                        -- 合計 (實際影響帳戶餘額的金額)
+        amount                    DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 合計 (實際影響帳戶餘額的金額)
 
         original_currency_id      BIGINT        NULL,                            -- 原始交易幣別 (外幣交易使用)
         original_amount           DECIMAL(18,8) NULL,                            -- 原始交易金額 (外幣交易使用)
@@ -756,7 +756,7 @@
 
         price                     DECIMAL(18,8) NULL,                            -- 價格
         quantity                  DECIMAL(18,8) NULL,                            -- 數量
-        amount                    DECIMAL(18,8) NOT NULL,                        -- 合計 (實際影響帳戶餘額的金額)
+        amount                    DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 合計 (實際影響帳戶餘額的金額)
 
         original_currency_id      BIGINT        NULL,                            -- 原始交易幣別 (外幣交易使用)
         original_amount           DECIMAL(18,8) NULL,                            -- 原始交易金額 (外幣交易使用)
