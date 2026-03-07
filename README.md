@@ -90,6 +90,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
 
         UNIQUE (base_currency_id, quote_currency_id, rate_date),
+        CHECK (base_currency_id <> quote_currency_id),
 
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id),
         FOREIGN KEY (quote_currency_id) REFERENCES currencies(id)
@@ -182,6 +183,8 @@
         
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+
+        UNIQUE(user_id, name),
         
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id)
@@ -599,6 +602,7 @@
         updated_date                     DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
 
         INDEX(investment_product_id, price_date),
+        INDEX(price_date),
 
         UNIQUE (investment_product_id, price_date),
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
@@ -618,9 +622,13 @@
         ledger_id                        BIGINT        NOT NULL,
         name                             VARCHAR(50)   NOT NULL,                        -- 大分類名稱
         category_type_id                 BIGINT        NOT NULL,                        -- 分類類型
+        
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE(ledger_id, name),
+        
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (category_type_id) REFERENCES category_types(id)
@@ -715,6 +723,7 @@
         INDEX (ledger_id, transaction_date),
         INDEX (user_id, transaction_date),
         INDEX (transaction_type_id),
+        INDEX (transaction_date),
         
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
@@ -797,6 +806,9 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
+        INDEX(start_date),
+        INDEX(account_id),
+
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
         FOREIGN KEY (account_id) REFERENCES accounts(id),
@@ -817,7 +829,7 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
-        CHECK (recurring_transaction_id <> related_recurring_transaction_id)
+        CHECK (recurring_transaction_id <> related_recurring_transaction_id),
 
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
         FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id)
