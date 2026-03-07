@@ -714,6 +714,7 @@
         INDEX (account_id, transaction_date),
         INDEX (ledger_id, transaction_date),
         INDEX (user_id, transaction_date),
+        INDEX (transaction_type_id),
         
         FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
@@ -734,6 +735,7 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(transaction_id, related_transaction_id),
+        CHECK (transaction_id <> related_transaction_id),
 
         FOREIGN KEY (transaction_id) REFERENCES transactions(id),
         FOREIGN KEY (related_transaction_id) REFERENCES transactions(id)
@@ -815,6 +817,7 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
+        CHECK (recurring_transaction_id <> related_recurring_transaction_id)
 
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
         FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id)
