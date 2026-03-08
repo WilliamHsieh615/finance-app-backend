@@ -874,8 +874,28 @@
         FOREIGN KEY (created_by) REFERENCES users(id)
     );
 
-    -- 投資持倉快照 (增加效能用)
-    CREATE TABLE investment_positions (
+    -- 帳戶餘額快照表
+    CREATE TABLE account_balance_snapshots (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT        NOT NULL,
+        
+        balance                          DECIMAL(18,8) NOT NULL,
+        currency_id                      BIGINT        NOT NULL,
+
+        base_balance                     DECIMAL(18,8) NOT NULL,                        -- 折算本位幣價值
+        base_currency_id                 BIGINT        NOT NULL,
+
+        snapshot_date                    DATE            NOT NULL,                      -- 快照日期
+        created_date                     DATETIME        NOT NULL,
+    
+        UNIQUE KEY uk_account_snapshot (account_id, snapshot_date),
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id),
+        FOREIGN KEY (base_currency_id) REFERENCES currencies(id)
+    );
+
+    -- 投資持倉快照表
+    CREATE TABLE investment_position_snapshots (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         account_id                       BIGINT        NOT NULL,
         investment_product_id            BIGINT        NOT NULL,
