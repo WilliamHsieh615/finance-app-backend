@@ -223,6 +223,7 @@
                                                                                         -- 應收帳下的借出款 lent，
                                                                                         -- 固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
                                                                                         -- 存貨帳下的生活用品或是備品
+        direction                        TINYINT       NOT NULL,                        -- 正向 / 負向
         note                             VARCHAR(255),
 
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
@@ -498,7 +499,7 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
 
-        UNIQUE (code, market_id),
+        UNIQUE(code, exchange_id, market_id),
         FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id),
         FOREIGN KEY (market_id) REFERENCES markets(id),
         FOREIGN KEY (currency_id) REFERENCES currencies(id),
@@ -617,7 +618,6 @@
     -- 大分類表
     CREATE TABLE category_groups (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT        NOT NULL,
         ledger_id                        BIGINT        NOT NULL,
         name                             VARCHAR(50)   NOT NULL,                        -- 大分類名稱
         category_type_id                 BIGINT        NOT NULL,                        -- 分類類型
@@ -628,7 +628,6 @@
 
         UNIQUE(ledger_id, name),
         
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (category_type_id) REFERENCES category_types(id)
     );
@@ -636,7 +635,6 @@
     -- 小分類表
     CREATE TABLE categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT        NOT NULL,
         ledger_id                        BIGINT        NOT NULL,
         category_group_id                BIGINT        NOT NULL,		                -- (對應大分類)
         name                             VARCHAR(50)   NOT NULL,                        -- 小分類名稱
@@ -644,7 +642,6 @@
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(ledger_id, category_group_id, name),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE
     );
@@ -666,7 +663,7 @@
         created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(user_id, ledger_id, name),
+        UNIQUE(user_id, name),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
     );
@@ -749,6 +746,7 @@
         transaction_id                   BIGINT        PRIMARY KEY,
         category_id                      BIGINT        NOT NULL,
         merchant_id                      BIGINT        NULL,
+        INDEX(category_id),
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
@@ -792,6 +790,7 @@
         recurrence_frequency_id          BIGINT        NOT NULL,                        -- 週期規則(如 一月一次、每日一次 等等，應由後端設定)
         start_date                       DATE          NOT NULL,
         end_date                         DATE          NULL,
+        is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
 
         note                             VARCHAR(255),
 
