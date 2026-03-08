@@ -764,6 +764,7 @@
     -- 交易商店表 
     CREATE TABLE merchants (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT        NOT NULL,
         ledger_id                        BIGINT        NOT NULL,
         merchant_type_id                 BIGINT        NOT NULL,                        -- 商店 / 公司類型
         name                             VARCHAR(100)  NOT NULL,                        -- 商店 / 公司名稱
@@ -771,6 +772,7 @@
         updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(ledger_id, name),
+        FOREIGN KEY (country_id) REFERENCES countries(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
     );
