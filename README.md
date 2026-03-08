@@ -9,7 +9,8 @@
         email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
         password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 角色表
@@ -19,7 +20,8 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、VIP、一般使用者
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 使用者與角色關聯表
@@ -27,6 +29,8 @@
         user_id                          BIGINT         NOT NULL,
         role_id                          BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (user_id, role_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
@@ -40,6 +44,7 @@
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 檔案表
@@ -54,6 +59,7 @@
         file_size                        BIGINT,                                         -- 檔案大小 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         INDEX idx_files_entity (entity_type, entity_id),
         INDEX idx_files_user (user_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -90,6 +96,7 @@
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (base_currency_id, quote_currency_id, rate_date),
         INDEX idx_exchange_rate_lookup (base_currency_id, quote_currency_id),
@@ -106,7 +113,8 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (地理、經濟、金融、政治)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 投資市場表
@@ -118,6 +126,7 @@
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name),
         FOREIGN KEY (market_type_id) REFERENCES market_types(id)
     );
@@ -126,6 +135,9 @@
     CREATE TABLE market_countries (
         market_id                        BIGINT         NOT NULL,
         country_id                       BIGINT         NOT NULL,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (market_id, country_id),
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
@@ -138,7 +150,8 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (銀行、券商、保險公司、交易所、平台)
         note                             VARCHAR(255)
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 金融機構表
@@ -151,6 +164,7 @@
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name),
         FOREIGN KEY (country_id) REFERENCES countries(id),
         FOREIGN KEY (financial_institution_type_id) REFERENCES financial_institution_types(id)
@@ -163,7 +177,8 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 還款、配息
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 頻率表(付款、收款、配息、不配息)
@@ -175,6 +190,7 @@
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(code, frequency_type_id),
         FOREIGN KEY (frequency_type_id) REFERENCES frequency_types(id)
     );
@@ -186,7 +202,8 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 存貨、金融商品、商品期貨
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 單位表
@@ -198,6 +215,7 @@
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (unit_type_id) REFERENCES unit_types(id)
     );
 
@@ -208,7 +226,8 @@
         name                             VARCHAR(50)    NOT NULL                         -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
 
@@ -223,6 +242,7 @@
         
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(user_id, name),
         
@@ -232,15 +252,16 @@
 
     -- 帳本成員表 (可設定多人共同維護一個帳戶)
     CREATE TABLE ledger_members (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT        NOT NULL,
-        ledger_id                        BIGINT        NOT NULL,
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        ledger_id                        BIGINT         NOT NULL,
         
-        role                             VARCHAR(50)   NOT NULL,                        -- 權限設定 (如 owner、admin、editor、viewer，由後端定義，不使用 ENUM，方便未來擴充）
-        joined_date                      DATETIME      NOT NULL,                        -- 加入時間
+        role                             VARCHAR(50)    NOT NULL,                       -- 權限設定 (如 owner、admin、editor、viewer，由後端定義，不使用 ENUM，方便未來擴充）
+        joined_date                      DATETIME       NOT NULL,                       -- 加入時間
         
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
         
         UNIQUE KEY uk_ledger_user (ledger_id, user_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
@@ -266,6 +287,7 @@
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
         UNIQUE (ledger_type_id, code)
@@ -370,7 +392,9 @@
         total_amount                     DECIMAL(18,8) NOT NULL,                        -- 總金額
         total_terms                      INT           NOT NULL,                        -- 總期數
 
-        created_date                     DATETIME      NOT NULL,
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
     );
@@ -383,8 +407,9 @@
         email                            VARCHAR(100),
         address                          VARCHAR(255),
         notes                            VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,
-        updated_date                     DATETIME      NOT NULL
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 帳戶表子表 (應收帳款)
@@ -417,7 +442,9 @@
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
 
-        created_date                     DATETIME      NOT NULL,
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
         FOREIGN KEY (debtor_id) REFERENCES debtors(id)
@@ -428,7 +455,10 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 房屋 house、車輛 car、家電 appliance、3C electronics
         name                             VARCHAR(50)   NOT NULL,                        -- 名稱
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 折舊方法表
@@ -436,7 +466,10 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- straight_line、declining_balance、double_declining、sum_of_years
         name                             VARCHAR(50)   NOT NULL,                        -- 直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 帳戶表子表 (固定資產帳 → 房屋、車輛、家電、3C)
@@ -461,7 +494,10 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 食品 food、飲品 beverage、消耗品 consumable、備件 spare_part、辦公用品office_supplies
         name                             VARCHAR(50)   NOT NULL,                        -- 名稱
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 存貨成本方法表
@@ -469,7 +505,10 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 先進先出法 fifo、後進先出法 lifo、加權平均法 average
         name                             VARCHAR(50)   NOT NULL,                        -- 名稱
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 帳戶表子表 (存貨帳 → 生活用品 / 備品)
@@ -495,7 +534,8 @@
         is_derivative                    BOOLEAN       DEFAULT FALSE,                   -- 是否為衍生性商品
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 時區表
@@ -507,7 +547,8 @@
         utc_offset                       TIME          NOT NULL,                        -- 偏移 (+00:00:00、-05:00:00、08:00:00)
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 交易所表
@@ -542,7 +583,8 @@
         note                             VARCHAR(255),
 
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(code, exchange_id, market_id),
         FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id),
@@ -559,7 +601,8 @@
         name                             VARCHAR(50)   NOT NULL,                        -- 股票型、債券型、平衡型、貨幣市場型、指數型、其他
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 投資產品表子表 (基金)
@@ -584,6 +627,9 @@
         name                             VARCHAR(100)  NOT NULL,                        -- 發行機構名稱
         country_id                       BIGINT        NOT NULL,                        -- 所屬國家
         note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (country_id) REFERENCES countries(id)
     );
 
@@ -594,7 +640,8 @@
         name                             VARCHAR(50)   NOT NULL,                        -- 政府債、公司債、市政債
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
     
     -- 投資產品表子表 (債券)
@@ -629,7 +676,8 @@
         name                             VARCHAR(50)   NOT NULL                         -- 買權 Call Option、賣權 Put Option
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 投資產品表子表 (選擇權)
@@ -666,8 +714,9 @@
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- income、expense、transfer
         name                             VARCHAR(50)   NOT NULL                         -- 收入、支出、轉帳
         note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL		                    -- 更新時間 (由後端寫入)
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
     
     -- 大分類表
@@ -707,8 +756,9 @@
         code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- restaurant、supermarket、utility
         name                             VARCHAR(100)  NOT NULL,                        -- 餐廳、超市、公共事業
         note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL 		                -- 更新時間 (由後端寫入)
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 交易商店表 
@@ -740,8 +790,9 @@
         direction                        TINYINT       NOT NULL,                        -- 正向 / 負向 (income=1、expense=-1、buy=-1、sell=1、transfer=0)
         affects_balance                  BOOLEAN       DEFAULT TRUE,
         note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (ledger_id, code),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
     );
