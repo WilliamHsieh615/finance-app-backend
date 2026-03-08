@@ -232,7 +232,6 @@
     -- 帳戶表
     CREATE TABLE accounts (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT        NOT NULL,
         ledger_id                        BIGINT        NOT NULL,
         account_type_id                  BIGINT        NOT NULL,
         currency_id                      BIGINT        NOT NULL,
@@ -246,7 +245,6 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(ledger_id, name),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (account_type_id) REFERENCES account_types(id),
         FOREIGN KEY (currency_id) REFERENCES currencies(id)
@@ -663,7 +661,6 @@
     CREATE TABLE merchants (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT        NOT NULL,
-        ledger_id                        BIGINT        NOT NULL,
         merchant_type_id                 BIGINT        NOT NULL,                        -- 商店 / 公司類型
         name                             VARCHAR(100)  NOT NULL,                        -- 商店 / 公司名稱
         created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
@@ -671,7 +668,6 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(user_id, ledger_id, name),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
     );
 
@@ -687,7 +683,7 @@
                                                                                         -- 應收帳款活動 (lend / receive / interest)
                                                                                         -- 固定資產活動 (depreciation / repair / revalue)
                                                                                         -- 存貨 (in / out / adjust)
-        direction                        TINYINT       NOT NULL,                        -- 正向 / 負向
+        direction                        TINYINT       NOT NULL,                        -- 正向 / 負向 (income=1、expense=-1、buy=-1、sell=1、transfer=0)
         affects_balance                  BOOLEAN       DEFAULT TRUE,
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
@@ -700,7 +696,6 @@
     -- 交易表
     CREATE TABLE transactions (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT        NOT NULL,
         ledger_id                        BIGINT        NOT NULL,
         account_id                       BIGINT        NOT NULL,
         transaction_type_id              BIGINT        NOT NULL,
@@ -722,11 +717,9 @@
         
         INDEX (account_id, transaction_date),
         INDEX (ledger_id, transaction_date),
-        INDEX (user_id, transaction_date),
         INDEX (transaction_type_id),
         INDEX (transaction_date),
         
-        FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
         FOREIGN KEY (account_id) REFERENCES accounts(id),
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
@@ -784,7 +777,6 @@
     -- 重複交易表
     CREATE TABLE recurring_transactions (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT        NOT NULL,
         ledger_id                        BIGINT        NOT NULL,
         account_id                       BIGINT        NOT NULL,
         transaction_type_id              BIGINT        NOT NULL,
@@ -810,7 +802,6 @@
         INDEX(start_date),
         INDEX(account_id),
 
-        FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
         FOREIGN KEY (account_id) REFERENCES accounts(id),
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
