@@ -148,7 +148,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (BANK、BROKER、INSURANCE、EXCHANGE、PLAT)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (銀行、券商、保險公司、交易所、平台)
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -223,7 +223,7 @@
     CREATE TABLE ledger_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- cashflow、investment、debt、receivable、fixed_asset、inventory
-        name                             VARCHAR(50)    NOT NULL                         -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
+        name                             VARCHAR(50)    NOT NULL,                        -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -673,7 +673,7 @@
     CREATE TABLE option_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- CALL、PUT
-        name                             VARCHAR(50)   NOT NULL                         -- 買權 Call Option、賣權 Put Option
+        name                             VARCHAR(50)   NOT NULL,                        -- 買權 Call Option、賣權 Put Option
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -712,7 +712,7 @@
     CREATE TABLE category_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- income、expense、transfer
-        name                             VARCHAR(50)   NOT NULL                         -- 收入、支出、轉帳
+        name                             VARCHAR(50)   NOT NULL,                        -- 收入、支出、轉帳
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -764,14 +764,14 @@
     -- 交易商店表 
     CREATE TABLE merchants (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT        NOT NULL,
+        ledger_id                        BIGINT        NOT NULL,
         merchant_type_id                 BIGINT        NOT NULL,                        -- 商店 / 公司類型
         name                             VARCHAR(100)  NOT NULL,                        -- 商店 / 公司名稱
         created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(user_id, name),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE(ledger_id, name),
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
     );
 
