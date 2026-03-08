@@ -15,7 +15,7 @@
     -- 角色表
     CREATE TABLE roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(20)    NOT NULL UNIQUE,                 -- admin, staff, vip, user
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- admin, staff, vip, user
         name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、VIP、一般使用者
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -35,9 +35,11 @@
     -- 檔案類型表
     CREATE TABLE file_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- JPG、PNG、PDF
-        name                             VARCHAR(50)    NOT NULL,                        -- JPEG image、PNG image、PDF file
-        note                             VARCHAR(255)
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (JPEG image、PNG image、PDF file)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
     );
 
     -- 檔案表
@@ -97,13 +99,27 @@
         FOREIGN KEY (quote_currency_id) REFERENCES currencies(id)
     );
 
+    -- 投資市場類型表
+    CREATE TABLE market_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (GEOGRAPHIC、ECONOMIC、FINANCIAL、POLITICS)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (地理、經濟、金融、政治)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+    );
+
     -- 投資市場表
     CREATE TABLE markets (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 市場代號 (TW、US、JP、CN、EU、EM、EMERGING、DEVELOPED、ASIA_TIGERS)
         name                             VARCHAR(50)    NOT NULL,                        -- 市場名稱 (台灣、美國、日本、中國、歐洲、新興市場、開發中國家、亞洲四小龍)
-        market_type                      VARCHAR(30)    NOT NULL,                        -- 市場種類 (地理 geographic、經濟 economic、金融 financial、政治 politics)
-        note                             VARCHAR(255)
+        market_type_id                   BIGINT         NOT NULL,                        -- 市場種類
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        UNIQUE(name),
+        FOREIGN KEY (market_type_id) REFERENCES market_types(id)
     );
 
     -- 市場國別關聯表
@@ -115,17 +131,29 @@
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
     );
 
+    -- 金融機構類型表
+    CREATE TABLE financial_institution_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (BANK、BROKER、INSURANCE、EXCHANGE、PLAT)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (銀行、券商、保險公司、交易所、平台)
+        note                             VARCHAR(255)
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
+    );
+
     -- 金融機構表
     CREATE TABLE financial_institutions (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華、富邦、IB、Binance)
-        type                             VARCHAR(50)    NOT NULL,                        -- 金融機構類型 (銀行 bank、券商 broker、保險公司 insurance、交易所 exchange、平台 plat)
+        financial_institution_type_id    BIGINT         NOT NULL,
         image_url                        VARCHAR(255),                                   -- 金融機構logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id)
+        UNIQUE(name),
+        FOREIGN KEY (country_id) REFERENCES countries(id),
+        FOREIGN KEY (financial_institution_type_id) REFERENCES financial_institution_types(id)
     );
 
     -- 頻率類型表
@@ -133,7 +161,9 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- repayment、payment、dividend、payout
         name                             VARCHAR(50)    NOT NULL,                        -- 還款、配息
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
     );
 
     -- 頻率表(付款、收款、配息、不配息)
@@ -143,6 +173,8 @@
         code                             VARCHAR(30)    NOT NULL,                        -- year、month、week、day、monthly、quarterly、semi_annual、annual、none
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         UNIQUE(code, frequency_type_id),
         FOREIGN KEY (frequency_type_id) REFERENCES frequency_types(id)
     );
@@ -150,26 +182,33 @@
     -- 單位類型表
     CREATE TABLE unit_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- inventory、financial、commodity
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- inventory、financial、commodity
         name                             VARCHAR(50)    NOT NULL,                        -- 存貨、金融商品、商品期貨
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
     );
 
     -- 單位表
     CREATE TABLE units (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(20)    NOT NULL UNIQUE,                 -- 單位代碼 (例如 pkg、bottle、piece、contract、share、oz、barrel)
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 單位代碼 (例如 pkg、bottle、piece、contract、share、oz、barrel)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (例如 包、瓶、個、合約、股、盎司、桶)
         unit_type_id                     BIGINT         NOT NULL,
         note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         FOREIGN KEY (unit_type_id) REFERENCES unit_types(id)
     );
 
     -- 帳本種類表
     CREATE TABLE ledger_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- cashflow、investment、debt、receivable、fixed_asset、inventory
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- cashflow、investment、debt、receivable、fixed_asset、inventory
         name                             VARCHAR(50)    NOT NULL                         -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL                         -- 更新時間 (由後端寫入)
     );
 
 
@@ -213,7 +252,7 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_type_id                   BIGINT        NOT NULL,
         
-        code                             VARCHAR(50)   NOT NULL,
+        code                             VARCHAR(30)   NOT NULL,
         name                             VARCHAR(50)   NOT NULL,                        -- 帳戶性質（如：
                                                                                         -- 收支帳下的現金 cash、銀行 bank、信用卡 credit_card ，
                                                                                         -- 投資帳下的股票 stock、基金 fund、債券 bond、外幣 forex、虛擬貨幣 crypto、
@@ -225,6 +264,8 @@
                                                                                         -- 存貨帳下的生活用品或是備品
         direction                        TINYINT       NOT NULL,                        -- 正向 / 負向
         note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
 
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
         UNIQUE (ledger_type_id, code)
@@ -385,7 +426,7 @@
     -- 固定資產分類表
     CREATE TABLE asset_categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- 房屋 house、車輛 car、家電 appliance、3C electronics
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 房屋 house、車輛 car、家電 appliance、3C electronics
         name                             VARCHAR(50)   NOT NULL,                        -- 名稱
         note                             VARCHAR(255)
     );
@@ -393,7 +434,7 @@
     -- 折舊方法表
     CREATE TABLE depreciation_methods (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- straight_line、declining_balance、double_declining、sum_of_years
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- straight_line、declining_balance、double_declining、sum_of_years
         name                             VARCHAR(50)   NOT NULL,                        -- 直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法
         note                             VARCHAR(255)
     );
@@ -418,7 +459,7 @@
     -- 存貨分類表
     CREATE TABLE inventory_categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- 食品 food、飲品 beverage、消耗品 consumable、備件 spare_part、辦公用品office_supplies
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 食品 food、飲品 beverage、消耗品 consumable、備件 spare_part、辦公用品office_supplies
         name                             VARCHAR(50)   NOT NULL,                        -- 名稱
         note                             VARCHAR(255)
     );
@@ -426,7 +467,7 @@
     -- 存貨成本方法表
     CREATE TABLE cost_methods (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- 先進先出法 fifo、後進先出法 lifo、加權平均法 average
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 先進先出法 fifo、後進先出法 lifo、加權平均法 average
         name                             VARCHAR(50)   NOT NULL,                        -- 名稱
         note                             VARCHAR(255)
     );
@@ -452,24 +493,28 @@
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- stock、etf、fund、bond、crypto、forex、gold、futures、option
         name                             VARCHAR(50)   NOT NULL,                        -- 股票、ETF、基金、債券、虛擬貨幣、外匯、黃金、期貨、選擇權
         is_derivative                    BOOLEAN       DEFAULT FALSE,                   -- 是否為衍生性商品
-        note VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
     );
 
     -- 時區表
     CREATE TABLE timezones (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- 時區代碼 (UTC、EST、CST)
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 時區代碼 (UTC、EST、CST)
         iana_name                        VARCHAR(50)   UNIQUE,                          -- IANA 時區名稱 (Etc/UTC、America/New_York、Asia/Taipei)
         name                             VARCHAR(100),                                  -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
         utc_offset                       TIME          NOT NULL,                        -- 偏移 (+00:00:00、-05:00:00、08:00:00)
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
     );
 
     -- 交易所表
     CREATE TABLE exchanges (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(20)   NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
-        name                             VARCHAR(100)  NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
+        name                             VARCHAR(50)  NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
         country_id                       BIGINT        NULL,                            -- 所屬國家
         timezone_id                      BIGINT        NULL,                            -- 時區
         image_url                        VARCHAR(255),
@@ -512,7 +557,9 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- equity、bond、balanced、money_market、index、etc
         name                             VARCHAR(50)   NOT NULL,                        -- 股票型、債券型、平衡型、貨幣市場型、指數型、其他
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
     );
 
     -- 投資產品表子表 (基金)
@@ -545,9 +592,11 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- government、corporate、municipal
         name                             VARCHAR(50)   NOT NULL,                        -- 政府債、公司債、市政債
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
     );
-
+    
     -- 投資產品表子表 (債券)
     CREATE TABLE bond_products (
         investment_product_id            BIGINT        PRIMARY KEY,
@@ -576,8 +625,11 @@
     -- 選擇權類型表
     CREATE TABLE option_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(10)   NOT NULL UNIQUE,                 -- CALL、PUT
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- CALL、PUT
         name                             VARCHAR(50)   NOT NULL                         -- 買權 Call Option、賣權 Put Option
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL                         -- 更新時間 (由後端寫入)
     );
 
     -- 投資產品表子表 (選擇權)
@@ -611,8 +663,11 @@
     -- 分類類型表
     CREATE TABLE category_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(20)   NOT NULL UNIQUE,                 -- income、expense、transfer
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- income、expense、transfer
         name                             VARCHAR(50)   NOT NULL                         -- 收入、支出、轉帳
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL		                    -- 更新時間 (由後端寫入)
     );
     
     -- 大分類表
@@ -651,7 +706,9 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- restaurant、supermarket、utility
         name                             VARCHAR(100)  NOT NULL,                        -- 餐廳、超市、公共事業
-        note                             VARCHAR(255)
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL 		                -- 更新時間 (由後端寫入)
     );
 
     -- 交易商店表 
@@ -672,7 +729,7 @@
     CREATE TABLE transaction_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
-        code                             VARCHAR(50)   NOT NULL,	                    -- 代號
+        code                             VARCHAR(30)   NOT NULL,	                    -- 代號
         name                             VARCHAR(50)   NOT NULL,                        -- 交易類型名稱 (如：
                                                                                         -- 收支活動 (income / expense / buy / sell)
                                                                                         -- 投資活動
