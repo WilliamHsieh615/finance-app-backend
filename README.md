@@ -526,7 +526,7 @@
         account_id                       BIGINT        PRIMARY KEY,
         inventory_category_id            BIGINT        NULL,
         unit_id                          BIGINT        NOT NULL,                        -- 單位
-        quantity                         DECIMAL(18,8) NOT NULL,                        -- 目前數量
+        quantity                         DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 目前數量
         warning_level                    DECIMAL(18,8) NULL,                            -- 低於提醒
         cost_method_id                   BIGINT        NULL,
         expiry_date                      DATE,                                          -- 有效期限
@@ -859,9 +859,8 @@
 
         UNIQUE(transaction_id, related_transaction_id),
         CHECK (transaction_id <> related_transaction_id),                               -- (後端應避免雙向連結)
-
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id),
-        FOREIGN KEY (related_transaction_id) REFERENCES transactions(id)
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
+        FOREIGN KEY (related_transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
     );
 
     -- 交易表子表 (收支)
@@ -878,12 +877,9 @@
     -- 交易表子表 (投資)
     CREATE TABLE investment_transaction_details (
         transaction_id                   BIGINT        PRIMARY KEY,
-        
         investment_product_id            BIGINT        NOT NULL,
-        
-        fee                              DECIMAL(18,8) NOT NULL,                        -- 手續費
-        tax                              DECIMAL(18,8) NOT NULL,                        -- 稅額
-
+        fee                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 手續費
+        tax                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 稅額
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
     );
@@ -944,9 +940,8 @@
 
         UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
         CHECK (recurring_transaction_id <> related_recurring_transaction_id),           -- (後端應避免雙向連結)
-
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
-        FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id)
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
+        FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE
     );
 
     -- 重複交易子表 (收支)
@@ -963,8 +958,8 @@
     CREATE TABLE investment_recurring_transaction_details (
         recurring_transaction_id         BIGINT        PRIMARY KEY,
         investment_product_id            BIGINT        NOT NULL,
-        fee                              DECIMAL(18,8) NOT NULL,                        -- 手續費
-        tax                              DECIMAL(18,8) NOT NULL,                        -- 稅額
+        fee                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 手續費
+        tax                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 稅額
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
     );
