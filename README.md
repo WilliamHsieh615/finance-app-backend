@@ -319,6 +319,8 @@
 
         UNIQUE(ledger_id, name),
         INDEX(ledger_id),
+        INDEX(account_type_id),
+        INDEX(currency_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (account_type_id) REFERENCES account_types(id),
         FOREIGN KEY (currency_id) REFERENCES currencies(id)
@@ -919,7 +921,9 @@
 
         INDEX(start_date),
         INDEX(account_id),
-
+        INDEX(ledger_id),
+        INDEX(recurrence_frequency_id),
+        
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
         FOREIGN KEY (account_id) REFERENCES accounts(id),
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
