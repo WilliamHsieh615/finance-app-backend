@@ -318,6 +318,7 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(ledger_id, name),
+        INDEX(ledger_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (account_type_id) REFERENCES account_types(id),
         FOREIGN KEY (currency_id) REFERENCES currencies(id)
@@ -755,6 +756,7 @@
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(ledger_id, category_group_id, name),
+        INDEX(category_group_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE
     );
@@ -781,6 +783,8 @@
         updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(ledger_id, name),
+        INDEX(ledger_id),
+        INDEX(merchant_type_id),
         FOREIGN KEY (country_id) REFERENCES countries(id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
@@ -974,7 +978,8 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE (ledger_id, name)
+        UNIQUE (ledger_id, name),
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
     );
 
     -- 交易標籤關聯表
@@ -985,8 +990,8 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (transaction_id, tag_id),
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id),
-        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id)
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE
     );
 
     -- 重複交易標籤關聯表
@@ -997,8 +1002,8 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (recurring_transaction_id, tag_id),
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
-        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id)
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE
     );
 
     -- 帳戶調整表 (會計用)
