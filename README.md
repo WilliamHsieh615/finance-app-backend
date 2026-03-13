@@ -965,6 +965,42 @@
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
     );
 
+    -- 交易標籤表
+    CREATE TABLE transaction_tags (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        ledger_id                        BIGINT        NOT NULL,
+        name                             VARCHAR(50)   NOT NULL,
+        color                            VARCHAR(20),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (ledger_id, name)
+    );
+
+    -- 交易標籤關聯表
+    CREATE TABLE transaction_tag_links (
+        transaction_id                   BIGINT        NOT NULL,
+        tag_id                           BIGINT        NOT NULL,
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        PRIMARY KEY (transaction_id, tag_id),
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id),
+        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id)
+    );
+
+    -- 重複交易標籤關聯表
+    CREATE TABLE recurring_transaction_tag_links (
+        recurring_transaction_id         BIGINT        NOT NULL,
+        tag_id                           BIGINT        NOT NULL,
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        PRIMARY KEY (recurring_transaction_id, tag_id),
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
+        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id)
+    );
+
     -- 帳戶調整表 (會計用)
     CREATE TABLE account_adjustments (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
