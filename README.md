@@ -250,22 +250,31 @@
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id)
     );
 
+    -- 帳本成員角色表
+    CREATE TABLE ledger_member_roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                -- OWNER、ADMIN、EDITOR、VIEWER
+        name                             VARCHAR(50)    NOT NULL,                       -- 擁有者、管理員、可編輯、只能看、
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
+    );
+
     -- 帳本成員表 (可設定多人共同維護一個帳戶)
     CREATE TABLE ledger_members (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         ledger_id                        BIGINT         NOT NULL,
-        
-        role                             VARCHAR(50)    NOT NULL,                       -- 權限設定 (如 owner、admin、editor、viewer，由後端定義，不使用 ENUM，方便未來擴充）
+        role_id                          BIGINT         NOT NULL,                       -- 權限設定
         joined_date                      DATETIME       NOT NULL,                       -- 加入時間
-        
         created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
-        
         UNIQUE KEY uk_ledger_user (ledger_id, user_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (role_id) REFERENCES ledger_member_roles(id)
     );
 
     -- 帳戶種類表
@@ -764,7 +773,7 @@
     -- 交易商店表 
     CREATE TABLE merchants (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT        NOT NULL,
+        country_id                       BIGINT        NULL,
         ledger_id                        BIGINT        NOT NULL,
         merchant_type_id                 BIGINT        NOT NULL,                        -- 商店 / 公司類型
         name                             VARCHAR(100)  NOT NULL,                        -- 商店 / 公司名稱
@@ -845,7 +854,7 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(transaction_id, related_transaction_id),
-        CHECK (transaction_id <> related_transaction_id),
+        CHECK (transaction_id <> related_transaction_id),                               -- (後端應避免雙向連結)
 
         FOREIGN KEY (transaction_id) REFERENCES transactions(id),
         FOREIGN KEY (related_transaction_id) REFERENCES transactions(id)
@@ -930,7 +939,7 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
-        CHECK (recurring_transaction_id <> related_recurring_transaction_id),
+        CHECK (recurring_transaction_id <> related_recurring_transaction_id),           -- (後端應避免雙向連結)
 
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id),
         FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id)
