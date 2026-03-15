@@ -17,7 +17,7 @@
     CREATE TABLE roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, VIP, USER
-        name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、VIP、一般使用者
+        name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、高級使用者、使用者
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
