@@ -71,7 +71,10 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             CHAR(2)        NOT NULL UNIQUE,                 -- ISO 3166-1國別碼 (TW、US、JP...)
         name                             VARCHAR(50)    NOT NULL,                        -- 國籍名稱 (台灣、美國、日本...)
-        image_url                        VARCHAR(255)                                    -- 國旗
+        image_url                        VARCHAR(255)   NULL,                            -- 國旗
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 貨幣表
@@ -80,7 +83,10 @@
         country_id                       BIGINT         NOT NULL,
         code                             CHAR(3)        NOT NULL UNIQUE,                 -- 貨幣碼 (TWD、USD、JPY...)
         name                             VARCHAR(50)    NOT NULL,                        -- 貨幣名稱 (新台幣、美元、日幣...)
-        symbol                           VARCHAR(10),                                    -- 貨幣符號 (NT$、$、¥、€、£、₩、₽...)
+        symbol                           VARCHAR(10)    NULL,                            -- 貨幣符號 (NT$、$、¥、€、£、₩、₽...)
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
         FOREIGN KEY (country_id) REFERENCES countries(id)
     );
 
@@ -160,7 +166,7 @@
         country_id                       BIGINT         NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華、富邦、IB、Binance)
         financial_institution_type_id    BIGINT         NOT NULL,
-        image_url                        VARCHAR(255),                                   -- 金融機構logo
+        image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -567,11 +573,16 @@
     CREATE TABLE exchanges (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
-        name                             VARCHAR(50)  NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
+        name                             VARCHAR(50)   NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
         country_id                       BIGINT        NULL,                            -- 所屬國家
         timezone_id                      BIGINT        NULL,                            -- 時區
-        image_url                        VARCHAR(255),
+        image_url                        VARCHAR(255)  NULL,
         note                             VARCHAR(255),
+        
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+        
         FOREIGN KEY (country_id) REFERENCES countries(id),
         FOREIGN KEY (timezone_id) REFERENCES timezones(id)
     );
@@ -591,7 +602,7 @@
         is_active                        BOOLEAN       DEFAULT TRUE,                    -- 是否仍可交易
 
         unit_id                          BIGINT        NULL,                            -- 商品單位 (口、股、張)
-        image_url                        VARCHAR(255),
+        image_url                        VARCHAR(255)  NULL,
         note                             VARCHAR(255),
 
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -807,9 +818,11 @@
         direction                        TINYINT       NOT NULL,                        -- 正向 / 負向 (income=1、expense=-1、buy=-1、sell=1、transfer=0)
         affects_balance                  BOOLEAN       DEFAULT TRUE,
         note                             VARCHAR(255),
+        
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        
         UNIQUE (ledger_id, code),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
     );
