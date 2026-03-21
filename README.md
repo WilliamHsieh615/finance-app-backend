@@ -581,7 +581,7 @@
         
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                             -- 刪除時間 (由後端寫入)
         
         FOREIGN KEY (country_id) REFERENCES countries(id),
         FOREIGN KEY (timezone_id) REFERENCES timezones(id)
