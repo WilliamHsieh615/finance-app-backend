@@ -69,12 +69,20 @@
     -- 國別表
     CREATE TABLE countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             CHAR(2)        NOT NULL UNIQUE,                 -- ISO 3166-1國別碼 (TW、US、JP...)
-        name                             VARCHAR(50)    NOT NULL,                        -- 國籍名稱 (台灣、美國、日本...)
+        iso2                             CHAR(2)        NOT NULL UNIQUE,                 -- ISO 3166-1國別碼 (兩碼)
+        iso3                             CHAR(3)        NULL,                            -- ISO 3166-1國別碼 (三碼)
+        iso_numeric                      CHAR(3)        NULL UNIQUE,                     -- ISO 3166-1國別碼 (數字)
+        phone_code                       VARCHAR(10)    NULL,                            -- 國際電話區碼
+    
+        name                             VARCHAR(50)    NOT NULL,                        -- 國籍名稱
         image_url                        VARCHAR(255)   NULL,                            -- 國旗
+
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+
+        INDEX idx_iso2 (iso2),
+        INDEX idx_iso3 (iso3)
     );
 
     -- 貨幣表
