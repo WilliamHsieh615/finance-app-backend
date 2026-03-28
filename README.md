@@ -166,7 +166,7 @@
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
     );
 
-    -- 金融機構角色表
+    -- 金融機構角色表 (以業務區分)
     CREATE TABLE financial_institution_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
@@ -177,18 +177,34 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 金融機構表
-    CREATE TABLE financial_institutions (
+    -- 金融機構集團表
+    CREATE TABLE financial_institution_groups (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT         NOT NULL,                        -- 金融機構總部國
-        name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華、富邦、IB、Binance)
-        image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
+        country_id                       BIGINT         NOT NULL,                        -- 金融機構集團總部國
+        name                             VARCHAR(100)   NOT NULL,                        -- 金融機構集團名稱 (例如：國泰金控、富邦金控)
+        image_url                        VARCHAR(255)   NULL,                            -- 金融機構集團logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name, country_id),
         FOREIGN KEY (country_id) REFERENCES countries(id)
+    );
+
+    -- 金融機構表
+    CREATE TABLE financial_institutions (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NOT NULL,                        -- 金融機構總部國
+        financial_institution_group_id   BIGINT         NULL,                            -- 金融機構集團
+        name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華銀行、台本富邦銀行、國泰人壽、IB、Binance)
+        image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE(name, country_id),
+        FOREIGN KEY (country_id) REFERENCES countries(id),
+        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id)
     );
 
     -- 金融機構國家與角色關聯表(金融機構在某國家的業務角色)
