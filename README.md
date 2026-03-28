@@ -166,11 +166,11 @@
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
     );
 
-    -- 金融機構類型表
-    CREATE TABLE financial_institution_types (
+    -- 金融機構角色表
+    CREATE TABLE financial_institution_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (BANK、BROKER、INSURANCE、EXCHANGE、PLAT)
-        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (銀行、券商、保險公司、交易所、平台)
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -182,15 +182,25 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華、富邦、IB、Binance)
-        financial_institution_type_id    BIGINT         NOT NULL,
         image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name),
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (financial_institution_type_id) REFERENCES financial_institution_types(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id)
+    );
+
+    -- 金融機構角色關聯表
+    CREATE TABLE financial_institution_has_roles (
+        financial_institution_id         BIGINT         NOT NULL,
+        financial_institution_role_id    BIGINT         NOT NULL,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE(financial_institution_id, financial_institution_role_id),
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
+        FOREIGN KEY (financial_institution_role_id) REFERENCES financial_institution_roles(id)
     );
 
     -- 頻率類型表
