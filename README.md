@@ -79,7 +79,7 @@
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         INDEX idx_iso2 (iso2),
         INDEX idx_iso3 (iso3)
