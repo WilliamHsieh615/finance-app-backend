@@ -98,8 +98,6 @@
 
     -- 國別貨幣關聯表
     CREATE TABLE currency_countries (
-        id               BIGINT AUTO_INCREMENT PRIMARY KEY,
-
         currency_id                      BIGINT         NOT NULL,
         country_id                       BIGINT         NOT NULL,
 
