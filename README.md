@@ -79,10 +79,7 @@
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-
-        INDEX idx_iso2 (iso2),
-        INDEX idx_iso3 (iso3)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 貨幣表
@@ -105,10 +102,9 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE KEY uk_currency_country (currency_id, country_id),
-
-        FOREIGN KEY (currency_id) REFERENCES currencies(id),
-        FOREIGN KEY (country_id) REFERENCES countries(id)
+        PRIMARY KEY (currency_id, country_id),
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 匯率表
