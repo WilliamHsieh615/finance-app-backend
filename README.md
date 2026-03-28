@@ -187,30 +187,28 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(name),
+        UNIQUE(name, country_id),
         FOREIGN KEY (country_id) REFERENCES countries(id)
     );
 
-    -- 金融機構國家關聯表(金融機構在多國有業務)
-    CREATE TABLE financial_institution_countries (
-        financial_institution_id         BIGINT         NOT NULL,
+    -- 金融機構國家與角色關聯表(金融機構在某國家的業務角色)
+    CREATE TABLE financial_institution_country_roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NOT NULL,
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        PRIMARY KEY (financial_institution_id, country_id),
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
-        FOREIGN KEY (country_id) REFERENCES countries(id)
-    );
-
-    -- 金融機構角色關聯表
-    CREATE TABLE financial_institution_has_roles (
         financial_institution_id         BIGINT         NOT NULL,
         financial_institution_role_id    BIGINT         NOT NULL,
+
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(financial_institution_id, financial_institution_role_id),
+
+        UNIQUE(country_id, financial_institution_id, financial_institution_role_id),
+
+        INDEX idx_fi (financial_institution_id),
+        INDEX idx_country (country_id),
+        INDEX idx_role (financial_institution_role_id),
+        
+        FOREIGN KEY (country_id) REFERENCES countries(id),
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
         FOREIGN KEY (financial_institution_role_id) REFERENCES financial_institution_roles(id)
     );
