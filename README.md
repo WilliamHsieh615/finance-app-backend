@@ -88,16 +88,31 @@
     -- 貨幣表
     CREATE TABLE currencies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT         NOT NULL,
         code                             CHAR(3)        NOT NULL UNIQUE,                 -- 貨幣碼 (TWD、USD、JPY...)
         name                             VARCHAR(50)    NOT NULL,                        -- 貨幣名稱 (新台幣、美元、日幣...)
         symbol                           VARCHAR(10)    NULL,                            -- 貨幣符號 (NT$、$、¥、€、£、₩、₽...)
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
+    -- 國別貨幣關聯表
+    CREATE TABLE currency_countries (
+        id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+        currency_id                      BIGINT         NOT NULL,
+        country_id                       BIGINT         NOT NULL,
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE KEY uk_currency_country (currency_id, country_id),
+
+        FOREIGN KEY (currency_id) REFERENCES currencies(id),
+        FOREIGN KEY (country_id) REFERENCES countries(id)
+    );
+    
     -- 匯率表
     CREATE TABLE exchange_rates (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
