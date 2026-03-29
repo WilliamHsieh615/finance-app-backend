@@ -1168,3 +1168,153 @@
 
 
 國別資料來源：https://github.com/dr5hn/countries-states-cities-database/tree/master
+
+
+    import json
+    import os
+    from datetime import datetime
+
+    # 1. 設定檔案路徑
+    INPUT_FILE = '/Users/williamhsieh/Desktop/countries.json'
+    OUTPUT_FILE = '/Users/williamhsieh/Desktop/countries.sql'
+
+    def format_sql_value(val):
+        if val is None or val == "": 
+            return "NULL"
+        # 處理單引號轉義
+        safe_val = str(val).replace("'", "''")
+        return f"'{safe_val}'"
+
+    def convert_offset(offset_str):
+        """
+        處理格式如 "+08:00"、"UTC-05:00" 或 "UTC±00:00" 
+        轉為 MySQL TIME 格式 (HH:mm:ss)
+        """
+        if not offset_str: return "00:00:00"
+        # 移除 UTC、空格以及特殊符號 ±
+        clean_offset = offset_str.replace("UTC", "").replace("±", "").strip()
+        # 如果清空後是空字串、0 或 00:00 則直接返回標準零值
+        if not clean_offset or clean_offset == "0" or "00:00" in clean_offset:
+            return "00:00:00"
+        # 判斷是否為負數
+        is_negative = "-" in clean_offset
+        # 取得純數字部分
+        numeric_part = clean_offset.replace("+", "").replace("-", "")
+        parts = numeric_part.split(':')
+        hh = parts[0].zfill(2)
+        mm = parts[1] if len(parts) > 1 else "00"
+        return f"{'-' if is_negative else ''}{hh}:{mm}:00"
+
+    if not os.path.exists(INPUT_FILE):
+        print(f"❌ 錯誤：找不到檔案 {INPUT_FILE}")
+    else:
+        with open(INPUT_FILE, 'r', encoding='utf-8') as f:
+            countries_data = json.load(f)
+
+        # SQL 標頭：確保編碼並暫時關閉外鍵檢查以加速匯入
+        sql_statements = [
+            "SET NAMES utf8mb4;",
+            "SET FOREIGN_KEY_CHECKS = 0;",
+            "TRUNCATE TABLE country_timezones;",
+            "TRUNCATE TABLE currency_countries;",
+            "TRUNCATE TABLE timezones;",
+            "TRUNCATE TABLE currencies;",
+            "TRUNCATE TABLE countries;",
+            "SET FOREIGN_KEY_CHECKS = 1;",
+            ""
+        ]
+
+        seen_currencies = {} 
+        seen_timezones = {}  
+        country_currency_map = [] 
+        country_timezone_map = [] 
+
+        print(f"🚀 開始處理 {len(countries_data)} 個國家...")
+
+        # --- 1. 處理國家資料 ---
+        sql_statements.append("-- ----------------------------")
+        sql_statements.append("-- Insert Countries")
+        sql_statements.append("-- ----------------------------")
+        for c in countries_data:
+            iso2 = c.get('iso2')
+            if not iso2: continue
+        
+            # 抓取在地化名稱
+            native_name = c.get('native') or c.get('name')
+        
+            sql_statements.append(
+                f"INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) "
+                f"VALUES ({format_sql_value(iso2)}, {format_sql_value(c.get('iso3'))}, {format_sql_value(c.get('numeric_code'))}, "
+                f"{format_sql_value(c.get('phone_code'))}, {format_sql_value(c.get('name'))}, "
+                f"{format_sql_value(native_name)}, 'https://flagcdn.com/w320/{iso2.lower()}.png', NOW(), NOW());"
+            )
+
+            # 收集貨幣
+            curr_code = c.get('currency')
+            if curr_code:
+                if curr_code not in seen_currencies:
+                    seen_currencies[curr_code] = {
+                        'name': c.get('currency_name', curr_code),
+                        'symbol': c.get('currency_symbol', '')
+                    }
+                country_currency_map.append((iso2, curr_code))
+
+            # 收集時區
+            tzs = c.get('timezones', [])
+            for index, tz in enumerate(tzs):
+                iana_name = tz.get('zoneName')
+                if iana_name:
+                    if iana_name not in seen_timezones:
+                        seen_timezones[iana_name] = {
+                            'code': tz.get('abbreviation'),
+                            'offset': convert_offset(tz.get('gmtOffsetName')),
+                            'display_name': tz.get('tzName')
+                        }
+                    # 第一個時區設為預設
+                    is_default = "TRUE" if index == 0 else "FALSE"
+                    country_timezone_map.append((iso2, iana_name, is_default))
+
+        # --- 2. 寫入貨幣表 ---
+        sql_statements.append("\n-- Insert Currencies")
+        for code, info in seen_currencies.items():
+            sql_statements.append(
+                f"INSERT INTO currencies (code, name, symbol, created_date, updated_date) "
+                f"VALUES ({format_sql_value(code)}, {format_sql_value(info['name'])}, {format_sql_value(info['symbol'])}, NOW(), NOW());"
+            )
+
+        # --- 3. 寫入時區表 ---
+        sql_statements.append("\n-- Insert Timezones")
+        for iana_name, info in seen_timezones.items():
+            sql_statements.append(
+                f"INSERT INTO timezones (code, iana_name, name, utc_offset, created_date, updated_date) "
+                f"VALUES ({format_sql_value(info['code'])}, {format_sql_value(iana_name)}, {format_sql_value(info['display_name'])}, '{info['offset']}', NOW(), NOW());"
+            )
+
+        # --- 4. 寫入國別-貨幣關聯 ---
+        sql_statements.append("\n-- Insert Currency-Country Mapping")
+        for iso2, curr_code in country_currency_map:
+            sql_statements.append(
+                f"INSERT INTO currency_countries (currency_id, country_id, created_date, updated_date) "
+                f"SELECT (SELECT id FROM currencies WHERE code={format_sql_value(curr_code)} LIMIT 1), "
+                f"(SELECT id FROM countries WHERE iso2='{iso2}' LIMIT 1), NOW(), NOW();"
+            )
+
+        # --- 5. 寫入國別-時區關聯 ---
+        sql_statements.append("\n-- Insert Country-Timezone Mapping")
+        for iso2, iana_name, is_default in country_timezone_map:
+            sql_statements.append(
+                f"INSERT INTO country_timezones (country_id, timezone_id, is_default, created_date, updated_date) "
+                f"SELECT (SELECT id FROM countries WHERE iso2='{iso2}' LIMIT 1), "
+                f"(SELECT id FROM timezones WHERE iana_name={format_sql_value(iana_name)} LIMIT 1), "
+                f"{is_default}, NOW(), NOW();"
+            )
+
+        # 寫入輸出檔案
+        with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+            f.write("\n".join(sql_statements))
+
+        print(f"✅ 成功！SQL 已產出至：{OUTPUT_FILE}")
+        print(f"📊 統計：國家 {len(countries_data)}, 貨幣 {len(seen_currencies)}, 時區 {len(seen_timezones)}")
+
+
+
