@@ -82,6 +82,38 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
+    -- 時區表
+    CREATE TABLE timezones (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 時區代碼 (UTC、EST、CST)
+        iana_name                        VARCHAR(50)   UNIQUE,                          -- IANA 時區名稱 (Etc/UTC、America/New_York、Asia/Taipei)
+        name                             VARCHAR(100),                                  -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
+        utc_offset                       TIME          NOT NULL,                        -- 偏移 (+00:00:00、-05:00:00、08:00:00)，為時區參考值，實際為 IANA 計算
+        
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 國別時區關聯表
+    CREATE TABLE country_timezones (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT        NOT NULL,
+        timezone_id                      BIGINT        NOT NULL,
+
+        is_default                       BOOLEAN       DEFAULT TRUE,                    -- 是否為預設時區
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (country_id, timezone_id),
+
+        FOREIGN KEY (country_id) REFERENCES countries(id),
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id)
+    );
+
     -- 貨幣表
     CREATE TABLE currencies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -609,19 +641,6 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 時區表
-    CREATE TABLE timezones (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 時區代碼 (UTC、EST、CST)
-        iana_name                        VARCHAR(50)   UNIQUE,                          -- IANA 時區名稱 (Etc/UTC、America/New_York、Asia/Taipei)
-        name                             VARCHAR(100),                                  -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
-        utc_offset                       TIME          NOT NULL,                        -- 偏移 (+00:00:00、-05:00:00、08:00:00)
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-
     -- 交易所表
     CREATE TABLE exchanges (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
@@ -634,7 +653,7 @@
         
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         
         FOREIGN KEY (country_id) REFERENCES countries(id),
         FOREIGN KEY (timezone_id) REFERENCES timezones(id)
