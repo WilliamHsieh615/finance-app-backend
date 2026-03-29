@@ -74,7 +74,8 @@
         iso_numeric                      CHAR(3)        NULL UNIQUE,                     -- ISO 3166-1國別碼 (數字)
         phone_code                       VARCHAR(10)    NULL,                            -- 國際電話區碼
     
-        name                             VARCHAR(50)    NOT NULL,                        -- 國籍名稱
+        name                             VARCHAR(50)    NOT NULL,                        -- 國家名稱 (英文)
+        native_name                      VARCHAR(100)                                    -- 國家名稱 (本地文字)
         image_url                        VARCHAR(255)   NULL,                            -- 國旗
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
