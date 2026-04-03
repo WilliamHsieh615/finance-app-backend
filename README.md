@@ -8,6 +8,8 @@
         name                             VARCHAR(100)   NOT NULL,                        -- 使用者名稱
         email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
         password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼
+        phone                            VARCHAR(20)    NOT NULL,
+        birthday                         DATE           NOT NULL,
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -26,6 +28,7 @@
 
     -- 使用者與角色關聯表
     CREATE TABLE user_has_roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         role_id                          BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -128,6 +131,7 @@
 
     -- 國別貨幣關聯表
     CREATE TABLE currency_countries (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         currency_id                      BIGINT         NOT NULL,
         country_id                       BIGINT         NOT NULL,
 
@@ -189,6 +193,7 @@
 
     -- 市場國別關聯表
     CREATE TABLE market_countries (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         market_id                        BIGINT         NOT NULL,
         country_id                       BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -937,7 +942,6 @@
     -- 交易關聯表 (不同交易之間的關聯)
     CREATE TABLE transaction_links (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-
         transaction_id                   BIGINT        NOT NULL,
         related_transaction_id           BIGINT        NOT NULL,
 
@@ -1020,7 +1024,6 @@
     -- 重複交易關聯表 (不同交易之間的關聯)
     CREATE TABLE recurring_transaction_links (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-
         recurring_transaction_id         BIGINT        NOT NULL,
         related_recurring_transaction_id BIGINT        NOT NULL,
 
@@ -1069,6 +1072,7 @@
 
     -- 交易標籤關聯表
     CREATE TABLE transaction_tag_links (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         transaction_id                   BIGINT        NOT NULL,
         tag_id                           BIGINT        NOT NULL,
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -1081,6 +1085,7 @@
 
     -- 重複交易標籤關聯表
     CREATE TABLE recurring_transaction_tag_links (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         recurring_transaction_id         BIGINT        NOT NULL,
         tag_id                           BIGINT        NOT NULL,
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
