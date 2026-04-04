@@ -75,7 +75,7 @@
     -- 角色表
     CREATE TABLE roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, VIP, USER
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, USER
         name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、高級使用者、使用者
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -91,7 +91,7 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        PRIMARY KEY (user_id, role_id),
+        UNIQUE (user_id, role_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
     );
@@ -147,7 +147,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        PRIMARY KEY (currency_id, country_id),
+        UNIQUE (currency_id, country_id),
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -207,7 +207,7 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        PRIMARY KEY (market_id, country_id),
+        UNIQUE (market_id, country_id),
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
     );
@@ -1086,7 +1086,7 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        PRIMARY KEY (transaction_id, tag_id),
+        UNIQUE (transaction_id, tag_id),
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE
     );
@@ -1099,7 +1099,7 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        PRIMARY KEY (recurring_transaction_id, tag_id),
+        UNIQUE (recurring_transaction_id, tag_id),
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE
     );
