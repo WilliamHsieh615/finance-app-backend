@@ -2,17 +2,74 @@
 
     USE finance_app;
     
-    -- 使用者表
-    CREATE TABLE users (
+    -- 國別表
+    CREATE TABLE countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        name                             VARCHAR(100)   NOT NULL,                        -- 使用者名稱
-        email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
-        password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼
-        phone                            VARCHAR(20)    NOT NULL,
-        birthday                         DATE           NOT NULL,
+        iso2                             CHAR(2)        NOT NULL UNIQUE,                 -- ISO 3166-1國別碼 (兩碼)
+        iso3                             CHAR(3)        NULL,                            -- ISO 3166-1國別碼 (三碼)
+        iso_numeric                      CHAR(3)        NULL UNIQUE,                     -- ISO 3166-1國別碼 (數字)
+        phone_code                       VARCHAR(10)    NULL,                            -- 國際電話區碼
+    
+        name                             VARCHAR(50)    NOT NULL,                        -- 國家名稱 (英文)
+        native_name                      VARCHAR(100)   NOT NULL,                        -- 國家名稱 (本地文字)
+        image_url                        VARCHAR(255)   NULL,                            -- 國旗
+
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 時區表
+    CREATE TABLE timezones (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL,                        -- 時區代碼 (UTC、EST、CST)
+        iana_name                        VARCHAR(50)   NOT NULL UNIQUE,                 -- IANA 時區名稱 (Etc/UTC、America/New_York、Asia/Taipei)
+        name                             VARCHAR(100),                                  -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
+        utc_offset                       TIME          NOT NULL,                        -- 偏移 (+00:00:00、-05:00:00、08:00:00)，為時區參考值，實際為 IANA 計算
+        
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 國別時區關聯表
+    CREATE TABLE country_timezones (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT        NOT NULL,
+        timezone_id                      BIGINT        NOT NULL,
+
+        is_default                       BOOLEAN       DEFAULT TRUE,                    -- 是否為預設時區
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (country_id, timezone_id),
+
+        FOREIGN KEY (country_id) REFERENCES countries(id),
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id)
+    );
+    
+    -- 使用者表
+    CREATE TABLE users (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NULL,
+        timezone_id                      BIGINT         NULL,
+
+        user_number                      VARCHAR(50)    NOT NULL UNIQUE,                 -- 使用者編號，編號格式為國別兩碼(iso2)+加入日期(YYYYMMDD)+五碼流水號
+        name                             VARCHAR(255)   NOT NULL,                        -- 姓名
+        nickname                         VARCHAR(100)   NOT NULL,                        -- 綽號
+        email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
+        password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼
+        birthday                         DATE           NOT NULL,                        -- 使用者生日
+        phone                            VARCHAR(20)    NULL,                            -- 手機號碼
+        
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (country_id) REFERENCES countries(id),
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id)
     );
 
     -- 角色表
@@ -67,55 +124,6 @@
         INDEX idx_files_user (user_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (file_type_id) REFERENCES file_types(id)
-    );
-
-    -- 國別表
-    CREATE TABLE countries (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        iso2                             CHAR(2)        NOT NULL UNIQUE,                 -- ISO 3166-1國別碼 (兩碼)
-        iso3                             CHAR(3)        NULL,                            -- ISO 3166-1國別碼 (三碼)
-        iso_numeric                      CHAR(3)        NULL UNIQUE,                     -- ISO 3166-1國別碼 (數字)
-        phone_code                       VARCHAR(10)    NULL,                            -- 國際電話區碼
-    
-        name                             VARCHAR(50)    NOT NULL,                        -- 國家名稱 (英文)
-        native_name                      VARCHAR(100)   NOT NULL,                        -- 國家名稱 (本地文字)
-        image_url                        VARCHAR(255)   NULL,                            -- 國旗
-
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 時區表
-    CREATE TABLE timezones (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL,                        -- 時區代碼 (UTC、EST、CST)
-        iana_name                        VARCHAR(50)   NOT NULL UNIQUE,                 -- IANA 時區名稱 (Etc/UTC、America/New_York、Asia/Taipei)
-        name                             VARCHAR(100),                                  -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
-        utc_offset                       TIME          NOT NULL,                        -- 偏移 (+00:00:00、-05:00:00、08:00:00)，為時區參考值，實際為 IANA 計算
-        
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 國別時區關聯表
-    CREATE TABLE country_timezones (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT        NOT NULL,
-        timezone_id                      BIGINT        NOT NULL,
-
-        is_default                       BOOLEAN       DEFAULT TRUE,                    -- 是否為預設時區
-
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE (country_id, timezone_id),
-
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id)
     );
 
     -- 貨幣表
