@@ -113,10 +113,10 @@
 
     -- 語言表
     CREATE TABLE languages (
-        id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-        code            VARCHAR(10) NOT NULL UNIQUE,   -- en, zh-TW, ja
-        name            VARCHAR(50) NOT NULL,          -- English, 繁體中文
-        is_active       BOOLEAN     NOT NULL DEFAULT TRUE,
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(10)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -124,21 +124,20 @@
 
     -- 翻譯表
     CREATE TABLE translations (
-        id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-        language_id     BIGINT      NOT NULL,
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        language_id                      BIGINT         NOT NULL,
 
-        table_name      VARCHAR(50) NOT NULL,   -- investment_products
-        column_name     VARCHAR(50) NOT NULL,   -- name
-        row_id          BIGINT      NOT NULL,   -- 1
+        table_name                       VARCHAR(50)    NOT NULL,   -- investment_products
+        column_name                      VARCHAR(50)    NOT NULL,   -- name
+        row_id                           BIGINT         NOT NULL,   -- 1
+        value                            VARCHAR(255)   NOT NULL,
 
-        value           VARCHAR(255) NOT NULL,
-
-        created_date    DATETIME NOT NULL,
-        updated_date    DATETIME NOT NULL,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
 
         UNIQUE (table_name, column_name, row_id, language_id),
-
-        FOREIGN KEY (language_id) REFERENCES languages(id)
+        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 使用者表
