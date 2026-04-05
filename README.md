@@ -103,7 +103,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE (base_currency_id, quote_currency_id, rate_date),
+        UNIQUE (exchange_rate_source_id, base_currency_id, quote_currency_id, rate_date),
         INDEX idx_exchange_rate_lookup (base_currency_id, quote_currency_id),
         CHECK (base_currency_id <> quote_currency_id),
         FOREIGN KEY (exchange_rate_source_id) REFERENCES exchange_rate_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -121,7 +121,7 @@
         name                             VARCHAR(255)   NOT NULL,                        -- 姓名
         nickname                         VARCHAR(100)   NOT NULL,                        -- 綽號
         email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
-        password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼 (後端使用hushcode寫入)
+        password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼 (後端使用hashcode寫入)
         birthday                         DATE           NOT NULL,                        -- 使用者生日
         phone                            VARCHAR(20)    NULL,                            -- 手機號碼
 
@@ -175,8 +175,9 @@
         plan_id                          BIGINT         NOT NULL,
         country_id                       BIGINT         NULL,
         currency_id                      BIGINT         NOT NULL,
-        
         price                            DECIMAL(18,8)  NOT NULL,
+        start_date                       DATE           NOT NULL,
+        end_date                         DATE           NOT NULL,
         
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -207,8 +208,8 @@
 
         price                            DECIMAL(18,8)  NOT NULL,
         currency_id                      BIGINT         NOT NULL,
-        start_date                       DATETIME       NOT NULL,
-        end_date                         DATETIME       NOT NULL,
+        start_date                       DATE           NOT NULL,
+        end_date                         DATE           NOT NULL,
 
         user_subscription_status_id      BIGINT         NOT NULL,   
         auto_renew                       BOOLEAN        DEFAULT TRUE,                    -- 是否自動續費
@@ -243,10 +244,11 @@
         is_active                        BOOLEAN        DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (payment_provider_type_id) REFERENCES payment_provider_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 付款提供者類型表
+    -- 付款狀態表
     CREATE TABLE payment_statuses (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、SUCCESS、FAILED、REFUNDED)
@@ -478,6 +480,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         ledger_type_id                   BIGINT         NOT NULL,
+        base_currency_id                 BIGINT         NOT NULL,                        -- 帳本基準幣
         
         name                             VARCHAR(100)   NOT NULL,                        -- 帳本名稱
         note                             VARCHAR(255),                                   -- 備註
@@ -488,7 +491,8 @@
 
         UNIQUE(user_id, name),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳本成員角色表
@@ -512,6 +516,7 @@
         created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
+        UNIQUE (user_id, ledger_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (role_id) REFERENCES ledger_member_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -538,8 +543,9 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        UNIQUE (ledger_type_id, code)
+        CHECK (direction IN (1, -1)),
+        UNIQUE (ledger_type_id, code),
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表
@@ -981,15 +987,13 @@
     -- 小分類表
     CREATE TABLE categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        ledger_id                        BIGINT        NOT NULL,
         category_group_id                BIGINT        NOT NULL,		                -- (對應大分類)
         name                             VARCHAR(50)   NOT NULL,                        -- 小分類名稱
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(ledger_id, category_group_id, name),
+        UNIQUE(category_group_id, name),
         INDEX(category_group_id),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
