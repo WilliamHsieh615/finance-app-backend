@@ -933,7 +933,7 @@
     );
 
     -- 投資產品歷史價格表
-    CREATE TABLE investment_price_history (
+    CREATE TABLE investment_price_histories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
 
         investment_product_id            BIGINT        NOT NULL,
@@ -1376,7 +1376,7 @@
     );
 
     -- 登入紀錄表
-    CREATE TABLE login_history (
+    CREATE TABLE login_histories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT        NULL,
         email                            VARCHAR(255)  NOT NULL,
