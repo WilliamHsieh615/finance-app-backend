@@ -110,6 +110,36 @@
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
+
+    -- 語言表
+    CREATE TABLE languages (
+        id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+        code            VARCHAR(10) NOT NULL UNIQUE,   -- en, zh-TW, ja
+        name            VARCHAR(50) NOT NULL,          -- English, 繁體中文
+        is_active       BOOLEAN     NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 翻譯表
+    CREATE TABLE translations (
+        id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+        language_id     BIGINT      NOT NULL,
+
+        table_name      VARCHAR(50) NOT NULL,   -- investment_products
+        column_name     VARCHAR(50) NOT NULL,   -- name
+        row_id          BIGINT      NOT NULL,   -- 1
+
+        value           VARCHAR(255) NOT NULL,
+
+        created_date    DATETIME NOT NULL,
+        updated_date    DATETIME NOT NULL,
+
+        UNIQUE (table_name, column_name, row_id, language_id),
+
+        FOREIGN KEY (language_id) REFERENCES languages(id)
+    );
     
     -- 使用者表
     CREATE TABLE users (
@@ -415,22 +445,11 @@
         FOREIGN KEY (financial_institution_role_id) REFERENCES financial_institution_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 利率類型表
-    CREATE TABLE interest_types (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- FIXED、FLOATING
-        name                             VARCHAR(50)   NOT NULL,                        -- 固定、流動
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-
     -- 頻率類型表
     CREATE TABLE frequency_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- repayment、payment、dividend、payout
-        name                             VARCHAR(50)    NOT NULL,                        -- 還款、配息
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- REPAYMENT、PAYOUT、RECOVERY、PAYMENT 
+        name                             VARCHAR(50)    NOT NULL,                        -- 你還錢給他(債務面)、他支付給你(投資面)、他把錢還給你(債務面)、你支付給他(投資面)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -584,16 +603,71 @@
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 合約種類表
+    CREATE TABLE contract_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                -- 代號
+        name                             VARCHAR(50)    NOT NULL,                       -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
+    );
+    
+    -- 合約表
+    CREATE TABLE contracts (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT         NOT NULL,
+        contract_type_id                 BIGINT         NOT NULL,
+
+        total_amount                     DECIMAL(18,8)  NULL,                           -- 總金額
+        total_terms                      INT            NULL,                           -- 總期數
+        start_date                       DATE           NOT NULL,                       -- 開始日
+        end_date                         DATE           NULL,                           -- 到期日
+
+        created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (contract_type_id) REFERENCES contract_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 利率類型表
+    CREATE TABLE interest_rate_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- FIXED、FLOATING
+        name                             VARCHAR(50)   NOT NULL,                        -- 固定、流動
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 利率排程表
+    CREATE TABLE interest_rate_schedules (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        contract_id                      BIGINT        NOT NULL,
+        interest_rate_type_id            BIGINT        NOT NULL,
+        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
+        start_date                       DATE          NOT NULL,                        -- 開始日
+        end_date                         DATE          NULL,                            -- 到期日
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        INDEX(contract_id, start_date, end_date),
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (interest_rate_type_id) REFERENCES interest_rate_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        
+    );
+
     -- 帳戶表子表 (收支帳 → 帳戶)
     CREATE TABLE bank_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
-        interest_type_id                 BIGINT        NOT NULL,                        -- 利率類型
         payout_frequency_id              BIGINT        NULL,                            -- 配息頻率
-        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (interest_type_id) REFERENCES interest_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -628,8 +702,6 @@
     CREATE TABLE term_investment_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
-        interest_type_id                 BIGINT        NOT NULL,
-        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
         early_termination_allowed        BOOLEAN,                                       -- 是否可提前贖回
@@ -638,45 +710,45 @@
         risk_level                       TINYINT       NULL,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (interest_type_id) REFERENCES interest_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 合約子表 (保險)
+    CREATE TABLE insurance_contracts (
+        contract_id                      BIGINT        PRIMARY KEY,
+        premium                          DECIMAL(18,8),                                 -- 保費
+        coverage_amount                  DECIMAL(18,8),                                 -- 保額
+        beneficiary                      VARCHAR(100),                                  -- 受益人
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (負債帳 → 房貸、車貸、信貸）
     CREATE TABLE debt_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
-        interest_type_id                 BIGINT        NOT NULL,
-        repayment_frequency_id           BIGINT        NOT NULL,
-        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
+        repayment_frequency_id           BIGINT        NULL,
 
-        cycle_day                        TINYINT       NOT NULL,                        -- 結帳日 (1~31)
-        due_day                          TINYINT       NOT NULL,                        -- 繳款日 (1~31)
+        cycle_day                        TINYINT       NULL,                            -- 結帳日 (1~31)
+        due_day                          TINYINT       NULL,                            -- 繳款日 (1~31)
         
         start_date                       DATE          NOT NULL,                        -- 開始日
-        end_date                         DATE          NOT NULL,                        -- 到期日
+        end_date                         DATE          NULL,                            -- 到期日
 
         CHECK (cycle_day BETWEEN 1 AND 31),
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (interest_type_id) REFERENCES interest_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 負債合約表
+    -- 合約子表 (負債)
     CREATE TABLE debt_contracts (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        account_id                       BIGINT        NOT NULL,
+        contract_id                      BIGINT        PRIMARY KEY,
+        apr                              DECIMAL(18,8),   -- 總費用率
+        fee_amount                       DECIMAL(18,8),   -- 手續費
+        repayment_type      VARCHAR(30),     -- 本息平均 / 只還利息
 
-        total_amount                     DECIMAL(18,8) NOT NULL,                        -- 總金額
-        total_terms                      INT           NOT NULL,                        -- 總期數
-
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 債務人表
@@ -695,48 +767,34 @@
     -- 帳戶表子表 (應收帳款)
     CREATE TABLE receivable_accounts (
         account_id                       BIGINT        PRIMARY KEY,
-        debtor_id                        BIGINT        NOT NULL,
-        repayment_frequency_id           BIGINT        NOT NULL,
-        
-        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
-        cycle_day                        TINYINT       NOT NULL,                        -- 結帳日 (1~31)
-        due_day                          TINYINT       NOT NULL,                        -- 繳款日 (1~31)
+        recovery_frequency_id            BIGINT        NULL,
+  
+        cycle_day                        TINYINT       NULL,                            -- 結帳日 (1~31)
+        due_day                          TINYINT       NULL,                            -- 繳款日 (1~31)
         
         start_date                       DATE          NOT NULL,                        -- 開始日
-        end_date                         DATE          NOT NULL,                        -- 到期日
+        end_date                         DATE          NULL,                            -- 到期日
 
         CHECK (cycle_day BETWEEN 1 AND 31),
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (recovery_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 應收帳款合約表
+    -- 合約子表 (應收帳款)
     CREATE TABLE receivable_contracts (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        account_id                       BIGINT        NOT NULL,
+        contract_id                      BIGINT        PRIMARY KEY,
         debtor_id                        BIGINT        NOT NULL,
-        
-        total_amount                     DECIMAL(18,8) NOT NULL,                        -- 總金額
-        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
-
-        start_date                       DATE          NOT NULL,                        -- 開始日
-        end_date                         DATE          NOT NULL,                        -- 到期日
-
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 固定資產分類表
     CREATE TABLE asset_categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 房屋 house、車輛 car、家電 appliance、3C electronics
-        name                             VARCHAR(50)   NOT NULL,                        -- 名稱
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 代號 (HOUSE、CAR、APPLIANCE、ELECTRONICS)
+        name                             VARCHAR(50)   NOT NULL,                        -- 名稱 (房屋、車輛、家電、電子產品)
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -746,8 +804,8 @@
     -- 折舊方法表
     CREATE TABLE depreciation_methods (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- straight_line、declining_balance、double_declining、sum_of_years
-        name                             VARCHAR(50)   NOT NULL,                        -- 直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 代號 (STRAIGHT_LINE、DECLINING_BALANCE、DOUBLE_DECLINING、SUM_OF_YEARS)
+        name                             VARCHAR(50)   NOT NULL,                        -- 名稱 (直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法)
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -774,8 +832,8 @@
     -- 存貨分類表
     CREATE TABLE inventory_categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 食品 food、飲品 beverage、消耗品 consumable、備件 spare_part、辦公用品office_supplies
-        name                             VARCHAR(50)   NOT NULL,                        -- 名稱
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 代號 (FOOD、BEVERAGE、CONSUMABLE、SPARE_PART、OFFICE_SUPPLIES)
+        name                             VARCHAR(50)   NOT NULL,                        -- 名稱 (食品、飲品、消耗品、備件、辦公用品)
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -785,8 +843,8 @@
     -- 存貨成本方法表
     CREATE TABLE cost_methods (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 先進先出法 fifo、後進先出法 lifo、加權平均法 average
-        name                             VARCHAR(50)   NOT NULL,                        -- 名稱
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- 代號 (FIFO、LIFO、AVERAGE)
+        name                             VARCHAR(50)   NOT NULL,                        -- 名稱 (先進先出法、後進先出法、加權平均法)
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
