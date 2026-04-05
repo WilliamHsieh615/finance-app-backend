@@ -154,6 +154,7 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (user_id, role_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -183,7 +184,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE (plan_id, country_id, currency_id),
+        UNIQUE (plan_id, country_id, currency_id, start_date, end_date),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -414,6 +415,17 @@
         FOREIGN KEY (financial_institution_role_id) REFERENCES financial_institution_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 利率類型表
+    CREATE TABLE interest_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- FIXED、FLOATING
+        name                             VARCHAR(50)   NOT NULL,                        -- 固定、流動
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
     -- 頻率類型表
     CREATE TABLE frequency_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -576,9 +588,13 @@
     CREATE TABLE bank_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
+        interest_type_id                 BIGINT        NOT NULL,                        -- 利率類型
+        payout_frequency_id              BIGINT        NULL,                            -- 配息頻率
         interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (interest_type_id) REFERENCES interest_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (收支帳 → 信用卡)
@@ -590,35 +606,39 @@
         due_day                          TINYINT       NOT NULL,                        -- 繳款日 (1~31)
         credit_limit                     DECIMAL(18,8) NULL,                            -- 信用額度
         annual_fee                       DECIMAL(18,8) NULL,                            -- 年費
-        
+
+        CHECK (cycle_day BETWEEN 1 AND 31),
+        CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
-    -- 帳戶表子表 (投資帳 → 股票、ETF、基金、債券、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
+    -- 帳戶表子表 (投資帳 → 股票、ETF、基金、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
     CREATE TABLE investment_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
         market_id                        BIGINT        NULL,
-        risk_level                       TINYINT,                                       -- 風險等級（1~5，可選）
+        risk_level                       TINYINT       NULL,                             -- 風險等級（1~5，可選）
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳戶表子表 (投資帳 → 定存、保險）
+    -- 帳戶表子表 (投資帳 → 定存、保險、基金、債券）
     CREATE TABLE term_investment_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
-        interest_type                    VARCHAR(20)   NOT NULL,                        -- 固定 fixed / 流動 floating
+        interest_type_id                 BIGINT        NOT NULL,
         interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
         early_termination_allowed        BOOLEAN,                                       -- 是否可提前贖回
         payout_frequency_id              BIGINT        NULL,                            -- 配息類型
         penalty_rate                     DECIMAL(18,8) NULL,                            -- 違約利率
+        risk_level                       TINYINT       NULL,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (interest_type_id) REFERENCES interest_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -626,8 +646,8 @@
     CREATE TABLE debt_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
+        interest_type_id                 BIGINT        NOT NULL,
         repayment_frequency_id           BIGINT        NOT NULL,
-        
         interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
 
         cycle_day                        TINYINT       NOT NULL,                        -- 結帳日 (1~31)
@@ -635,8 +655,11 @@
         
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
-        
+
+        CHECK (cycle_day BETWEEN 1 AND 31),
+        CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (interest_type_id) REFERENCES interest_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -681,7 +704,9 @@
         
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
-        
+
+        CHECK (cycle_day BETWEEN 1 AND 31),
+        CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -835,7 +860,7 @@
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE(code, exchange_id, market_id),
+        UNIQUE(code, exchange_id),
         FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
