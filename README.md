@@ -47,83 +47,8 @@
 
         UNIQUE (country_id, timezone_id),
 
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id)
-    );
-    
-    -- 使用者表
-    CREATE TABLE users (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT         NULL,
-        timezone_id                      BIGINT         NULL,
-
-        user_number                      VARCHAR(50)    NOT NULL UNIQUE,                 -- 使用者編號，編號格式為國別兩碼(iso2)+加入日期(YYYYMMDD)+五碼流水號
-        name                             VARCHAR(255)   NOT NULL,                        -- 姓名
-        nickname                         VARCHAR(100)   NOT NULL,                        -- 綽號
-        email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
-        password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼
-        birthday                         DATE           NOT NULL,                        -- 使用者生日
-        phone                            VARCHAR(20)    NULL,                            -- 手機號碼
-        
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id)
-    );
-
-    -- 角色表
-    CREATE TABLE roles (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, USER
-        name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、高級使用者、使用者
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 使用者與角色關聯表
-    CREATE TABLE user_has_roles (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT         NOT NULL,
-        role_id                          BIGINT         NOT NULL,
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE (user_id, role_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-    );
-
-    -- 檔案類型表
-    CREATE TABLE file_types (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF)
-        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (JPEG image、PNG image、PDF file)
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 檔案表
-    CREATE TABLE files (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT         NULL,                            -- 誰上傳的檔案
-        entity_type                      VARCHAR(50)    NOT NULL,                        -- 使用在的表 users、ledgers、accounts、category_groups、categories、merchants
-        entity_id                        BIGINT         NOT NULL,                        -- 對應表的id
-        file_role                        VARCHAR(50),                                    -- 檔案的角色 avatar、logo、cover、receipt
-        file_url                         VARCHAR(255)   NOT NULL, 
-        file_type_id                     BIGINT         NOT NULL,                        -- 檔案類型 JPG、PNG、GIF、TXT 
-        file_size                        BIGINT,                                         -- 檔案大小 
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        INDEX idx_files_entity (entity_type, entity_id),
-        INDEX idx_files_user (user_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (file_type_id) REFERENCES file_types(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 貨幣表
@@ -170,8 +95,207 @@
         INDEX idx_exchange_rate_lookup (base_currency_id, quote_currency_id),
         CHECK (base_currency_id <> quote_currency_id),
 
-        FOREIGN KEY (base_currency_id) REFERENCES currencies(id),
-        FOREIGN KEY (quote_currency_id) REFERENCES currencies(id)
+        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    
+    -- 使用者表
+    CREATE TABLE users (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NULL,
+        timezone_id                      BIGINT         NULL,
+
+        user_number                      VARCHAR(50)    NOT NULL UNIQUE,                 -- 使用者編號，USER/STAFF/ADMIN+加入日期(YYYYMMDD)+五碼流水號
+        name                             VARCHAR(255)   NOT NULL,                        -- 姓名
+        nickname                         VARCHAR(100)   NOT NULL,                        -- 綽號
+        email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
+        password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼 (後端使用hushcode寫入)
+        birthday                         DATE           NOT NULL,                        -- 使用者生日
+        phone                            VARCHAR(20)    NOT NULL,                        -- 手機號碼
+
+        email_verified                   BOOLEAN        DEFAULT FALSE,                   -- 電子郵件驗證
+        sms_verified                     BOOLEAN        DEFAULT FALSE,                   -- 簡訊驗證
+        
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 角色表
+    CREATE TABLE roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, USER
+        name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、使用者
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 使用者與角色關聯表
+    CREATE TABLE user_has_roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        role_id                          BIGINT         NOT NULL,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 訂閱方案表
+    CREATE TABLE subscription_plans (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- FREE, PRO, PREMIUM
+        name                             VARCHAR(100)   NOT NULL,
+        duration_days                    INT            NOT NULL,                        -- 訂閱時效 (30天、365天)
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 訂閱方案價格表
+    CREATE TABLE subscription_plan_prices (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        plan_id                          BIGINT         NOT NULL,
+        country_id                       BIGINT         NULL,
+        currency_id                      BIGINT         NOT NULL,
+        
+        price                            DECIMAL(10,2)  NOT NULL,
+        
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (plan_id, country_id, currency_id),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 使用者訂閱狀態表
+    CREATE TABLE user_subscription_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (ACTIVE、EXPIRED、CANCELLED)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (啟動、過期、取消)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 使用者訂閱關聯表
+    CREATE TABLE user_subscriptions (
+        id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        subscription_plan_id             BIGINT         NOT NULL,
+
+        price                            DECIMAL(10,2)  NOT NULL,
+        currency_id                      BIGINT         NOT NULL,
+        start_date                       DATETIME       NOT NULL,
+        end_date                         DATETIME       NOT NULL,
+
+        user_subscription_status_id      BIGINT         NOT NULL,   
+        auto_renew                       BOOLEAN        DEFAULT TRUE,                    -- 是否自動續費
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (user_subscription_status_id) REFERENCES user_subscription_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 付款提供者類型表
+    CREATE TABLE payment_provider_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PAYMENT、SUBSCRIPTION、BOTH)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (一次性付款、訂閱制、兩者皆有)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 付款提供者表
+    CREATE TABLE payment_providers (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (STRIPE、APPLE、GOOGLE)
+        name                             VARCHAR(50)    NOT NULL,
+        payment_provider_type_id         BIGINT         NOT NULL,
+        is_active                        BOOLEAN        DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 付款提供者類型表
+    CREATE TABLE payment_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、SUCCESS、FAILED、REFUNDED)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+    );
+
+    -- 使用者訂閱付款表
+    CREATE TABLE user_subscription_payments (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        user_subscription_id             BIGINT         NULL,
+
+        amount                           DECIMAL(10,2)  NOT NULL,
+        currency_id                      BIGINT         NOT NULL,
+
+        payment_status_id                BIGINT         NOT NULL,
+        payment_provider_id              BIGINT         NOT NULL,
+        paid_date                        DATETIME       NULL,
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (payment_provider_id) REFERENCES payment_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (payment_status_id) REFERENCES payment_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (user_subscription_id) REFERENCES user_subscriptions(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 檔案類型表
+    CREATE TABLE file_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (JPEG image、PNG image、PDF file)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 檔案表
+    CREATE TABLE files (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NULL,                            -- 誰上傳的檔案
+        entity_type                      VARCHAR(50)    NOT NULL,                        -- 使用在的表 users、ledgers、accounts、category_groups、categories、merchants
+        entity_id                        BIGINT         NOT NULL,                        -- 對應表的id
+        file_role                        VARCHAR(50),                                    -- 檔案的角色 avatar、logo、cover、receipt
+        file_url                         VARCHAR(255)   NOT NULL, 
+        file_type_id                     BIGINT         NOT NULL,                        -- 檔案類型 JPG、PNG、GIF、TXT 
+        file_size                        BIGINT,                                         -- 檔案大小 
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        INDEX idx_files_entity (entity_type, entity_id),
+        INDEX idx_files_user (user_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (file_type_id) REFERENCES file_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 投資市場類型表
@@ -196,7 +320,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name),
-        FOREIGN KEY (market_type_id) REFERENCES market_types(id)
+        FOREIGN KEY (market_type_id) REFERENCES market_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 市場國別關聯表
@@ -208,8 +332,8 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (market_id, country_id),
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE,
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 金融機構角色表 (以業務區分)
@@ -234,7 +358,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name, country_id),
-        FOREIGN KEY (country_id) REFERENCES countries(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 金融機構表
@@ -249,8 +373,8 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name, country_id),
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 金融機構國家與角色關聯表(金融機構在某國家的業務角色)
@@ -270,9 +394,9 @@
         INDEX idx_country (country_id),
         INDEX idx_role (financial_institution_role_id),
         
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
-        FOREIGN KEY (financial_institution_role_id) REFERENCES financial_institution_roles(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_role_id) REFERENCES financial_institution_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 頻率類型表
@@ -297,7 +421,7 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(code, frequency_type_id),
-        FOREIGN KEY (frequency_type_id) REFERENCES frequency_types(id)
+        FOREIGN KEY (frequency_type_id) REFERENCES frequency_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 單位類型表
@@ -321,7 +445,7 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (unit_type_id) REFERENCES unit_types(id)
+        FOREIGN KEY (unit_type_id) REFERENCES unit_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳本種類表
@@ -351,8 +475,8 @@
 
         UNIQUE(user_id, name),
         
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id)
+        FOREIGN KEY (user_id) REFERENCES users(id) DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳本成員角色表
@@ -377,9 +501,9 @@
         updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
         UNIQUE KEY uk_ledger_user (ledger_id, user_id),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (role_id) REFERENCES ledger_member_roles(id)
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (role_id) REFERENCES ledger_member_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶種類表
@@ -403,7 +527,7 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id),
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         UNIQUE (ledger_type_id, code)
     );
 
@@ -426,9 +550,9 @@
         INDEX(ledger_id),
         INDEX(account_type_id),
         INDEX(currency_id),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
-        FOREIGN KEY (account_type_id) REFERENCES account_types(id),
-        FOREIGN KEY (currency_id) REFERENCES currencies(id)
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_type_id) REFERENCES account_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (收支帳 → 帳戶)
@@ -436,8 +560,8 @@
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
         interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (收支帳 → 信用卡)
@@ -450,8 +574,8 @@
         credit_limit                     DECIMAL(18,8) NULL,                            -- 信用額度
         annual_fee                       DECIMAL(18,8) NULL,                            -- 年費
         
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 帳戶表子表 (投資帳 → 股票、ETF、基金、債券、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
@@ -460,9 +584,9 @@
         financial_institution_id         BIGINT        NULL,
         market_id                        BIGINT        NULL,
         risk_level                       TINYINT,                                       -- 風險等級（1~5，可選）
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
-        FOREIGN KEY (market_id) REFERENCES markets(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (投資帳 → 定存、保險）
@@ -477,9 +601,9 @@
         payout_frequency_id              BIGINT        NULL,                            -- 配息類型
         penalty_rate                     DECIMAL(18,8) NULL,                            -- 違約利率
         status                           VARCHAR(20)   NOT NULL,                        -- 狀態
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
-        FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (負債帳 → 房貸、車貸、信貸）
@@ -496,9 +620,9 @@
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
         
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
-        FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 負債合約表
@@ -513,7 +637,7 @@
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 債務人表
@@ -542,9 +666,9 @@
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
         
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (debtor_id) REFERENCES debtors(id),
-        FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 應收帳款合約表
@@ -563,8 +687,8 @@
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (debtor_id) REFERENCES debtors(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 固定資產分類表
@@ -601,9 +725,9 @@
         depreciation_method_id           BIGINT        NULL,
         salvage_value                    DECIMAL(18,8) NULL,                            -- 殘值
         location                         VARCHAR(100),                                  -- 位置
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (asset_category_id) REFERENCES asset_categories(id),
-        FOREIGN KEY (depreciation_method_id) REFERENCES depreciation_methods(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (asset_category_id) REFERENCES asset_categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (depreciation_method_id) REFERENCES depreciation_methods(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 存貨分類表
@@ -637,10 +761,10 @@
         warning_level                    DECIMAL(18,8) NULL,                            -- 低於提醒
         cost_method_id                   BIGINT        NULL,
         expiry_date                      DATE,                                          -- 有效期限
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (inventory_category_id) REFERENCES inventory_categories(id),
-        FOREIGN KEY (cost_method_id) REFERENCES cost_methods(id),
-        FOREIGN KEY (unit_id) REFERENCES units(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (inventory_category_id) REFERENCES inventory_categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (cost_method_id) REFERENCES cost_methods(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 投資產品種類表
@@ -669,8 +793,8 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 投資產品表
@@ -696,11 +820,11 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(code, exchange_id, market_id),
-        FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id),
-        FOREIGN KEY (market_id) REFERENCES markets(id),
-        FOREIGN KEY (currency_id) REFERENCES currencies(id),
-        FOREIGN KEY (exchange_id) REFERENCES exchanges(id),
-        FOREIGN KEY (unit_id) REFERENCES units(id)
+        FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (exchange_id) REFERENCES exchanges(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 基金類型表
@@ -723,10 +847,10 @@
         dividend_frequency_id            BIGINT        NULL,                            -- 配息頻率
         fund_type_id                     BIGINT        NULL,                            -- 基金類型
         
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id),
-        FOREIGN KEY (dividend_frequency_id) REFERENCES frequencies(id),
-        FOREIGN KEY (fund_type_id) REFERENCES fund_types(id)
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (dividend_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 債券發行單位表
@@ -739,7 +863,7 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 債券種類表
@@ -764,10 +888,10 @@
         face_value                       DECIMAL(18,8) NOT NULL,                        -- 面額
         bond_type_id                     BIGINT        NULL,                            -- 債券種類
 
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE,
-        FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id),
-        FOREIGN KEY (coupon_frequency_id) REFERENCES frequencies(id),
-        FOREIGN KEY (bond_type_id) REFERENCES bond_types(id)
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (coupon_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (bond_type_id) REFERENCES bond_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 投資產品表子表 (期貨)
@@ -775,7 +899,7 @@
         investment_product_id            BIGINT        PRIMARY KEY,
         contract_size                    DECIMAL(18,8) NOT NULL,                        -- 每張合約的標的數量
         expiration_date                  DATE          NOT NULL,                        -- 到期日
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 選擇權類型表
@@ -794,8 +918,8 @@
         investment_product_id            BIGINT        PRIMARY KEY,
         strike_price                     DECIMAL(18,8) NOT NULL,                        -- 履約價
         option_type_id                   BIGINT        NOT NULL,
-        FOREIGN KEY (investment_product_id) REFERENCES derivative_products(investment_product_id),
-        FOREIGN KEY (option_type_id) REFERENCES option_types(id)
+        FOREIGN KEY (investment_product_id) REFERENCES derivative_products(investment_product_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (option_type_id) REFERENCES option_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 投資產品歷史價格表
@@ -812,9 +936,8 @@
 
         INDEX(investment_product_id, price_date),
         INDEX(price_date),
-
         UNIQUE (investment_product_id, price_date),
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 分類類型表
@@ -841,8 +964,8 @@
 
         UNIQUE(ledger_id, name),
         
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
-        FOREIGN KEY (category_type_id) REFERENCES category_types(id)
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category_type_id) REFERENCES category_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 小分類表
@@ -856,8 +979,8 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(ledger_id, category_group_id, name),
         INDEX(category_group_id),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
-        FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 商店類型表
@@ -884,9 +1007,9 @@
         UNIQUE(ledger_id, name),
         INDEX(ledger_id),
         INDEX(merchant_type_id),
-        FOREIGN KEY (country_id) REFERENCES countries(id),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE,
-        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 交易類型表
@@ -910,7 +1033,7 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         
         UNIQUE (ledger_id, code),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
 
@@ -941,10 +1064,10 @@
         INDEX (transaction_type_id),
         INDEX (transaction_date),
         
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
-        FOREIGN KEY (account_id) REFERENCES accounts(id),
-        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id)
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 交易關聯表 (不同交易之間的關聯)
@@ -959,8 +1082,8 @@
 
         UNIQUE(transaction_id, related_transaction_id),
         CHECK (transaction_id <> related_transaction_id),                               -- (後端應避免雙向連結)
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (related_transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (related_transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 交易表子表 (收支)
@@ -969,8 +1092,8 @@
         category_id                      BIGINT        NOT NULL,
         merchant_id                      BIGINT        NULL,
         INDEX(category_id),
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
     );
 
@@ -980,15 +1103,15 @@
         investment_product_id            BIGINT        NOT NULL,
         fee                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 手續費
         tax                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 稅額
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 交易表子表 (存貨)
     CREATE TABLE inventory_transaction_details (
         transaction_id                   BIGINT        PRIMARY KEY,
         expiry_date                      DATE,                                          -- 這批存貨的到期日
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 重複交易表
@@ -1022,11 +1145,11 @@
         INDEX(ledger_id),
         INDEX(recurrence_frequency_id),
         
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id),
-        FOREIGN KEY (account_id) REFERENCES accounts(id),
-        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
-        FOREIGN KEY (recurrence_frequency_id) REFERENCES frequencies(id),
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id)
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (recurrence_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 重複交易關聯表 (不同交易之間的關聯)
@@ -1041,8 +1164,8 @@
 
         UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
         CHECK (recurring_transaction_id <> related_recurring_transaction_id),           -- (後端應避免雙向連結)
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 重複交易子表 (收支)
@@ -1051,7 +1174,7 @@
         category_id                      BIGINT        NOT NULL,
         merchant_id                      BIGINT        NULL,
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
     );
     
@@ -1061,8 +1184,8 @@
         investment_product_id            BIGINT        NOT NULL,
         fee                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 手續費
         tax                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 稅額
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 交易標籤表
@@ -1075,7 +1198,7 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (ledger_id, name),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 交易標籤關聯表
@@ -1087,8 +1210,8 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (transaction_id, tag_id),
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE
+        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 重複交易標籤關聯表
@@ -1100,8 +1223,8 @@
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (recurring_transaction_id, tag_id),
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶調整表 (會計用)
@@ -1118,8 +1241,8 @@
         created_by                       BIGINT        NOT NULL,                        -- 誰做的調整
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (created_by) REFERENCES users(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶餘額快照表
@@ -1137,9 +1260,9 @@
         created_date                     DATETIME        NOT NULL,
     
         UNIQUE KEY uk_account_snapshot (account_id, snapshot_date),
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id),
-        FOREIGN KEY (base_currency_id) REFERENCES currencies(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 投資持倉快照表
@@ -1158,8 +1281,8 @@
         UNIQUE (account_id, investment_product_id, snapshot_date),
         INDEX(account_id),
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 登入紀錄表
