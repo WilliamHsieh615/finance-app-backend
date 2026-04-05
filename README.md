@@ -76,10 +76,22 @@
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
+
+    -- 匯率來源表
+    CREATE TABLE exchange_rate_sources (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             CHAR(3)        NOT NULL UNIQUE,                 -- 代碼 (ECB、yahoo)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
     
     -- 匯率表
     CREATE TABLE exchange_rates (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        exchange_rate_source_id          BIGINT         NOT NULL,
 
         base_currency_id                 BIGINT         NOT NULL,                        -- 基準幣別 (USD)
         quote_currency_id                BIGINT         NOT NULL,                        -- 報價幣別 (TWD)
@@ -94,7 +106,7 @@
         UNIQUE (base_currency_id, quote_currency_id, rate_date),
         INDEX idx_exchange_rate_lookup (base_currency_id, quote_currency_id),
         CHECK (base_currency_id <> quote_currency_id),
-
+        FOREIGN KEY (exchange_rate_source_id) REFERENCES exchange_rate_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -111,7 +123,7 @@
         email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
         password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼 (後端使用hushcode寫入)
         birthday                         DATE           NOT NULL,                        -- 使用者生日
-        phone                            VARCHAR(20)    NOT NULL,                        -- 手機號碼
+        phone                            VARCHAR(20)    NULL,                            -- 手機號碼
 
         email_verified                   BOOLEAN        DEFAULT FALSE,                   -- 電子郵件驗證
         sms_verified                     BOOLEAN        DEFAULT FALSE,                   -- 簡訊驗證
@@ -164,7 +176,7 @@
         country_id                       BIGINT         NULL,
         currency_id                      BIGINT         NOT NULL,
         
-        price                            DECIMAL(10,2)  NOT NULL,
+        price                            DECIMAL(18,8)  NOT NULL,
         
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -193,7 +205,7 @@
         user_id                          BIGINT         NOT NULL,
         subscription_plan_id             BIGINT         NOT NULL,
 
-        price                            DECIMAL(10,2)  NOT NULL,
+        price                            DECIMAL(18,8)  NOT NULL,
         currency_id                      BIGINT         NOT NULL,
         start_date                       DATETIME       NOT NULL,
         end_date                         DATETIME       NOT NULL,
@@ -242,6 +254,7 @@
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 使用者訂閱付款表
@@ -250,7 +263,7 @@
         user_id                          BIGINT         NOT NULL,
         user_subscription_id             BIGINT         NULL,
 
-        amount                           DECIMAL(10,2)  NOT NULL,
+        amount                           DECIMAL(18,8)  NOT NULL,
         currency_id                      BIGINT         NOT NULL,
 
         payment_status_id                BIGINT         NOT NULL,
@@ -474,8 +487,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(user_id, name),
-        
-        FOREIGN KEY (user_id) REFERENCES users(id) DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -500,7 +512,6 @@
         created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
-        UNIQUE KEY uk_ledger_user (ledger_id, user_id),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (role_id) REFERENCES ledger_member_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -643,9 +654,9 @@
     CREATE TABLE debtors (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         name                             VARCHAR(100)  NOT NULL,
-        phone                            VARCHAR(50),
-        email                            VARCHAR(100),
-        address                          VARCHAR(255),
+        phone                            VARCHAR(50)   NULL,
+        email                            VARCHAR(100)  NULL,
+        address                          VARCHAR(255)  NULL,
         notes                            VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -1226,6 +1237,58 @@
         FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 總預算表
+    CREATE TABLE general_budgets (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        ledger_id                        BIGINT        NOT NULL,
+
+        name                             VARCHAR(100)  NOT NULL,
+        start_date                       DATE          NOT NULL,
+        end_date                         DATE          NOT NULL,
+
+        currency_id                      BIGINT        NOT NULL,
+
+        total_amount                     DECIMAL(18,8) NOT NULL,                        -- 預算金額
+        safety_amount                    DECIMAL(18,8) NULL,                            -- 安全金額 (低於安全金額可設定提醒)
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (ledger_id, name),
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 個別預算表
+    CREATE TABLE individual_budgets (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        general_budget_id                BIGINT        NOT NULL,
+        category_id                      BIGINT        NOT NULL,
+
+        amount                           DECIMAL(18,8) NOT NULL,                        -- 預算金額
+        spent_amount                     DECIMAL(18,8) DEFAULT 0,                       -- 已花費金額（可快取）
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (general_budget_id, category_id),
+        FOREIGN KEY (general_budget_id) REFERENCES general_budgets(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 帳戶調整理由表
+    CREATE TABLE account_adjustment_reasons (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- 代碼
+        name                             VARCHAR(100)  NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
     -- 帳戶調整表 (會計用)
     CREATE TABLE account_adjustments (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
@@ -1234,37 +1297,65 @@
         before_balance                   DECIMAL(18,8) NOT NULL,                        -- 調整前餘額
         after_balance                    DECIMAL(18,8) NOT NULL,                        -- 調整後餘額
 
-        reason                           VARCHAR(255)  NOT NULL,                        -- 調整原因
+        account_adjustment_reason_id     BIGINT        NOT NULL,
         note                             VARCHAR(255),
 
         created_by                       BIGINT        NOT NULL,                        -- 誰做的調整
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳戶餘額快照表
-    CREATE TABLE account_balance_snapshots (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        account_id                       BIGINT        NOT NULL,
-        
-        balance                          DECIMAL(18,8) NOT NULL,
-        currency_id                      BIGINT        NOT NULL,
+    -- 使用者餘額快照表 (可作總資產、總負債或淨資產 圓餅圖或曲線圖)
+    CREATE TABLE user_balance_snapshots (
+        id                               BIGINT          AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT          NOT NULL,
 
-        base_balance                     DECIMAL(18,8) NOT NULL,                        -- 折算本位幣價值
-        base_currency_id                 BIGINT        NOT NULL,
+        total_assets                     DECIMAL(18,8)   NOT NULL,                      -- 總資產
+        total_liabilities                DECIMAL(18,8)   NOT NULL,                      -- 總負債
+        net_worth                        DECIMAL(18,8)   NOT NULL,                      -- 淨資產
+
+        snapshot_date                    DATE            NOT NULL,                      -- 快照日期
+        created_date                     DATETIME        NOT NULL,
+
+        UNIQUE (user_id, snapshot_date),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 帳本餘額快照表 (單一帳本)
+    CREATE TABLE ledger_balance_snapshots (
+        id                               BIGINT          AUTO_INCREMENT PRIMARY KEY,
+        ledger_id                        BIGINT          NOT NULL,
+        balance                          DECIMAL(18,8)   NOT NULL,
+        snapshot_date                    DATE            NOT NULL,                      -- 快照日期
+        created_date                     DATETIME        NOT NULL,
+        UNIQUE (ledger_id, snapshot_date),
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 帳戶餘額快照表 (單一帳戶)
+    CREATE TABLE account_balance_snapshots (
+        id                               BIGINT          AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT          NOT NULL,
+        
+        balance                          DECIMAL(18,8)   NOT NULL,
+        currency_id                      BIGINT          NOT NULL,
+
+        base_balance                     DECIMAL(18,8)   NOT NULL,                      -- 折算本位幣價值
+        base_currency_id                 BIGINT          NOT NULL,
 
         snapshot_date                    DATE            NOT NULL,                      -- 快照日期
         created_date                     DATETIME        NOT NULL,
     
-        UNIQUE KEY uk_account_snapshot (account_id, snapshot_date),
+        UNIQUE (account_id, snapshot_date),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 投資持倉快照表
+    -- 投資持倉快照表 (單一投資商品)
     CREATE TABLE investment_position_snapshots (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         account_id                       BIGINT        NOT NULL,
