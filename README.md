@@ -1303,7 +1303,7 @@
         created_by                       BIGINT        NOT NULL,                        -- 誰做的調整
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
