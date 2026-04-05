@@ -600,7 +600,6 @@
         early_termination_allowed        BOOLEAN,                                       -- 是否可提前贖回
         payout_frequency_id              BIGINT        NULL,                            -- 配息類型
         penalty_rate                     DECIMAL(18,8) NULL,                            -- 違約利率
-        status                           VARCHAR(20)   NOT NULL,                        -- 狀態
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
