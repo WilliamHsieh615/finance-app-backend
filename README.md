@@ -863,6 +863,26 @@
         FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 合約子表 (租賃合約)
+    CREATE TABLE lease_contracts (
+        contract_id                      BIGINT        PRIMARY KEY,
+        tenant_name                      VARCHAR(100)  NOT NULL,
+        rent_amount                      DECIMAL(18,8),
+        deposit_amount                   DECIMAL(18,8),
+        payment_day                      TINYINT, -- 每月幾號
+        FOREIGN KEY (contract_id) REFERENCES contracts(id)
+    );
+
+    -- 合約子表 (薪資合約)
+    CREATE TABLE salary_contracts (
+        contract_id                      BIGINT        PRIMARY KEY,
+        employer_name                    VARCHAR(100),
+        base_salary                      DECIMAL(18,8),
+        bonus_rule                       VARCHAR(100),
+        pay_day                          TINYINT,
+        FOREIGN KEY (contract_id) REFERENCES contracts(id)
+    );
+
     -- 投資產品種類表
     CREATE TABLE investment_product_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
@@ -1137,6 +1157,7 @@
         ledger_id                        BIGINT        NOT NULL,
         account_id                       BIGINT        NOT NULL,
         transaction_type_id              BIGINT        NOT NULL,
+        contract_id                      BIGINT        NULL,
         
         price                            DECIMAL(18,8) NULL,                            -- 價格
         quantity                         DECIMAL(18,8) NULL,                            -- 數量
@@ -1161,6 +1182,7 @@
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -1214,6 +1236,7 @@
         ledger_id                        BIGINT        NOT NULL,
         account_id                       BIGINT        NOT NULL,
         transaction_type_id              BIGINT        NOT NULL,
+        contract_id                      BIGINT        NULL,
 
         price                            DECIMAL(18,8) NULL,                            -- 價格
         quantity                         DECIMAL(18,8) NULL,                            -- 數量
@@ -1242,6 +1265,7 @@
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (recurrence_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
