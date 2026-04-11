@@ -835,6 +835,33 @@
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 利率類型表
+    CREATE TABLE interest_rate_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- FIXED、FLOATING
+        name                             VARCHAR(50)   NOT NULL,                        -- 固定、流動
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 利率排程表
+    CREATE TABLE interest_rate_schedules (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT        NOT NULL,
+        interest_rate_type_id            BIGINT        NOT NULL,
+        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
+        start_date                       DATE          NOT NULL,                        -- 開始日
+        end_date                         DATE          NULL,                            -- 到期日
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        INDEX(contract_id, start_date, end_date),
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (interest_rate_type_id) REFERENCES interest_rate_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
     -- 帳戶表子表 (收支帳 → 帳戶)
     CREATE TABLE bank_accounts (
         account_id                       BIGINT        PRIMARY KEY,
@@ -866,7 +893,6 @@
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
         market_id                        BIGINT        NULL,
-        risk_level                       TINYINT       NULL,                             -- 風險等級（1~5，可選）
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -878,10 +904,9 @@
         financial_institution_id         BIGINT        NULL,
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
-        early_termination_allowed        BOOLEAN,                                       -- 是否可提前贖回
+        early_termination_allowed        BOOLEAN       NOT NULL DEFAULT FALSE,          -- 是否可提前贖回
         payout_frequency_id              BIGINT        NULL,                            -- 配息類型
         penalty_rate                     DECIMAL(18,8) NULL,                            -- 違約利率
-        risk_level                       TINYINT       NULL,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1029,33 +1054,6 @@
         FOREIGN KEY (contract_type_id) REFERENCES contract_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 利率類型表
-    CREATE TABLE interest_rate_types (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- FIXED、FLOATING
-        name                             VARCHAR(50)   NOT NULL,                        -- 固定、流動
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 利率排程表
-    CREATE TABLE interest_rate_schedules (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        contract_id                      BIGINT        NOT NULL,
-        interest_rate_type_id            BIGINT        NOT NULL,
-        interest_rate                    DECIMAL(18,8) NOT NULL,                        -- 利率 %
-        start_date                       DATE          NOT NULL,                        -- 開始日
-        end_date                         DATE          NULL,                            -- 到期日
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        INDEX(contract_id, start_date, end_date),
-        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (interest_rate_type_id) REFERENCES interest_rate_types(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
     -- 合約子表 (保險)
     CREATE TABLE insurance_contracts (
         contract_id                      BIGINT        PRIMARY KEY,
@@ -1065,14 +1063,37 @@
         FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 還款種類表
+    CREATE TABLE repayment_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                -- 代號 (EQUAL_PRINCIPAL_INTEREST、EQUAL_PRINCIPAL、INTEREST_ONLY)
+        name                             VARCHAR(50)    NOT NULL,                       -- 名稱 (等額本息或本息平均、等額本金或本金平均、只還利息)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
+    );
+
     -- 合約子表 (負債)
     CREATE TABLE debt_contracts (
-        contract_id                      BIGINT        PRIMARY KEY,
-        apr                              DECIMAL(18,8),   -- 總費用率
-        fee_amount                       DECIMAL(18,8),   -- 手續費
-        repayment_type VARCHAR(30),       -- 本息平均 / 只還利息
-        amortization_method VARCHAR(30),  -- 等額本息 / 等額本金（建議加）
-        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
+        contract_id                      BIGINT         PRIMARY KEY,
+        repayment_type_id                BIGINT         NOT NULL,
+        apr                              DECIMAL(18,8)  NULL,                           -- 總費用率
+        overdue_apr                      DECIMAL(18,8)  NULL,                           -- 逾期利率 (逾期後適用的利率)
+        fee_amount                       DECIMAL(18,8)  NULL,                           -- 開辦手續費
+        
+        cycle_day                        TINYINT        NULL,                           -- 結帳日 (1~31)
+        due_day                          TINYINT        NULL,                           -- 繳款日 (1~31)
+        grace_period_days                TINYINT        NULL,                           -- 寬限天數 (超過幾天才算遲繳)
+
+        penalty_type                     VARCHAR(20)    NULL,                           -- 'FIXED'(固定), 'TIERED'(階梯), 'PERCENT'(百分比)
+        penalty_fee                      DECIMAL(18,8)  NULL,                           -- 基礎違約金金額
+        
+        lockin_period                    TINYINT        NULL,                           -- 閉鎖期 (月數)
+        prepayment_penalty_type          VARCHAR(20)    NULL,                           -- 'PERCENT'(餘額百分比), 'FIXED'(固定)
+        prepayment_penalty               DECIMAL(18,8)  NULL,                           -- 提前清償違約金 (數值)
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (repayment_type_id) REFERENCES repayment_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 合約子表 (應收帳款)
@@ -1090,7 +1111,7 @@
         rent_amount                      DECIMAL(18,8),
         deposit_amount                   DECIMAL(18,8),
         payment_day                      TINYINT, -- 每月幾號
-        FOREIGN KEY (contract_id) REFERENCES contracts(id)
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 合約子表 (薪資合約)
@@ -1100,7 +1121,7 @@
         base_salary                      DECIMAL(18,8),
         bonus_rule                       VARCHAR(100),
         pay_day                          TINYINT,
-        FOREIGN KEY (contract_id) REFERENCES contracts(id)
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 交易來源種類表
@@ -1296,6 +1317,61 @@
         INDEX(price_date),
         UNIQUE (investment_product_id, price_date),
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 風險評分系統
+    CREATE TABLE risk_rating_systems (
+        id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT        NULL,                            -- 國家
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- S&P、晨星、Moody’s
+        name                             VARCHAR(50)   NOT NULL,
+        scale_min                        INT NOT NULL,                                  -- 1
+        scale_max                        INT NOT NULL,                                  -- 5 / 10
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 風險等級規模表
+    CREATE TABLE risk_rating_scales (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        risk_rating_system_id            BIGINT        NOT NULL,
+
+        code                             VARCHAR(30)   NOT NULL,                         -- AAA、AA+、BBB、Aaa、⭐5
+        name                             VARCHAR(50)   NOT NULL,                         -- 顯示名稱
+
+        score                            DECIMAL(5,2)  NULL,                            -- 可選：轉換成數值 (方便排序)
+        rank_order                       INT           NOT NULL,                        -- 排序用 (1 = 最安全)
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        
+        UNIQUE(risk_rating_system_id, code),
+        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    );
+
+    -- 投資商品風險表
+    CREATE TABLE investment_product_risk_ratings (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        investment_product_id            BIGINT        NOT NULL,
+        risk_rating_system_id            BIGINT        NOT NULL,
+        risk_rating_scale_id             BIGINT        NOT NULL,
+
+        effective_from                   DATE          NOT NULL,
+        effective_to                     DATE          NULL,
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE(investment_product_id, risk_rating_system_id, effective_from),
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (risk_rating_scale_id) REFERENCES risk_rating_scales(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (risk_level_id) REFERENCES risk_levels(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 分類類型表
