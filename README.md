@@ -188,23 +188,51 @@
         FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 發行平台公司表
+    CREATE TABLE distribution_platform_companies (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APPLE、GOOGLE)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        image_url                        VARCHAR(255)   NULL,                            -- logo
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+    );
+
+    -- 發行平台表
+    CREATE TABLE distribution_platforms (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APP_STORE、GOOGLE_PLAY)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        distribution_platform_company_id BIGINT         NOT NULL,
+        image_url                        VARCHAR(255)   NULL,                            -- logo
+        is_active                        BOOLEAN        DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (distribution_platform_company_id) REFERENCES distribution_platform_companies(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
     -- 訂閱方案表
     CREATE TABLE subscription_plans (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- FREE, PRO, PREMIUM
+        distribution_platform_id         BIGINT         NOT NULL,
+        code                             VARCHAR(50)    NOT NULL       ,                 -- FREE, PRO, PREMIUM
         name                             VARCHAR(100)   NOT NULL,
         duration_days                    INT            NOT NULL,                        -- 訂閱時效 (30天、365天)
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (distribution_platform_id, code),
+        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 訂閱方案價格表
     CREATE TABLE subscription_plan_prices (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        plan_id                          BIGINT         NOT NULL,
         country_id                       BIGINT         NULL,
         currency_id                      BIGINT         NOT NULL,
+        subscription_plan_id             BIGINT         NOT NULL,
         price                            DECIMAL(18,8)  NOT NULL,
         start_date                       DATE           NOT NULL,
         end_date                         DATE           NOT NULL,
@@ -213,10 +241,10 @@
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE (plan_id, country_id, currency_id, start_date, end_date),
+        UNIQUE (subscription_plan_id, country_id, currency_id, start_date, end_date),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 使用者訂閱狀態表
@@ -235,9 +263,8 @@
         id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         subscription_plan_id             BIGINT         NOT NULL,
-
-        price                            DECIMAL(18,8)  NOT NULL,
         currency_id                      BIGINT         NOT NULL,
+        price                            DECIMAL(18,8)  NOT NULL,
         start_date                       DATE           NOT NULL,
         end_date                         DATE           NOT NULL,
 
@@ -254,32 +281,8 @@
         FOREIGN KEY (user_subscription_status_id) REFERENCES user_subscription_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 付款提供者類型表
-    CREATE TABLE payment_provider_types (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PAYMENT、SUBSCRIPTION、BOTH)
-        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (一次性付款、訂閱制、兩者皆有)
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 付款提供者表
-    CREATE TABLE payment_providers (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (STRIPE、APPLE、GOOGLE)
-        name                             VARCHAR(50)    NOT NULL,
-        payment_provider_type_id         BIGINT         NOT NULL,
-        is_active                        BOOLEAN        DEFAULT TRUE,
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (payment_provider_type_id) REFERENCES payment_provider_types(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 付款狀態表
-    CREATE TABLE payment_statuses (
+    -- 訂單狀態表
+    CREATE TABLE order_statuses (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、SUCCESS、FAILED、REFUNDED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
@@ -289,28 +292,245 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 使用者訂閱付款表
-    CREATE TABLE user_subscription_payments (
+    -- 訂單表
+    CREATE TABLE orders (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
-        user_subscription_id             BIGINT         NULL,
-
-        amount                           DECIMAL(18,8)  NOT NULL,
+        distribution_platform_id         BIGINT         NOT NULL,
+        user_subscription_id             BIGINT         NOT NULL,
         currency_id                      BIGINT         NOT NULL,
 
-        payment_status_id                BIGINT         NOT NULL,
-        payment_provider_id              BIGINT         NOT NULL,
+        original_amount                  DECIMAL(18,8)  NOT NULL,
+        total_discount_amount            DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        total_tax_amount                 DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        total_fee_amount                 DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        refund_amount                    DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        total_amount                     DECIMAL(18,8)  NOT NULL,
+        
+        order_status_id                  BIGINT         NOT NULL,
         paid_date                        DATETIME       NULL,
+
+        provider_transaction_number      VARCHAR(100)   NULL,                            -- 本次扣款編號 (訂閱平台提供)
+        original_transaction_number      VARCHAR(100)   NULL,                            -- 訂閱起點編號 (訂閱平台提供)
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
+        UNIQUE (distribution_platform_id, provider_transaction_number),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (user_subscription_id) REFERENCES user_subscriptions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payment_provider_id) REFERENCES payment_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payment_status_id) REFERENCES payment_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (user_subscription_id) REFERENCES user_subscriptions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (order_status_id) REFERENCES order_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 折扣類型表
+    CREATE TABLE discount_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PERCENTAGE、FIXED)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (百分比、固定)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 折扣表
+    CREATE TABLE discounts (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        discount_type_id                 BIGINT         NOT NULL,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        amount                           DECIMAL(18,8)  NOT NULL,
+        total_usage_limit                INT,                                            -- 總使用次數限制
+        used_count                       INT            DEFAULT 0,
+        max_discount_amount              DECIMAL(18,8)  DEFAULT 0,
+        is_stackable                     BOOLEAN        DEFAULT FALSE,                   -- 是否可累計折扣
+        is_auto_apply                    BOOLEAN        DEFAULT FALSE,                   -- 是否自動申請折扣
+        priority                         INT            DEFAULT 0,                       -- 優先順序
+        note                             VARCHAR(255),
+        start_date                       DATE           NOT NULL,                        -- 開始日
+        end_date                         DATE           NOT NULL,                        -- 到期日
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (discount_type_id) REFERENCES discount_types(id)
+    );
+
+    -- 會員與折扣關聯表
+    CREATE TABLE member_has_discounts ( 
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        discount_id                      BIGINT         NOT NULL, 
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (user_id, discount_id),
+        UNIQUE (discount_id, order_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (discount_id) REFERENCES discounts(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 折扣使用表
+    CREATE TABLE discount_usage (
+        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        discount_id                      BIGINT        NOT NULL,
+        user_id                          BIGINT        NOT NULL,
+        order_id                         BIGINT        NOT NULL,
+        used_date                        DATETIME      NOT NULL,    -- 使用時間
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (discount_id) REFERENCES discounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 稅種表
+    CREATE TABLE tax_types (
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VAT、SALES_TAX
+        name                             VARCHAR(50)   NOT NULL,                        -- 加值稅、營業稅
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+    );
+
+    -- 稅費表
+    CREATE TABLE taxes (
+        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        country_id                       BIGINT        NOT NULL,
+        tax_type_id                      BIGINT        NOT NULL,
+
+        code                             VARCHAR(30)   NOT NULL UNIQUE,
+        name                             VARCHAR(50)  NOT NULL,    
+        rate                             DECIMAL(18,8) NULL,                            -- 稅率 (與稅費二選一填寫)
+        amount                           DECIMAL(18,8) NULL,                            -- 稅費 (與稅率二選一填寫)
+        note                             VARCHAR(255),
+
+        is_active                        BOOLEAN       DEFAULT TRUE,                     -- 是否生效
+        min_amount                       DECIMAL(18,8) NOT NULL,                         -- 下限
+        max_amount                       DECIMAL(18,8),                                  -- 上限
+        effective_from                   DATETIME      NOT NULL,                         -- 有限時間(起)
+        effective_to                     DATETIME,                                       -- 有限時間(迄)
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (tax_type_id) REFERENCES tax_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 訂單稅費關聯表
+    CREATE TABLE order_taxes (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        order_id                         BIGINT         NOT NULL,
+        tax_id                           BIGINT         NOT NULL,
+        tax_amount                       DECIMAL(18,8)  NOT NULL,                        -- 小計稅金
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (order_id, tax_id),
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (tax_id) REFERENCES taxes(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 費用類型表
+    CREATE TABLE fee_types (
+        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,
+        name                             VARCHAR(50)  NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+    );
+
+    -- 費用表
+    CREATE TABLE fees (
+        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        country_id                       BIGINT        NULL,
+        distribution_platform_id         BIGINT        NOT NULL,
+        fee_type_id                      BIGINT        NOT NULL,
+        
+        code                             VARCHAR(30)   NOT NULL UNIQUE,
+        name                             VARCHAR(50)  NOT NULL,
+        rate                             DECIMAL(18,8) NULL,                            -- 費率 (與費用二選一填寫)
+        amount                           DECIMAL(18,8) NULL,                            -- 費用 (與費率二選一填寫)
+        note                             VARCHAR(255),
+        
+        is_active                        BOOLEAN       DEFAULT TRUE,                     -- 是否生效
+        min_amount                       DECIMAL(18,8) NOT NULL,                         -- 下限
+        max_amount                       DECIMAL(18,8),                                  -- 上限
+        effective_from                   DATETIME      NOT NULL,                         -- 有限時間(起)
+        effective_to                     DATETIME,                                       -- 有限時間(迄)
+        
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (fee_type_id) REFERENCES fee_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 訂單費用關聯表
+    CREATE TABLE order_fees (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        order_id                         BIGINT         NOT NULL,
+        fee_id                           BIGINT         NOT NULL,
+        fee_amount                       DECIMAL(18,8)  NOT NULL,                        -- 小計費用
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (order_id, fee_id),
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (fee_id) REFERENCES fees(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 退款原因表
+    CREATE TABLE refund_transaction_reasons (
+        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,
+        name                             VARCHAR(50)  NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+    );
+
+    -- 退款狀態表
+    CREATE TABLE refund_transaction_statuses (
+        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                  -- PENDING、SUCCESS、FAILED
+        name                             VARCHAR(50)  NOT NULL,                          -- 待退款、退款成功、退款失敗
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+    );
+
+    -- 訂單退款交易關聯表
+    CREATE TABLE order_refund_transactions (
+        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        order_id                         BIGINT         NOT NULL,
+        refund_transaction_reason_id     BIGINT        NOT NULL,
+
+        refund_amount                    DECIMAL(18,8) NOT NULL,
+        refunded_date                    DATETIME,
+
+        refund_transaction_status_id     BIGINT        NOT NULL,
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (refund_transaction_reason_id) REFERENCES refund_transaction_reasons(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (refund_transaction_status_id) REFERENCES refund_transaction_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 檔案類型表
@@ -883,6 +1103,28 @@
         FOREIGN KEY (contract_id) REFERENCES contracts(id)
     );
 
+    -- 交易來源種類表
+    CREATE TABLE transaction_source_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- MANUAL、CONTRACT、IMPORT
+        name                             VARCHAR(50)   NOT NULL,                        -- 手動、合約、匯入
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 交易來源表 (可自動生成交易)
+    CREATE TABLE transaction_sources (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        transaction_source_type_id       BIGINT        NOT NULL,
+        source_id                        BIGINT        NULL,                            -- transaction_source_type 為 MANUAL 時 = NULL
+                                                                                           transaction_source_type 為 CONTRACT 時 = contract_id
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
     -- 投資產品種類表
     CREATE TABLE investment_product_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
@@ -1156,8 +1398,8 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
         account_id                       BIGINT        NOT NULL,
+        transaction_source_id            BIGINT        NOT NULL,
         transaction_type_id              BIGINT        NOT NULL,
-        contract_id                      BIGINT        NULL,
         
         price                            DECIMAL(18,8) NULL,                            -- 價格
         quantity                         DECIMAL(18,8) NULL,                            -- 數量
@@ -1181,8 +1423,8 @@
         
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -1235,8 +1477,8 @@
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
         account_id                       BIGINT        NOT NULL,
+        transaction_source_id            BIGINT        NOT NULL,
         transaction_type_id              BIGINT        NOT NULL,
-        contract_id                      BIGINT        NULL,
 
         price                            DECIMAL(18,8) NULL,                            -- 價格
         quantity                         DECIMAL(18,8) NULL,                            -- 數量
@@ -1264,8 +1506,8 @@
         
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (recurrence_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
