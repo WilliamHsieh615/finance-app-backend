@@ -217,8 +217,8 @@
     CREATE TABLE subscription_plans (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         distribution_platform_id         BIGINT         NOT NULL,
-        code                             VARCHAR(50)    NOT NULL       ,                 -- FREE, PRO, PREMIUM
-        name                             VARCHAR(100)   NOT NULL,
+        code                             VARCHAR(30)    NOT NULL       ,                 -- FREE, PRO, PREMIUM
+        name                             VARCHAR(50)    NOT NULL,
         duration_days                    INT            NOT NULL,                        -- 訂閱時效 (30天、365天)
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
