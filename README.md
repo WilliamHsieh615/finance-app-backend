@@ -33,7 +33,7 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 國別時區關聯表
+    -- 國別與時區關聯表
     CREATE TABLE country_timezones (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT        NOT NULL,
@@ -62,7 +62,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 國別貨幣關聯表
+    -- 國別與貨幣關聯表
     CREATE TABLE currency_countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         currency_id                      BIGINT         NOT NULL,
@@ -258,7 +258,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 使用者訂閱關聯表
+    -- 使用者與訂閱關聯表
     CREATE TABLE user_subscriptions (
         id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
@@ -425,7 +425,7 @@
         FOREIGN KEY (tax_type_id) REFERENCES tax_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 訂單稅費關聯表
+    -- 訂單與稅費關聯表
     CREATE TABLE order_taxes (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         order_id                         BIGINT         NOT NULL,
@@ -477,7 +477,7 @@
         FOREIGN KEY (fee_type_id) REFERENCES fee_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 訂單費用關聯表
+    -- 訂單與費用關聯表
     CREATE TABLE order_fees (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         order_id                         BIGINT         NOT NULL,
@@ -513,7 +513,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
     );
 
-    -- 訂單退款交易關聯表
+    -- 訂單與退款交易關聯表
     CREATE TABLE order_refund_transactions (
         id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
         order_id                         BIGINT         NOT NULL,
@@ -588,7 +588,7 @@
         FOREIGN KEY (market_type_id) REFERENCES market_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 市場國別關聯表
+    -- 市場與國別關聯表
     CREATE TABLE market_countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         market_id                        BIGINT         NOT NULL,
@@ -1561,7 +1561,7 @@
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 交易標籤關聯表
+    -- 交易與標籤關聯表
     CREATE TABLE transaction_tag_links (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         transaction_id                   BIGINT        NOT NULL,
@@ -1574,7 +1574,7 @@
         FOREIGN KEY (tag_id) REFERENCES transaction_tags(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 重複交易標籤關聯表
+    -- 重複交易與標籤關聯表
     CREATE TABLE recurring_transaction_tag_links (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         recurring_transaction_id         BIGINT        NOT NULL,
