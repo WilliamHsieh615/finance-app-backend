@@ -785,6 +785,233 @@
         FOREIGN KEY (role_id) REFERENCES ledger_member_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 投資產品種類表
+    CREATE TABLE investment_product_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- stock、etf、fund、bond、crypto、forex、gold、futures、option
+        name                             VARCHAR(50)   NOT NULL,                        -- 股票、ETF、基金、債券、虛擬貨幣、外匯、黃金、期貨、選擇權
+        is_derivative                    BOOLEAN       DEFAULT FALSE,                   -- 是否為衍生性商品
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 交易所表
+    CREATE TABLE exchanges (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
+        name                             VARCHAR(50)   NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
+        country_id                       BIGINT        NULL,                            -- 所屬國家
+        timezone_id                      BIGINT        NULL,                            -- 時區
+        image_url                        VARCHAR(255)  NULL,
+        note                             VARCHAR(255),
+        
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 投資產品表
+    CREATE TABLE investment_products (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        product_type_id                  BIGINT        NOT NULL,
+        
+        market_id                        BIGINT        NULL,                            -- 所屬市場 (美股、台股、幣圈)
+        currency_id                      BIGINT        NOT NULL,                        -- 報價幣別 (USD、TWD)
+        exchange_id                      BIGINT        NULL,                            -- 交易所
+
+        code                             VARCHAR(50)   NOT NULL,                        -- 商品代碼 (AAPL、TSLA、BTC、0050)
+        name                             VARCHAR(100)  NOT NULL,                        -- 商品名稱 (Apple Inc.)
+        isin                             VARCHAR(20),                                   -- 國際證券識別碼 ISIN（可為 NULL）
+        is_active                        BOOLEAN       DEFAULT TRUE,                    -- 是否仍可交易
+
+        unit_id                          BIGINT        NULL,                            -- 商品單位 (口、股、張)
+        image_url                        VARCHAR(255)  NULL,
+        note                             VARCHAR(255),
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE(code, exchange_id),
+        FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (exchange_id) REFERENCES exchanges(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 基金類型表
+    CREATE TABLE fund_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- equity、bond、balanced、money_market、index、etc
+        name                             VARCHAR(50)   NOT NULL,                        -- 股票型、債券型、平衡型、貨幣市場型、指數型、其他
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 投資產品表子表 (基金)
+    CREATE TABLE fund_products (
+        investment_product_id            BIGINT        PRIMARY KEY,
+        
+        financial_institution_id         BIGINT        NULL,                            -- 發行金融機構
+        expense_ratio                    DECIMAL(18,8) NOT NULL,                        -- 總費用率
+        dividend_frequency_id            BIGINT        NULL,                            -- 配息頻率
+        fund_type_id                     BIGINT        NULL,                            -- 基金類型
+        
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (dividend_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 債券發行單位表
+    CREATE TABLE bond_issuers (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- 代碼
+        name                             VARCHAR(100)  NOT NULL,                        -- 發行機構名稱
+        country_id                       BIGINT        NOT NULL,                        -- 所屬國家
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 債券種類表
+    CREATE TABLE bond_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- government、corporate、municipal
+        name                             VARCHAR(50)   NOT NULL,                        -- 政府債、公司債、市政債
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+    
+    -- 投資產品表子表 (債券)
+    CREATE TABLE bond_products (
+        investment_product_id            BIGINT        PRIMARY KEY,
+
+        bond_issuer_id                   BIGINT        NULL,                            -- 發行機構
+        coupon_rate                      DECIMAL(18,8) NOT NULL,                        -- 票面利率
+        coupon_frequency_id              BIGINT        NULL,                            -- 票面配息頻率
+        maturity_date                    DATE          NOT NULL,                        -- 到期日
+        face_value                       DECIMAL(18,8) NOT NULL,                        -- 面額
+        bond_type_id                     BIGINT        NULL,                            -- 債券種類
+
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (coupon_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (bond_type_id) REFERENCES bond_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 投資產品表子表 (期貨)
+    CREATE TABLE derivative_products (
+        investment_product_id            BIGINT        PRIMARY KEY,
+        contract_size                    DECIMAL(18,8) NOT NULL,                        -- 每張合約的標的數量
+        expiration_date                  DATE          NOT NULL,                        -- 到期日
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 選擇權類型表
+    CREATE TABLE option_types (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- CALL、PUT
+        name                             VARCHAR(50)   NOT NULL,                        -- 買權 Call Option、賣權 Put Option
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 投資產品表子表 (選擇權)
+    CREATE TABLE option_products (
+        investment_product_id            BIGINT        PRIMARY KEY,
+        strike_price                     DECIMAL(18,8) NOT NULL,                        -- 履約價
+        option_type_id                   BIGINT        NOT NULL,
+        FOREIGN KEY (investment_product_id) REFERENCES derivative_products(investment_product_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (option_type_id) REFERENCES option_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 投資產品歷史價格表
+    CREATE TABLE investment_price_histories (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+
+        investment_product_id            BIGINT        NOT NULL,
+
+        price                            DECIMAL(18,8) NOT NULL,
+        price_date                       DATE          NOT NULL,
+
+        created_date                     DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
+
+        INDEX(investment_product_id, price_date),
+        INDEX(price_date),
+        UNIQUE (investment_product_id, price_date),
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 風險評分系統
+    CREATE TABLE risk_rating_systems (
+        id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT        NULL,                            -- 國家
+        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- S&P、晨星、Moody’s
+        name                             VARCHAR(50)   NOT NULL,
+        scale_min                        INT NOT NULL,                                  -- 1
+        scale_max                        INT NOT NULL,                                  -- 5 / 10
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 風險等級規模表
+    CREATE TABLE risk_rating_scales (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        risk_rating_system_id            BIGINT        NOT NULL,
+
+        code                             VARCHAR(30)   NOT NULL,                         -- AAA、AA+、BBB、Aaa、⭐5
+        name                             VARCHAR(50)   NOT NULL,                         -- 顯示名稱
+
+        score                            DECIMAL(5,2)  NULL,                            -- 可選：轉換成數值 (方便排序)
+        rank_order                       INT           NOT NULL,                        -- 排序用 (1 = 最安全)
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        
+        UNIQUE(risk_rating_system_id, code),
+        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 投資商品風險表
+    CREATE TABLE investment_product_risk_ratings (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        investment_product_id            BIGINT        NOT NULL,
+        risk_rating_system_id            BIGINT        NOT NULL,
+        risk_rating_scale_id             BIGINT        NOT NULL,
+
+        effective_from                   DATE          NOT NULL,
+        effective_to                     DATE          NULL,
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE(investment_product_id, risk_rating_system_id, effective_from),
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (risk_rating_scale_id) REFERENCES risk_rating_scales(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
     -- 帳戶種類表
     CREATE TABLE account_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
@@ -857,7 +1084,7 @@
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        INDEX(contract_id, start_date, end_date),
+        INDEX(account_id, start_date, end_date),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (interest_rate_type_id) REFERENCES interest_rate_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -891,17 +1118,40 @@
     -- 帳戶表子表 (投資帳 → 股票、ETF、基金、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
     CREATE TABLE investment_accounts (
         account_id                       BIGINT        PRIMARY KEY,
-        financial_institution_id         BIGINT        NULL,
         market_id                        BIGINT        NULL,
+        financial_institution_id         BIGINT        NULL,
+        fee                              DECIMAL(18,8) DEFAULT 0,                        -- 手續費
+        tax                              DECIMAL(18,8) DEFAULT 0,                        -- 稅額
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 投資持倉表
+    CREATE TABLE investment_positions (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT        NOT NULL,
+        investment_product_id            BIGINT        NOT NULL,
+
+        quantity                         DECIMAL(18,8) NOT NULL DEFAULT 0,
+        avg_cost                         DECIMAL(18,8) NOT NULL DEFAULT 0,
+
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+
+        UNIQUE(account_id, investment_product_id),
+
+        FOREIGN KEY (account_id) REFERENCES investment_accounts(account_id),
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
     );
 
     -- 帳戶表子表 (投資帳 → 定存、保險、基金、債券）
     CREATE TABLE term_investment_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
+        investment_product_id            BIGINT        NULL,
+        fee                              DECIMAL(18,8) DEFAULT 0,                       -- 手續費
+        tax                              DECIMAL(18,8) DEFAULT 0,                       -- 稅額
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
         early_termination_allowed        BOOLEAN       NOT NULL DEFAULT FALSE,          -- 是否可提前贖回
@@ -909,6 +1159,7 @@
         penalty_rate                     DECIMAL(18,8) NULL,                            -- 違約利率
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -1146,234 +1397,6 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 投資產品種類表
-    CREATE TABLE investment_product_types (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- stock、etf、fund、bond、crypto、forex、gold、futures、option
-        name                             VARCHAR(50)   NOT NULL,                        -- 股票、ETF、基金、債券、虛擬貨幣、外匯、黃金、期貨、選擇權
-        is_derivative                    BOOLEAN       DEFAULT FALSE,                   -- 是否為衍生性商品
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 交易所表
-    CREATE TABLE exchanges (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
-        name                             VARCHAR(50)   NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
-        country_id                       BIGINT        NULL,                            -- 所屬國家
-        timezone_id                      BIGINT        NULL,                            -- 時區
-        image_url                        VARCHAR(255)  NULL,
-        note                             VARCHAR(255),
-        
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 投資產品表
-    CREATE TABLE investment_products (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        product_type_id                  BIGINT        NOT NULL,
-        
-        market_id                        BIGINT        NULL,                            -- 所屬市場 (美股、台股、幣圈)
-        currency_id                      BIGINT        NOT NULL,                        -- 報價幣別 (USD、TWD)
-        exchange_id                      BIGINT        NULL,                            -- 交易所
-
-        code                             VARCHAR(50)   NOT NULL,                        -- 商品代碼 (AAPL、TSLA、BTC、0050)
-        name                             VARCHAR(100)  NOT NULL,                        -- 商品名稱 (Apple Inc.)
-        isin                             VARCHAR(20),                                   -- 國際證券識別碼 ISIN（可為 NULL）
-        is_active                        BOOLEAN       DEFAULT TRUE,                    -- 是否仍可交易
-
-        unit_id                          BIGINT        NULL,                            -- 商品單位 (口、股、張)
-        image_url                        VARCHAR(255)  NULL,
-        note                             VARCHAR(255),
-
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE(code, exchange_id),
-        FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (exchange_id) REFERENCES exchanges(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 基金類型表
-    CREATE TABLE fund_types (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- equity、bond、balanced、money_market、index、etc
-        name                             VARCHAR(50)   NOT NULL,                        -- 股票型、債券型、平衡型、貨幣市場型、指數型、其他
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 投資產品表子表 (基金)
-    CREATE TABLE fund_products (
-        investment_product_id            BIGINT        PRIMARY KEY,
-        
-        financial_institution_id         BIGINT        NULL,                            -- 發行金融機構
-        expense_ratio                    DECIMAL(18,8) NOT NULL,                        -- 總費用率
-        dividend_frequency_id            BIGINT        NULL,                            -- 配息頻率
-        fund_type_id                     BIGINT        NULL,                            -- 基金類型
-        
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (dividend_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 債券發行單位表
-    CREATE TABLE bond_issuers (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- 代碼
-        name                             VARCHAR(100)  NOT NULL,                        -- 發行機構名稱
-        country_id                       BIGINT        NOT NULL,                        -- 所屬國家
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 債券種類表
-    CREATE TABLE bond_types (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- government、corporate、municipal
-        name                             VARCHAR(50)   NOT NULL,                        -- 政府債、公司債、市政債
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-    
-    -- 投資產品表子表 (債券)
-    CREATE TABLE bond_products (
-        investment_product_id            BIGINT        PRIMARY KEY,
-
-        bond_issuer_id                   BIGINT        NULL,                            -- 發行機構
-        coupon_rate                      DECIMAL(18,8) NOT NULL,                        -- 票面利率
-        coupon_frequency_id              BIGINT        NULL,                            -- 票面配息頻率
-        maturity_date                    DATE          NOT NULL,                        -- 到期日
-        face_value                       DECIMAL(18,8) NOT NULL,                        -- 面額
-        bond_type_id                     BIGINT        NULL,                            -- 債券種類
-
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (coupon_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (bond_type_id) REFERENCES bond_types(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 投資產品表子表 (期貨)
-    CREATE TABLE derivative_products (
-        investment_product_id            BIGINT        PRIMARY KEY,
-        contract_size                    DECIMAL(18,8) NOT NULL,                        -- 每張合約的標的數量
-        expiration_date                  DATE          NOT NULL,                        -- 到期日
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 選擇權類型表
-    CREATE TABLE option_types (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- CALL、PUT
-        name                             VARCHAR(50)   NOT NULL,                        -- 買權 Call Option、賣權 Put Option
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 投資產品表子表 (選擇權)
-    CREATE TABLE option_products (
-        investment_product_id            BIGINT        PRIMARY KEY,
-        strike_price                     DECIMAL(18,8) NOT NULL,                        -- 履約價
-        option_type_id                   BIGINT        NOT NULL,
-        FOREIGN KEY (investment_product_id) REFERENCES derivative_products(investment_product_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (option_type_id) REFERENCES option_types(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 投資產品歷史價格表
-    CREATE TABLE investment_price_histories (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-
-        investment_product_id            BIGINT        NOT NULL,
-
-        price                            DECIMAL(18,8) NOT NULL,
-        price_date                       DATE          NOT NULL,
-
-        created_date                     DATETIME      NOT NULL,		                 -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                 -- 更新時間 (由後端寫入)
-
-        INDEX(investment_product_id, price_date),
-        INDEX(price_date),
-        UNIQUE (investment_product_id, price_date),
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 風險評分系統
-    CREATE TABLE risk_rating_systems (
-        id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT        NULL,                            -- 國家
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- S&P、晨星、Moody’s
-        name                             VARCHAR(50)   NOT NULL,
-        scale_min                        INT NOT NULL,                                  -- 1
-        scale_max                        INT NOT NULL,                                  -- 5 / 10
-        note                             VARCHAR(255),
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 風險等級規模表
-    CREATE TABLE risk_rating_scales (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        risk_rating_system_id            BIGINT        NOT NULL,
-
-        code                             VARCHAR(30)   NOT NULL,                         -- AAA、AA+、BBB、Aaa、⭐5
-        name                             VARCHAR(50)   NOT NULL,                         -- 顯示名稱
-
-        score                            DECIMAL(5,2)  NULL,                            -- 可選：轉換成數值 (方便排序)
-        rank_order                       INT           NOT NULL,                        -- 排序用 (1 = 最安全)
-
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        
-        UNIQUE(risk_rating_system_id, code),
-        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    );
-
-    -- 投資商品風險表
-    CREATE TABLE investment_product_risk_ratings (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        investment_product_id            BIGINT        NOT NULL,
-        risk_rating_system_id            BIGINT        NOT NULL,
-        risk_rating_scale_id             BIGINT        NOT NULL,
-
-        effective_from                   DATE          NOT NULL,
-        effective_to                     DATE          NULL,
-
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE(investment_product_id, risk_rating_system_id, effective_from),
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (risk_rating_scale_id) REFERENCES risk_rating_scales(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (risk_level_id) REFERENCES risk_levels(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
     -- 分類類型表
     CREATE TABLE category_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
@@ -1468,7 +1491,6 @@
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-
     -- 交易表
     CREATE TABLE transactions (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
@@ -1529,16 +1551,6 @@
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
-    );
-
-    -- 交易表子表 (投資)
-    CREATE TABLE investment_transaction_details (
-        transaction_id                   BIGINT        PRIMARY KEY,
-        investment_product_id            BIGINT        NOT NULL,
-        fee                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 手續費
-        tax                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 稅額
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 交易表子表 (存貨)
@@ -1612,16 +1624,6 @@
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
-    );
-    
-    -- 重複交易子表 (投資)
-    CREATE TABLE investment_recurring_transaction_details (
-        recurring_transaction_id         BIGINT        PRIMARY KEY,
-        investment_product_id            BIGINT        NOT NULL,
-        fee                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 手續費
-        tax                              DECIMAL(18,8) NOT NULL DEFAULT 0,               -- 稅額
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 交易標籤表
