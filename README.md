@@ -523,8 +523,8 @@
         note                             VARCHAR(255),
 
         is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否生效
-        min_amount                       DECIMAL(18,8)  NOT NULL,                        -- 下限
-        max_amount                       DECIMAL(18,8),                                  -- 上限
+        min_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 下限
+        max_amount                       DECIMAL(18,8)  NULL,                            -- 上限
         effective_from                   DATE           NOT NULL,                        -- 有限時間(起)
         effective_to                     DATE           NULL,                            -- 有限時間(迄)
 
@@ -542,7 +542,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         order_id                         BIGINT         NOT NULL,
         tax_id                           BIGINT         NOT NULL,
-        tax_amount                       DECIMAL(18,8)  NOT NULL,                        -- 小計稅金
+        tax_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計稅金
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -566,7 +566,8 @@
     CREATE TABLE fees (
         id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
         country_id                       BIGINT         NULL,
-        distribution_platform_id         BIGINT         NOT NULL,
+        financial_institution_id         BIGINT         NULL,
+        distribution_platform_id         BIGINT         NULL,
         fee_type_id                      BIGINT         NOT NULL,
         
         code                             VARCHAR(30)    NOT NULL UNIQUE,
@@ -576,8 +577,8 @@
         note                             VARCHAR(255),
         
         is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否生效
-        min_amount                       DECIMAL(18,8)  NOT NULL,                        -- 下限
-        max_amount                       DECIMAL(18,8),                                  -- 上限
+        min_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 下限
+        max_amount                       DECIMAL(18,8)  NULL,                            -- 上限
         effective_from                   DATE           NOT NULL,                        -- 有限時間(起)
         effective_to                     DATE           NULL,                            -- 有限時間(迄)
         
@@ -586,6 +587,8 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (fee_type_id) REFERENCES fee_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -594,7 +597,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         order_id                         BIGINT         NOT NULL,
         fee_id                           BIGINT         NOT NULL,
-        fee_amount                       DECIMAL(18,8)  NOT NULL,                        -- 小計費用
+        fee_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計費用
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -786,7 +789,6 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-
     -- 帳本表
     CREATE TABLE ledgers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -823,15 +825,15 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         ledger_id                        BIGINT         NOT NULL,
-        role_id                          BIGINT         NOT NULL,                       -- 權限設定
+        ledger_member_role_id            BIGINT         NOT NULL,                       -- 權限設定
         joined_date                      DATETIME       NOT NULL,                       -- 加入時間
         created_date                     DATETIME       NOT NULL,                       -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
         UNIQUE (user_id, ledger_id),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (role_id) REFERENCES ledger_member_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (ledger_member_role_id) REFERENCES ledger_member_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 投資產品種類表
@@ -1009,7 +1011,7 @@
 
     -- 風險評分系統
     CREATE TABLE risk_rating_systems (
-        id                               BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT        NULL,                            -- 國家
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- S&P、晨星、Moody’s
         name                             VARCHAR(50)   NOT NULL,
@@ -1138,6 +1140,34 @@
         FOREIGN KEY (interest_rate_type_id) REFERENCES interest_rate_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 帳戶與稅費關聯表
+    CREATE TABLE account_taxes (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT         NOT NULL,
+        tax_id                           BIGINT         NOT NULL,
+        tax_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計稅金
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (account_id, tax_id),
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (tax_id) REFERENCES taxes(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 帳戶與費用關聯表
+    CREATE TABLE account_fees (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT         NOT NULL,
+        fee_id                           BIGINT         NOT NULL,
+        fee_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計費用
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (account_id, fee_id),
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (fee_id) REFERENCES fees(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
     -- 帳戶表子表 (收支帳 → 帳戶)
     CREATE TABLE bank_accounts (
         account_id                       BIGINT        PRIMARY KEY,
@@ -1157,10 +1187,15 @@
         due_day                          TINYINT       NOT NULL,                        -- 繳款日 (1~31)
         credit_limit                     DECIMAL(18,8) NULL,                            -- 信用額度
         annual_fee                       DECIMAL(18,8) NULL,                            -- 年費
+        is_auto_pay                      BOOLEAN       DEFAULT FALSE,                   -- 是否自動扣款
+        auto_pay_account_id              BIGINT        NULL,                            -- 自動扣款帳戶
 
+        UNIQUE(account_id, auto_pay_account_id),
+        CHECK (account_id <> auto_pay_account_id),                                      -- (後端應避免雙向連結)
         CHECK (cycle_day BETWEEN 1 AND 31),
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (auto_pay_account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
@@ -1169,8 +1204,7 @@
         account_id                       BIGINT        PRIMARY KEY,
         market_id                        BIGINT        NULL,
         financial_institution_id         BIGINT        NULL,
-        fee                              DECIMAL(18,8) DEFAULT 0,                        -- 手續費
-        tax                              DECIMAL(18,8) DEFAULT 0,                        -- 稅額
+        realized_pnl                     DECIMAL(18,8) DEFAULT 0,                        -- 已實現損益
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1182,8 +1216,14 @@
         account_id                       BIGINT        NOT NULL,
         investment_product_id            BIGINT        NOT NULL,
 
-        quantity                         DECIMAL(18,8) NOT NULL DEFAULT 0,
-        avg_cost                         DECIMAL(18,8) NOT NULL DEFAULT 0,
+        quantity                         DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 持有數量
+        avg_unit_cost                    DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 平均成本
+        total_tax_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總稅費
+        total_fee_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總費用
+        total_cost                       DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總成本
+
+        last_price                       DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 最後報價
+        last_updated_price_date          DATETIME      NOT NULL,                        -- 報價更新時間
 
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -1199,8 +1239,8 @@
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
         investment_product_id            BIGINT        NULL,
-        fee                              DECIMAL(18,8) DEFAULT 0,                       -- 手續費
-        tax                              DECIMAL(18,8) DEFAULT 0,                       -- 稅額
+        total_tax_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總稅費
+        total_fee_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總費用
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NOT NULL,                        -- 到期日
         early_termination_allowed        BOOLEAN       NOT NULL DEFAULT FALSE,          -- 是否可提前贖回
@@ -1218,9 +1258,10 @@
         financial_institution_id         BIGINT        NULL,
         repayment_frequency_id           BIGINT        NULL,
 
+        total_tax_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總稅費
+        total_fee_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總費用
         cycle_day                        TINYINT       NULL,                            -- 結帳日 (1~31)
         due_day                          TINYINT       NULL,                            -- 繳款日 (1~31)
-        
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NULL,                            -- 到期日
 
@@ -1235,10 +1276,11 @@
     CREATE TABLE receivable_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         recovery_frequency_id            BIGINT        NULL,
-  
+
+        total_tax_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總稅費
+        total_fee_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總費用
         cycle_day                        TINYINT       NULL,                            -- 結帳日 (1~31)
         due_day                          TINYINT       NULL,                            -- 繳款日 (1~31)
-        
         start_date                       DATE          NOT NULL,                        -- 開始日
         end_date                         DATE          NULL,                            -- 到期日
 
@@ -1282,6 +1324,7 @@
         depreciation_method_id           BIGINT        NULL,
         salvage_value                    DECIMAL(18,8) NULL,                            -- 殘值
         location                         VARCHAR(100),                                  -- 位置
+        
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (asset_category_id) REFERENCES asset_categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (depreciation_method_id) REFERENCES depreciation_methods(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1838,9 +1881,12 @@
         account_id                       BIGINT        NOT NULL,
         investment_product_id            BIGINT        NOT NULL,
 
-        quantity                         DECIMAL(18,8) NOT NULL,                        -- 持有數量
-        avg_cost                         DECIMAL(18,8) NOT NULL,                        -- 平均成本
-        market_value                     DECIMAL(18,8) NULL,                            -- 市值 (快照時計算)
+        quantity                         DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 持有數量
+        avg_unit_cost                    DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 平均成本
+        total_tax_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總稅費
+        total_fee_amount                 DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總費用
+        total_cost                       DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 總成本
+        market_value                     DECIMAL(18,8) DEFAULT 0,                       -- 市值 (快照時計算)
 
         snapshot_date                    DATE          NOT NULL,                        -- 快照日期
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
