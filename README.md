@@ -65,27 +65,106 @@
     -- 國別與貨幣關聯表
     CREATE TABLE currency_countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        currency_id                      BIGINT         NOT NULL,
         country_id                       BIGINT         NOT NULL,
-
+        currency_id                      BIGINT         NOT NULL,
+        
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (currency_id, country_id),
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 匯率來源表
-    CREATE TABLE exchange_rate_sources (
+    -- 金融機構類型表
+    CREATE TABLE financial_institution_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             CHAR(3)        NOT NULL UNIQUE,                 -- 代碼 (ECB、yahoo)
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (BANK, BROKER, INSURANCE, EXCHANGE, CRYPTO)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 金融機構能力表 (業務範圍)
+    CREATE TABLE financial_institution_capabilities (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 金融機構集團表
+    CREATE TABLE financial_institution_groups (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NOT NULL,                        -- 金融機構集團總部國
+        code                             VARCHAR(50)    NOT NULL,
+        name                             VARCHAR(100)   NOT NULL,                        -- 金融機構集團名稱 (例如：國泰金控、富邦金控)
+        image_url                        VARCHAR(255)   NULL,                            -- 金融機構集團logo
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE(country_id, code),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 金融機構表
+    CREATE TABLE financial_institutions (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NOT NULL,                        -- 金融機構總部國
+        financial_institution_type_id    BIGINT         NOT NULL,
+        financial_institution_group_id   BIGINT         NULL,                            -- 金融機構集團
+        code                             VARCHAR(50)    NOT NULL,
+        name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華銀行、台本富邦銀行、國泰人壽、IB、Binance)
+        image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE(country_id, code),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_type_id) REFERENCES financial_institution_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 金融機構在某個國家的能力關聯表 (金融機構在某國家的業務範圍)
+    CREATE TABLE financial_institution_country_capabilities (
+        id                                  BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                          BIGINT         NOT NULL,
+        financial_institution_id            BIGINT         NOT NULL,
+        financial_institution_capability_id BIGINT         NOT NULL,
+        
+        is_active                           BOOLEAN        NOT NULL DEFAULT TRUE,
+        effective_from                      DATE           NULL,
+        effective_to                        DATE           NULL,
+
+        created_date                        DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                        DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                        DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE(country_id, financial_institution_id, financial_institution_capability_id, effective_from),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_capability_id) REFERENCES financial_institution_capabilities(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 匯率來源表
+    CREATE TABLE exchange_rate_sources (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        financial_institution_id         BIGINT         NULL,
+        code                             CHAR(3)        NOT NULL UNIQUE,                 -- 代碼 (ECB、yahoo)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 匯率表
@@ -97,13 +176,13 @@
         quote_currency_id                BIGINT         NOT NULL,                        -- 報價幣別 (TWD)
 
         rate                             DECIMAL(18,8)  NOT NULL,                        -- 匯率 (例 1 USD = 30 TWD)
-        rate_date                        DATE           NOT NULL,                        -- 匯率日期
+        rate_datetime                    DATETIME       NOT NULL,                        -- 匯率時間
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE (exchange_rate_source_id, base_currency_id, quote_currency_id, rate_date),
+        UNIQUE (exchange_rate_source_id, base_currency_id, quote_currency_id, rate_datetime),
         INDEX idx_exchange_rate_lookup (base_currency_id, quote_currency_id),
         CHECK (base_currency_id <> quote_currency_id),
         FOREIGN KEY (exchange_rate_source_id) REFERENCES exchange_rate_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -122,21 +201,54 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 翻譯表
-    CREATE TABLE translations (
+    -- 國別與語言關聯表
+    CREATE TABLE country_languages (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NOT NULL,
         language_id                      BIGINT         NOT NULL,
 
-        table_name                       VARCHAR(50)    NOT NULL,   -- investment_products
-        column_name                      VARCHAR(50)    NOT NULL,   -- name
-        row_id                           BIGINT         NOT NULL,   -- 1
-        value                            VARCHAR(255)   NOT NULL,
+        is_official                      BOOLEAN        DEFAULT FALSE,                   -- 是否為官方語言
+        is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設語言
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE (table_name, column_name, row_id, language_id),
+        UNIQUE (country_id, language_id),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 翻譯鍵表
+    CREATE TABLE translation_keys (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        entity_type                      VARCHAR(50)    NOT NULL, 
+        entity_id                        BIGINT         NOT NULL,
+        field_name                       VARCHAR(50)    NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (entity_type, entity_id, field_name)
+    );
+
+    -- 翻譯表
+    CREATE TABLE translations (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        translation_key_id               BIGINT         NOT NULL,
+        language_id                      BIGINT         NOT NULL,
+        
+        value                            TEXT           NOT NULL,
+        version                          INT            DEFAULT 1,                       -- 版本
+        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否啟用
+        is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (translation_key_id, language_id, version),
+        FOREIGN KEY (translation_key_id) REFERENCES translation_keys(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
@@ -374,11 +486,11 @@
 
     -- 折扣使用表
     CREATE TABLE discount_usage (
-        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
-        discount_id                      BIGINT        NOT NULL,
-        user_id                          BIGINT        NOT NULL,
-        order_id                         BIGINT        NOT NULL,
-        used_date                        DATETIME      NOT NULL,    -- 使用時間
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
+        discount_id                      BIGINT         NOT NULL,
+        user_id                          BIGINT         NOT NULL,
+        order_id                         BIGINT         NOT NULL,
+        used_date                        DATETIME       NOT NULL,                        -- 使用時間
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -413,8 +525,8 @@
         is_active                        BOOLEAN       DEFAULT TRUE,                     -- 是否生效
         min_amount                       DECIMAL(18,8) NOT NULL,                         -- 下限
         max_amount                       DECIMAL(18,8),                                  -- 上限
-        effective_from                   DATETIME      NOT NULL,                         -- 有限時間(起)
-        effective_to                     DATETIME,                                       -- 有限時間(迄)
+        effective_from                   DATE          NOT NULL,                         -- 有限時間(起)
+        effective_to                     DATE          NULL,                             -- 有限時間(迄)
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -466,8 +578,8 @@
         is_active                        BOOLEAN       DEFAULT TRUE,                     -- 是否生效
         min_amount                       DECIMAL(18,8) NOT NULL,                         -- 下限
         max_amount                       DECIMAL(18,8),                                  -- 上限
-        effective_from                   DATETIME      NOT NULL,                         -- 有限時間(起)
-        effective_to                     DATETIME,                                       -- 有限時間(迄)
+        effective_from                   DATE          NOT NULL,                         -- 有限時間(起)
+        effective_to                     DATE          NULL,                             -- 有限時間(迄)
         
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -599,69 +711,6 @@
         UNIQUE (market_id, country_id),
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 金融機構角色表 (以業務區分)
-    CREATE TABLE financial_institution_roles (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
-        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 金融機構集團表
-    CREATE TABLE financial_institution_groups (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT         NOT NULL,                        -- 金融機構集團總部國
-        name                             VARCHAR(100)   NOT NULL,                        -- 金融機構集團名稱 (例如：國泰金控、富邦金控)
-        image_url                        VARCHAR(255)   NULL,                            -- 金融機構集團logo
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(name, country_id),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 金融機構表
-    CREATE TABLE financial_institutions (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT         NOT NULL,                        -- 金融機構總部國
-        financial_institution_group_id   BIGINT         NULL,                            -- 金融機構集團
-        name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華銀行、台本富邦銀行、國泰人壽、IB、Binance)
-        image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(name, country_id),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 金融機構國家與角色關聯表(金融機構在某國家的業務角色)
-    CREATE TABLE financial_institution_country_roles (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT         NOT NULL,
-        financial_institution_id         BIGINT         NOT NULL,
-        financial_institution_role_id    BIGINT         NOT NULL,
-
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE(country_id, financial_institution_id, financial_institution_role_id),
-
-        INDEX idx_fi (financial_institution_id),
-        INDEX idx_country (country_id),
-        INDEX idx_role (financial_institution_role_id),
-        
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_role_id) REFERENCES financial_institution_roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 債務人表
