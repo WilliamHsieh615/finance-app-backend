@@ -314,9 +314,9 @@
     -- 發行平台表
     CREATE TABLE distribution_platforms (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        distribution_platform_company_id BIGINT         NOT NULL,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APP_STORE、GOOGLE_PLAY)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        distribution_platform_company_id BIGINT         NOT NULL,
         image_url                        VARCHAR(255)   NULL,                            -- logo
         is_active                        BOOLEAN        DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -454,13 +454,13 @@
         discount_type_id                 BIGINT         NOT NULL,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        amount                           DECIMAL(18,8)  NOT NULL,
+        amount                           DECIMAL(18,8)  NOT NULL,                        -- 金額
         total_usage_limit                INT,                                            -- 總使用次數限制
-        used_count                       INT            DEFAULT 0,
-        max_discount_amount              DECIMAL(18,8)  DEFAULT 0,
-        is_stackable                     BOOLEAN        DEFAULT FALSE,                   -- 是否可累計折扣
-        is_auto_apply                    BOOLEAN        DEFAULT FALSE,                   -- 是否自動申請折扣
-        priority                         INT            DEFAULT 0,                       -- 優先順序
+        used_count                       INT            DEFAULT 0,                       -- 已使用次數
+        max_discount_amount              DECIMAL(18,8)  DEFAULT 0,                       -- 最大折扣金額
+        is_stackable                     BOOLEAN        DEFAULT FALSE,                   -- 是否累計折扣
+        is_auto_apply                    BOOLEAN        DEFAULT FALSE,                   -- 是否自動折扣
+        priority                         INT            DEFAULT 0,                       -- 優先順序 (1~10)
         note                             VARCHAR(255),
         start_date                       DATE           NOT NULL,                        -- 開始日
         end_date                         DATE           NOT NULL,                        -- 到期日
@@ -503,7 +503,7 @@
     CREATE TABLE tax_types (
         id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VAT、SALES_TAX
-        name                             VARCHAR(50)   NOT NULL,                        -- 加值稅、營業稅
+        name                             VARCHAR(50)    NOT NULL,                        -- 加值稅、營業稅
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -512,21 +512,21 @@
 
     -- 稅費表
     CREATE TABLE taxes (
-        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
-        country_id                       BIGINT        NOT NULL,
-        tax_type_id                      BIGINT        NOT NULL,
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
+        country_id                       BIGINT         NOT NULL,
+        tax_type_id                      BIGINT         NOT NULL,
 
-        code                             VARCHAR(30)   NOT NULL UNIQUE,
-        name                             VARCHAR(50)  NOT NULL,    
-        rate                             DECIMAL(18,8) NULL,                            -- 稅率 (與稅費二選一填寫)
-        amount                           DECIMAL(18,8) NULL,                            -- 稅費 (與稅率二選一填寫)
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,    
+        rate                             DECIMAL(18,8)  NULL,                            -- 稅率 (與稅費二選一填寫)
+        amount                           DECIMAL(18,8)  NULL,                            -- 稅費 (與稅率二選一填寫)
         note                             VARCHAR(255),
 
-        is_active                        BOOLEAN       DEFAULT TRUE,                     -- 是否生效
-        min_amount                       DECIMAL(18,8) NOT NULL,                         -- 下限
+        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否生效
+        min_amount                       DECIMAL(18,8)  NOT NULL,                        -- 下限
         max_amount                       DECIMAL(18,8),                                  -- 上限
-        effective_from                   DATE          NOT NULL,                         -- 有限時間(起)
-        effective_to                     DATE          NULL,                             -- 有限時間(迄)
+        effective_from                   DATE           NOT NULL,                        -- 有限時間(起)
+        effective_to                     DATE           NULL,                            -- 有限時間(迄)
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -553,9 +553,9 @@
 
     -- 費用類型表
     CREATE TABLE fee_types (
-        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,
-        name                             VARCHAR(50)  NOT NULL,
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -564,22 +564,22 @@
 
     -- 費用表
     CREATE TABLE fees (
-        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
-        country_id                       BIGINT        NULL,
-        distribution_platform_id         BIGINT        NOT NULL,
-        fee_type_id                      BIGINT        NOT NULL,
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
+        country_id                       BIGINT         NULL,
+        distribution_platform_id         BIGINT         NOT NULL,
+        fee_type_id                      BIGINT         NOT NULL,
         
-        code                             VARCHAR(30)   NOT NULL UNIQUE,
-        name                             VARCHAR(50)  NOT NULL,
-        rate                             DECIMAL(18,8) NULL,                            -- 費率 (與費用二選一填寫)
-        amount                           DECIMAL(18,8) NULL,                            -- 費用 (與費率二選一填寫)
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
+        rate                             DECIMAL(18,8)  NULL,                            -- 費率 (與費用二選一填寫)
+        amount                           DECIMAL(18,8)  NULL,                            -- 費用 (與費率二選一填寫)
         note                             VARCHAR(255),
         
-        is_active                        BOOLEAN       DEFAULT TRUE,                     -- 是否生效
-        min_amount                       DECIMAL(18,8) NOT NULL,                         -- 下限
+        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否生效
+        min_amount                       DECIMAL(18,8)  NOT NULL,                        -- 下限
         max_amount                       DECIMAL(18,8),                                  -- 上限
-        effective_from                   DATE          NOT NULL,                         -- 有限時間(起)
-        effective_to                     DATE          NULL,                             -- 有限時間(迄)
+        effective_from                   DATE           NOT NULL,                        -- 有限時間(起)
+        effective_to                     DATE           NULL,                            -- 有限時間(迄)
         
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -605,9 +605,9 @@
 
     -- 退款原因表
     CREATE TABLE refund_transaction_reasons (
-        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,
-        name                             VARCHAR(50)  NOT NULL,
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -616,9 +616,9 @@
 
     -- 退款狀態表
     CREATE TABLE refund_transaction_statuses (
-        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
-        code                             VARCHAR(30)   NOT NULL UNIQUE,                  -- PENDING、SUCCESS、FAILED
-        name                             VARCHAR(50)  NOT NULL,                          -- 待退款、退款成功、退款失敗
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- PENDING、SUCCESS、FAILED
+        name                             VARCHAR(50)    NOT NULL,                        -- 待退款、退款成功、退款失敗
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -627,14 +627,14 @@
 
     -- 訂單與退款交易關聯表
     CREATE TABLE order_refund_transactions (
-        id                               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+        id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
         order_id                         BIGINT         NOT NULL,
-        refund_transaction_reason_id     BIGINT        NOT NULL,
+        refund_transaction_reason_id     BIGINT         NOT NULL,
 
-        refund_amount                    DECIMAL(18,8) NOT NULL,
+        refund_amount                    DECIMAL(18,8)  NOT NULL,
         refunded_date                    DATETIME,
 
-        refund_transaction_status_id     BIGINT        NOT NULL,
+        refund_transaction_status_id     BIGINT         NOT NULL,
 
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
