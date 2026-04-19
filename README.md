@@ -2,7 +2,7 @@
 
     USE finance_app;
     
-    -- 國別表
+    -- (測試中)國別表
     CREATE TABLE countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         iso2                             CHAR(2)        NOT NULL UNIQUE,                 -- ISO 3166-1國別碼 (兩碼)
@@ -19,7 +19,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 時區表
+    -- (測試中)時區表
     CREATE TABLE timezones (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL,                        -- 時區代碼 (UTC、EST、CST)
@@ -33,7 +33,7 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 國別與時區關聯表
+    -- (測試中)國別與時區關聯表
     CREATE TABLE country_timezones (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT        NOT NULL,
@@ -51,7 +51,7 @@
         FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 貨幣表
+    -- (測試中)貨幣表
     CREATE TABLE currencies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             CHAR(3)        NOT NULL UNIQUE,                 -- 貨幣碼 (TWD、USD、JPY...)
@@ -62,7 +62,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 國別與貨幣關聯表
+    -- (測試中)國別與貨幣關聯表
     CREATE TABLE currency_countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NOT NULL,
