@@ -77,6 +77,68 @@
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 語言表
+    CREATE TABLE languages (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(10)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 國別與語言關聯表
+    CREATE TABLE country_languages (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NOT NULL,
+        language_id                      BIGINT         NOT NULL,
+
+        is_official                      BOOLEAN        DEFAULT FALSE,                   -- 是否為官方語言
+        is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設語言
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (country_id, language_id),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 翻譯鍵表
+    CREATE TABLE translation_keys (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        entity_type                      VARCHAR(50)    NOT NULL, 
+        entity_id                        BIGINT         NOT NULL,
+        field_name                       VARCHAR(50)    NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE (entity_type, entity_id, field_name)
+    );
+
+    -- 翻譯表
+    CREATE TABLE translations (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        translation_key_id               BIGINT         NOT NULL,
+        language_id                      BIGINT         NOT NULL,
+        
+        value                            TEXT           NOT NULL,
+        version                          INT            DEFAULT 1,                       -- 版本
+        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否啟用
+        is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+
+        UNIQUE (translation_key_id, language_id, version),
+        FOREIGN KEY (translation_key_id) REFERENCES translation_keys(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
     -- 金融機構類型表
     CREATE TABLE financial_institution_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -188,68 +250,6 @@
         FOREIGN KEY (exchange_rate_source_id) REFERENCES exchange_rate_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 語言表
-    CREATE TABLE languages (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(10)    NOT NULL UNIQUE,                 -- 代號
-        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 國別與語言關聯表
-    CREATE TABLE country_languages (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT         NOT NULL,
-        language_id                      BIGINT         NOT NULL,
-
-        is_official                      BOOLEAN        DEFAULT FALSE,                   -- 是否為官方語言
-        is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設語言
-
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE (country_id, language_id),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- 翻譯鍵表
-    CREATE TABLE translation_keys (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        entity_type                      VARCHAR(50)    NOT NULL, 
-        entity_id                        BIGINT         NOT NULL,
-        field_name                       VARCHAR(50)    NOT NULL,
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE (entity_type, entity_id, field_name)
-    );
-
-    -- 翻譯表
-    CREATE TABLE translations (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        translation_key_id               BIGINT         NOT NULL,
-        language_id                      BIGINT         NOT NULL,
-        
-        value                            TEXT           NOT NULL,
-        version                          INT            DEFAULT 1,                       -- 版本
-        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否啟用
-        is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設
-
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE (translation_key_id, language_id, version),
-        FOREIGN KEY (translation_key_id) REFERENCES translation_keys(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 使用者表
