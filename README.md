@@ -1925,7 +1925,7 @@
 
     # 1. 設定檔案路徑
     INPUT_FILE = '/Users/williamhsieh/Desktop/countries.json'
-    OUTPUT_FILE = '/Users/williamhsieh/Desktop/countries.sql'
+    OUTPUT_FILE = '/Users/williamhsieh/Desktop/countries_full.sql'
 
     def format_sql_value(val):
         if val is None or val == "": 
@@ -1940,11 +1940,24 @@
         with open(INPUT_FILE, 'r', encoding='utf-8') as f:
             countries_data = json.load(f)
 
+        # 用於快取避免重複插入
+        seen_currencies = {}
+        seen_timezones = {}
+        seen_languages = {}
+    
+        # 儲存關聯關係
+        country_currency_map = []
+        country_timezone_map = []
+        country_lang_map = []
+
         sql_statements = [
+            "USE finance_app;",
             "SET NAMES utf8mb4;",
             "SET FOREIGN_KEY_CHECKS = 0;",
+            "TRUNCATE TABLE country_languages;",
             "TRUNCATE TABLE country_timezones;",
             "TRUNCATE TABLE currency_countries;",
+            "TRUNCATE TABLE languages;",
             "TRUNCATE TABLE timezones;",
             "TRUNCATE TABLE currencies;",
             "TRUNCATE TABLE countries;",
@@ -1952,17 +1965,12 @@
             ""
         ]
 
-        seen_currencies = {} 
-        seen_timezones = {}  
-        country_currency_map = [] 
-        country_timezone_map = [] 
-
-        print(f"🚀 開始處理 {len(countries_data)} 個國家...")
+        print(f"🚀 開始解析 {len(countries_data)} 個國家資料...")
 
         for c in countries_data:
             iso2 = c.get('iso2')
             if not iso2: continue
-    
+
             # --- 1. 處理國家 ---
             native_name = c.get('native') or c.get('name')
             sql_statements.append(
@@ -1988,55 +1996,65 @@
                 iana_name = tz.get('zoneName')
                 if iana_name:
                     if iana_name not in seen_timezones:
-                        # 邏輯：dr5hn 資料中，如果有夏令時間，gmtOffsetName 通常會反映出來
-                        # 或是我們可以預設，只要是 America/, Europe/, Australia/ 等地區多半有 DST 政策
-                        # 更準確的做法是檢查資料源是否有提供 dstOffset，若無，則統一存入 iana_name 供 Java 計算
                         seen_timezones[iana_name] = {
                             'code': tz.get('abbreviation'),
-                            'offset': tz.get('gmtOffset'), # 直接存秒數整數
+                            'offset': tz.get('gmtOffset'),
                             'display_name': tz.get('tzName'),
                             'has_dst': "TRUE" if "Daylight" in (tz.get('tzName') or "") else "FALSE"
                         }
                     is_default = "TRUE" if index == 0 else "FALSE"
                     country_timezone_map.append((iso2, iana_name, is_default))
 
-        # 寫入各表資料
+            # --- 4. 收集語言 ---
+            # 處理格式可能是 "en,es,fr" 的字串
+            raw_langs = c.get('languages', "")
+            if isinstance(raw_langs, str):
+                lang_list = [l.strip() for l in raw_langs.split(',') if l.strip()]
+            else:
+                lang_list = []
+
+            for index, l_code in enumerate(lang_list):
+                if l_code not in seen_languages:
+                    # 預設名稱先用代碼大寫，後續可手動修正
+                    seen_languages[l_code] = l_code.upper()
+            
+                # 第一個語言設為預設
+                is_def = "TRUE" if index == 0 else "FALSE"
+                country_lang_map.append((iso2, l_code, is_def))
+
+        # --- 寫入各主表資料 ---
+    
         sql_statements.append("\n-- Insert Currencies")
         for code, info in seen_currencies.items():
-            sql_statements.append(
-                f"INSERT INTO currencies (code, name, symbol, created_date, updated_date) "
-                f"VALUES ({format_sql_value(code)}, {format_sql_value(info['name'])}, {format_sql_value(info['symbol'])}, NOW(), NOW());"
-            )
+            sql_statements.append(f"INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ({format_sql_value(code)}, {format_sql_value(info['name'])},{format_sql_value(info['symbol'])}, NOW(), NOW());")
+
+        sql_statements.append("\n-- Insert Languages")
+        for code, name in seen_languages.items():
+            sql_statements.append(f"INSERT INTO languages (code, name, created_date, updated_date) VALUES ({format_sql_value(code)}, {format_sql_value(name)}, NOW(), NOW());")
 
         sql_statements.append("\n-- Insert Timezones")
         for iana_name, info in seen_timezones.items():
-            # 注意：info['offset'] 是整數，不加單引號
-            sql_statements.append(
-                f"INSERT INTO timezones (code, iana_name, name, utc_offset, has_dst, created_date, updated_date) "
-                f"VALUES ({format_sql_value(info['code'])}, {format_sql_value(iana_name)}, {format_sql_value(info['display_name'])}, "
-                f"{info['offset']}, {info['has_dst']}, NOW(), NOW());"
-            )
+            sql_statements.append(f"INSERT INTO timezones (code, iana_name, name, utc_offset, has_dst, created_date, updated_date) VALUES ({format_sql_value(info['code'])}, {format_sql_value(iana_name)}, {format_sql_value(info['display_name'])}, {info['offset']}, {info['has_dst']}, NOW(), NOW());")
+
+        # --- 寫入關聯表資料 ---
 
         sql_statements.append("\n-- Insert Currency-Country Mapping")
         for iso2, curr_code in country_currency_map:
-            sql_statements.append(
-                f"INSERT INTO currency_countries (currency_id, country_id, created_date, updated_date) "
-                f"SELECT (SELECT id FROM currencies WHERE code={format_sql_value(curr_code)} LIMIT 1), "
-                f"(SELECT id FROM countries WHERE iso2='{iso2}' LIMIT 1), NOW(), NOW();"
-            )
+            sql_statements.append(f"INSERT INTO currency_countries (currency_id, country_id, created_date, updated_date) SELECT (SELECT id FROM currencies WHERE code={format_sql_value(curr_code)} LIMIT 1), (SELECT id FROM countries WHERE iso2='{iso2}' LIMIT 1), NOW(), NOW();")
 
         sql_statements.append("\n-- Insert Country-Timezone Mapping")
         for iso2, iana_name, is_default in country_timezone_map:
-            sql_statements.append(
-                f"INSERT INTO country_timezones (country_id, timezone_id, is_default, created_date, updated_date) "
-                f"SELECT (SELECT id FROM countries WHERE iso2='{iso2}' LIMIT 1), "
-                f"(SELECT id FROM timezones WHERE iana_name={format_sql_value(iana_name)} LIMIT 1), "
-                f"{is_default}, NOW(), NOW();"
-            )
+            sql_statements.append(f"INSERT INTO country_timezones (country_id, timezone_id, is_default, created_date, updated_date) SELECT (SELECT id FROM countries WHERE iso2='{iso2}' LIMIT 1), (SELECT id FROM timezones WHERE iana_name={format_sql_value(iana_name)} LIMIT 1), {is_default}, NOW(), NOW();")
 
+        sql_statements.append("\n-- Insert Country-Language Mapping")
+        for iso2, l_code, is_default in country_lang_map:
+            sql_statements.append(f"INSERT INTO country_languages (country_id, language_id, is_official, is_default, created_date, updated_date) SELECT (SELECT id FROM countries WHERE iso2='{iso2}' LIMIT 1), (SELECT id FROM languages WHERE code={format_sql_value(l_code)} LIMIT 1), FALSE, {is_default}, NOW(), NOW();")
+
+        # 存檔
         with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
             f.write("\n".join(sql_statements))
 
-        print(f"✅ 成功！SQL 統計：國家 {len(countries_data)}, 貨幣 {len(seen_currencies)}, 時區 {len(seen_timezones)}")
+        print(f"✅ 成功產出！")
+        print(f"📊 統計：國家 {len(countries_data)}, 貨幣 {len(seen_currencies)}, 時區 {len(seen_timezones)}, 語言 {len(seen_languages)}")
 
 
