@@ -1925,7 +1925,7 @@
 
     # 1. 設定檔案路徑
     INPUT_FILE = '/Users/williamhsieh/Desktop/countries.json'
-    OUTPUT_FILE = '/Users/williamhsieh/Desktop/countries_full.sql'
+    OUTPUT_FILE = '/Users/williamhsieh/Desktop/countries.sql'
 
     def format_sql_value(val):
         if val is None or val == "": 
