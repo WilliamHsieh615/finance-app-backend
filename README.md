@@ -77,7 +77,7 @@
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 語言表
+    -- (測試中)語言表
     CREATE TABLE languages (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(10)    NOT NULL UNIQUE,                 -- 代號
@@ -88,7 +88,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 國別與語言關聯表
+    -- (測試中)國別與語言關聯表
     CREATE TABLE country_languages (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NOT NULL,
