@@ -258,10 +258,10 @@
         country_id                       BIGINT         NULL,
         timezone_id                      BIGINT         NULL,
 
-        user_number                      VARCHAR(50)    NOT NULL UNIQUE,                 -- 使用者編號，USER/STAFF/ADMIN+加入日期(YYYYMMDD)+五碼流水號
+        user_number                      VARCHAR(10)    NOT NULL UNIQUE,                 -- 使用者編號，10碼隨機碼
         name                             VARCHAR(255)   NOT NULL,                        -- 姓名
         nickname                         VARCHAR(100)   NOT NULL,                        -- 綽號
-        email                            VARCHAR(100)   NOT NULL UNIQUE,                 -- 使用者電子郵件
+        email                            VARCHAR(255)   NOT NULL UNIQUE,                 -- 使用者電子郵件
         password                         VARCHAR(255)   NOT NULL,                        -- 使用者密碼 (後端使用hashcode寫入)
         birthday                         DATE           NOT NULL,                        -- 使用者生日
         phone                            VARCHAR(20)    NULL,                            -- 手機號碼
@@ -298,6 +298,64 @@
         UNIQUE (user_id, role_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 推薦碼類型表
+    CREATE TABLE referral_code_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (USER、CAMPAIGN、INFLUENCER)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 推薦碼表
+    CREATE TABLE referral_codes (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NULL,                            -- 擁有者
+        code                             VARCHAR(20)    NOT NULL UNIQUE,
+        referral_code_type_id            BIGINT         NOT NULL,
+        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否啟用
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (referral_code_type_id) REFERENCES referral_code_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 使用者推薦狀態表
+    CREATE TABLE user_referral_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、COMPLETED、INVALID)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 使用者推薦表
+    CREATE TABLE user_referrals (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        referrer_id                      BIGINT         NOT NULL,                        -- 推薦人        
+        referee_id                       BIGINT         NOT NULL,                        -- 被推薦人
+
+        referral_code_id                 BIGINT         NOT NULL,                        -- 當時使用的推薦碼
+        user_referral_status_id          BIGINT         NOT NULL,
+
+        reward_granted                   BOOLEAN        DEFAULT FALSE,                   -- 推薦獎金是否已發放
+
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        completed_date                   DATETIME       NULL,
+
+        UNIQUE (referee_id, referral_code_id),
+        FOREIGN KEY (referrer_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (referee_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (referral_code_id) REFERENCES referral_codes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (user_referral_status_id) REFERENCES user_referral_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 發行平台公司表
