@@ -167,6 +167,7 @@
         country_id                       BIGINT         NOT NULL,                        -- 金融機構集團總部國
         code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構集團名稱 (例如：國泰金控、富邦金控)
+        legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構集團正式名稱
         image_url                        VARCHAR(255)   NULL,                            -- 金融機構集團logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -184,6 +185,7 @@
         financial_institution_group_id   BIGINT         NULL,                            -- 金融機構集團
         code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華銀行、台本富邦銀行、國泰人壽、IB、Binance)
+        legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構正式名稱
         image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
