@@ -139,8 +139,8 @@
         FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 金融機構類型表
-    CREATE TABLE financial_institution_types (
+    -- (測試中)金融機構大類表
+    CREATE TABLE financial_institution_type_groups (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (BANK, BROKER, INSURANCE, EXCHANGE, CRYPTO)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
@@ -148,6 +148,19 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- (測試中)金融機構小類表
+    CREATE TABLE financial_institution_types (
+        id                                  BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        financial_institution_type_group_id BIGINT         NOT NULL,
+        code                                VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        name                                VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                                VARCHAR(255),
+        created_date                        DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                        DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                        DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (financial_institution_type_group_id) REFERENCES financial_institution_type_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 金融機構能力表 (業務範圍)
