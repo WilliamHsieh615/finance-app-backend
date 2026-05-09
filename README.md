@@ -882,7 +882,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(code, flow_type_id, frequency_id),
         FOREIGN KEY (flow_type_id) REFERENCES flow_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (frequency_id) REFERENCES frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 單位類型表
@@ -1228,6 +1228,7 @@
         currency_id                      BIGINT        NOT NULL,
 
         name                             VARCHAR(100)  NOT NULL,
+        legal_name                       VARCHAR(150)  NULL,
         initial_balance                  DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 初始餘額
         note                             VARCHAR(255),                                  -- 備註
         
@@ -1299,14 +1300,30 @@
         FOREIGN KEY (fee_id) REFERENCES fees(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳戶表子表 (收支帳 → 帳戶)
+    -- (測試中)帳戶表子表 (收支帳 → 帳戶)
     CREATE TABLE bank_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
+        account_number                   VARCHAR(50)   NULL,
+        statement_day                    TINYINT       NULL,
+        settlement_days                  INT           NULL,
         payout_frequency_id              BIGINT        NULL,                            -- 配息頻率
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 支付網路表
+    CREATE TABLE payment_networks (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                       BIGINT         NULL,                            -- 母公司所在國（Amex=US, JCB=JP）
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VISA, MASTERCARD, JCB, AMEX, UNIONPAY
+        name                             VARCHAR(50)    NOT NULL,                        -- Visa, Mastercard...
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (收支帳 → 信用卡)
@@ -1322,9 +1339,6 @@
         auto_pay_account_id              BIGINT        NULL,                            -- 自動扣款帳戶
 
         UNIQUE(account_id, auto_pay_account_id),
-        CHECK (account_id <> auto_pay_account_id),                                      -- (後端應避免雙向連結)
-        CHECK (cycle_day BETWEEN 1 AND 31),
-        CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (auto_pay_account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
