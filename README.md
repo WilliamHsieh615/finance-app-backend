@@ -181,6 +181,7 @@
         code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構集團名稱 (例如：國泰金控、富邦金控)
         legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構集團正式名稱
+        is_active                        BOOLEAN        DEFAULT TRUE,
         image_url                        VARCHAR(255)   NULL,                            -- 金融機構集團logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -199,6 +200,7 @@
         code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華銀行、台本富邦銀行、國泰人壽、IB、Binance)
         legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構正式名稱
+        is_active                        BOOLEAN        DEFAULT TRUE,
         image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -234,28 +236,44 @@
     -- 金融機構變更類型表
     CREATE TABLE financial_institution_change_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號(MERGER、ACQUISITION、RENAME、SPLIT、DISSOLUTION)
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號(MERGER、ACQUISITION、RENAME、SPLIT、DISSOLUTION、LICENSE_REVOKED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
+
+    -- 金融機構集團變更表
+    CREATE TABLE financial_institution_group_changes (
+        id                                    BIGINT       AUTO_INCREMENT PRIMARY KEY,
+        financial_institution_change_type_id  BIGINT       NOT NULL,
+        source_financial_institution_group_id BIGINT       NOT NULL,
+        target_financial_institution_group_id BIGINT       NULL,
+        effective_date                        DATE         NULL,
+        note                                  VARCHAR(255),
+        created_date                          DATETIME     NOT NULL,                     -- 建立時間 (由後端寫入)
+        updated_date                          DATETIME     NOT NULL,                     -- 更新時間 (由後端寫入)
+        deleted_date                          DATETIME     NULL,                         -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (source_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (target_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
     
     -- 金融機構變更表
     CREATE TABLE financial_institution_changes (
         id                                   BIGINT     AUTO_INCREMENT PRIMARY KEY,
         financial_institution_change_type_id BIGINT     NOT NULL,
-        old_financial_institution_id         BIGINT     NOT NULL,
-        new_financial_institution_id         BIGINT     NULL,
+        source_financial_institution_id      BIGINT     NOT NULL,
+        target_financial_institution_id      BIGINT     NULL,
         effective_date                       DATE       NULL,
         note                                 VARCHAR(255),
         created_date                         DATETIME   NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                         DATETIME   NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                         DATETIME   NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (old_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (new_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (source_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (target_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 匯率來源表
