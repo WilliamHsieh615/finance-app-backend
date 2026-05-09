@@ -847,8 +847,8 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 頻率類型表
-    CREATE TABLE frequency_types (
+    -- (測試中)流向類型表
+    CREATE TABLE flow_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- REPAYMENT、PAYOUT、RECOVERY、PAYMENT 
         name                             VARCHAR(50)    NOT NULL,                        -- 你還錢給他(債務面)、他支付給你(投資面)、他把錢還給你(債務面)、你支付給他(投資面)
@@ -858,18 +858,31 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 頻率表(付款、收款、配息、不配息)
+    -- (測試中)頻率表
     CREATE TABLE frequencies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        frequency_type_id                BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL,                        -- year、month、week、day、monthly、quarterly、semi_annual、annual、none
+        code                             VARCHAR(30)    NOT NULL,                        -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- (測試中)流向頻率表(付款、收款、配息、不配息)
+    CREATE TABLE flow_frequencys (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        flow_type_id                     BIGINT         NOT NULL,
+        frequency_id                     BIGINT         NOT NULL,
+        code                             VARCHAR(30)    NOT NULL,                        -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(code, frequency_type_id),
-        FOREIGN KEY (frequency_type_id) REFERENCES frequency_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        UNIQUE(code, flow_type_id, frequency_id),
+        FOREIGN KEY (flow_type_id) REFERENCES flow_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (frequency_id) REFERENCES frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 單位類型表
@@ -896,7 +909,7 @@
         FOREIGN KEY (unit_type_id) REFERENCES unit_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳本種類表
+    -- (測試中)帳本種類表
     CREATE TABLE ledger_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- cashflow、investment、debt、receivable、fixed_asset、inventory
@@ -907,7 +920,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 帳本表
+    -- (測試中)帳本表
     CREATE TABLE ledgers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
@@ -1036,7 +1049,7 @@
         
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (dividend_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (dividend_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -1077,7 +1090,7 @@
 
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (coupon_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (coupon_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (bond_type_id) REFERENCES bond_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -1293,7 +1306,7 @@
         payout_frequency_id              BIGINT        NULL,                            -- 配息頻率
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (收支帳 → 信用卡)
@@ -1367,7 +1380,7 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payout_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (負債帳 → 房貸、車貸、信貸）
@@ -1387,7 +1400,7 @@
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (repayment_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (repayment_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (應收帳款)
@@ -1405,7 +1418,7 @@
         CHECK (cycle_day BETWEEN 1 AND 31),
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (recovery_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (recovery_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 固定資產分類表
@@ -1806,7 +1819,7 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (recurrence_frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (recurrence_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
