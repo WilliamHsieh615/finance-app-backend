@@ -231,6 +231,33 @@
         FOREIGN KEY (financial_institution_capability_id) REFERENCES financial_institution_capabilities(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 金融機構變更類型表
+    CREATE TABLE financial_institution_change_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號(MERGER、ACQUISITION、RENAME、SPLIT、DISSOLUTION)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+    
+    -- 金融機構變更表
+    CREATE TABLE financial_institution_changes (
+        id                                   BIGINT     AUTO_INCREMENT PRIMARY KEY,
+        financial_institution_change_type_id BIGINT     NOT NULL,
+        old_financial_institution_id         BIGINT     NOT NULL,
+        new_financial_institution_id         BIGINT     NULL,
+        effective_date                       DATE       NULL,
+        note                                 VARCHAR(255),
+        created_date                         DATETIME   NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                         DATETIME   NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                         DATETIME   NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (old_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (new_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
     -- 匯率來源表
     CREATE TABLE exchange_rate_sources (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
