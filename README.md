@@ -174,7 +174,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 金融機構集團表
+    -- (測試中)金融機構集團表
     CREATE TABLE financial_institution_groups (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NOT NULL,                        -- 金融機構集團總部國
@@ -191,7 +191,7 @@
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 金融機構表
+    -- (測試中)金融機構表
     CREATE TABLE financial_institutions (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NOT NULL,                        -- 金融機構總部國
