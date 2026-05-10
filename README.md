@@ -1313,35 +1313,80 @@
         FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 支付網路表
+    -- (測試中)支付網路類型表
+    CREATE TABLE payment_network_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (測試中)支付網路表
     CREATE TABLE payment_networks (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NULL,                            -- 母公司所在國（Amex=US, JCB=JP）
+        payment_network_type_id          BIGINT         NOT NULL,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VISA, MASTERCARD, JCB, AMEX, UNIONPAY
         name                             VARCHAR(50)    NOT NULL,                        -- Visa, Mastercard...
+        image_url                        VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (payment_network_type_id) REFERENCES payment_network_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- (測試中)信用卡等級表
+    CREATE TABLE card_tiers (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (測試中)支付網路可支援的信用卡等級表
+    CREATE TABLE payment_network_card_tiers (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        payment_network_id               BIGINT         NOT NULL,
+        card_tier_id                     BIGINT         NOT NULL,
+        display_name                     VARCHAR(50)    NOT NULL, -- 實際顯示名稱
+        level_rank                       INT            NOT NULL, -- 在該 network 內的排序
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL,
+        deleted_date                     DATETIME       NULL,
+        UNIQUE(payment_network_id, credit_card_tier_id),
+        FOREIGN KEY (payment_network_id) REFERENCES payment_networks(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (card_tier_id) REFERENCES card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (收支帳 → 信用卡)
     CREATE TABLE credit_card_accounts (
-        account_id                       BIGINT        PRIMARY KEY,
-        financial_institution_id         BIGINT        NULL,
-        
-        cycle_day                        TINYINT       NOT NULL,		                -- 結帳日 (1~31)
-        due_day                          TINYINT       NOT NULL,                        -- 繳款日 (1~31)
-        credit_limit                     DECIMAL(18,8) NULL,                            -- 信用額度
-        annual_fee                       DECIMAL(18,8) NULL,                            -- 年費
-        is_auto_pay                      BOOLEAN       DEFAULT FALSE,                   -- 是否自動扣款
-        auto_pay_account_id              BIGINT        NULL,                            -- 自動扣款帳戶
+        account_id                          BIGINT        PRIMARY KEY,
+        financial_institution_id            BIGINT        NULL,
+        payment_network_card_tier_id        BIGINT        NULL,
+        cycle_day                           TINYINT       NOT NULL,		                   -- 結帳日 (1~31)
+        due_day                             TINYINT       NOT NULL,                        -- 繳款日 (1~31)
+        credit_limit                        DECIMAL(18,8) NULL,                            -- 信用額度
+        annual_fee                          DECIMAL(18,8) NULL,                            -- 年費
+        is_auto_pay                         BOOLEAN       DEFAULT FALSE,                   -- 是否自動扣款
+        auto_pay_account_id                 BIGINT        NULL,                            -- 自動扣款帳戶
 
         UNIQUE(account_id, auto_pay_account_id),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (auto_pay_account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (auto_pay_account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 帳戶表子表 (投資帳 → 股票、ETF、基金、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
