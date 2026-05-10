@@ -1304,10 +1304,22 @@
         FOREIGN KEY (fee_id) REFERENCES fees(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 銀行帳戶類型表
+    CREATE TABLE bank_account_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
     -- (測試中)帳戶表子表 (收支帳 → 帳戶)
     CREATE TABLE bank_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
+        bank_account_type_id             BIGINT        NULL,
         account_number                   VARCHAR(50)   NULL,
         is_digital                       BOOLEAN       NOT NULL DEFAULT FALSE,
         has_passbook                     BOOLEAN       NOT NULL DEFAULT FALSE,
@@ -1316,6 +1328,7 @@
         payout_frequency_id              BIGINT        NULL,                            -- 配息頻率
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (bank_account_type_id) REFERENCES bank_account_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
