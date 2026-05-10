@@ -929,6 +929,9 @@
         
         name                             VARCHAR(100)   NOT NULL,                        -- 帳本名稱
         note                             VARCHAR(255),                                   -- 備註
+
+        is_archived                      BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否封存    
+        archived_date                    DATETIME       NULL,                            -- 封存時間
         
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -1230,6 +1233,7 @@
         name                             VARCHAR(100)  NOT NULL,
         legal_name                       VARCHAR(150)  NULL,
         initial_balance                  DECIMAL(18,8) NOT NULL DEFAULT 0,              -- 初始餘額
+        is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
         note                             VARCHAR(255),                                  -- 備註
         
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
