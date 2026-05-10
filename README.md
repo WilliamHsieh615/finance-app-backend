@@ -1309,6 +1309,7 @@
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
         account_number                   VARCHAR(50)   NULL,
+        is_digital                       BOOLEAN       NOT NULL DEFAULT FALSE,
         has_passbook                     BOOLEAN       NOT NULL DEFAULT FALSE,
         statement_day                    TINYINT       NULL,
         settlement_days                  INT           NULL,
