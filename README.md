@@ -213,7 +213,7 @@
     );
 
     -- 金融機構在某個國家的能力關聯表 (金融機構在某國家的業務範圍)
-    CREATE TABLE financial_institution_country_capabilities (
+    CREATE TABLE financial_institution_in_country_has_capabilities (
         id                                  BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                          BIGINT         NOT NULL,
         financial_institution_id            BIGINT         NOT NULL,
@@ -1197,7 +1197,7 @@
         FOREIGN KEY (risk_rating_scale_id) REFERENCES risk_rating_scales(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳戶種類表
+    -- (測試中)帳戶種類表
     CREATE TABLE account_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_type_id                   BIGINT        NOT NULL,
@@ -1223,7 +1223,7 @@
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳戶表
+    -- (測試中)帳戶表
     CREATE TABLE accounts (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
@@ -1304,7 +1304,7 @@
         FOREIGN KEY (fee_id) REFERENCES fees(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 銀行帳戶類型表
+    -- (測試中)銀行帳戶類型表
     CREATE TABLE bank_account_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,
@@ -1315,7 +1315,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- (測試中)帳戶表子表 (收支帳 → 帳戶)
+    -- (測試中)帳戶表子表 (收支帳 → 銀行帳戶)
     CREATE TABLE bank_accounts (
         account_id                       BIGINT        PRIMARY KEY,
         financial_institution_id         BIGINT        NULL,
@@ -1360,7 +1360,7 @@
         FOREIGN KEY (payment_network_type_id) REFERENCES payment_network_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- (測試中)信用卡等級表
+    -- (測試中)卡片等級表
     CREATE TABLE card_tiers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,
@@ -1372,7 +1372,7 @@
         deleted_date                     DATETIME       NULL
     );
 
-    -- (測試中)支付網路可支援的信用卡等級表
+    -- (測試中)支付網路可支援的卡片等級表
     CREATE TABLE payment_network_card_tiers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         payment_network_id               BIGINT         NOT NULL,
@@ -1384,19 +1384,62 @@
         created_date                     DATETIME       NOT NULL,
         updated_date                     DATETIME       NOT NULL,
         deleted_date                     DATETIME       NULL,
-        UNIQUE(payment_network_id, credit_card_tier_id),
+        UNIQUE(payment_network_id, card_tier_id),
         FOREIGN KEY (payment_network_id) REFERENCES payment_networks(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (card_tier_id) REFERENCES card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳戶表子表 (收支帳 → 信用卡)
+    -- (測試中)卡片能力表
+    CREATE TABLE card_capabilities (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- 帳戶表子表 (收支帳 → 銀行卡) 
+    CREATE TABLE bank_cards (
+        account_id                      BIGINT        NOT NULL,
+        payment_network_card_tier_id    BIGINT        NULL,
+        name                            VARCHAR(100)  NOT NULL,
+        card_number                     VARCHAR(20)   NULL,
+        card_holder_name                VARCHAR(100)  NULL,
+        expiry_date                     DATE          NULL,
+        is_virtual                      BOOLEAN       NOT NULL DEFAULT FALSE,          -- 是否為虛擬卡
+        is_active                       BOOLEAN       DEFAULT TRUE,
+        note                            VARCHAR(255),
+        FOREIGN KEY (account_id) REFERENCES bank_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 銀行卡能力關聯表
+    CREATE TABLE bank_card_has_capabilities (
+        account_id                       BIGINT        NOT NULL,
+        card_capability_id               BIGINT        NOT NULL,
+        is_active                        BOOLEAN       DEFAULT TRUE,
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        PRIMARY KEY (account_id, card_capability_id),
+        FOREIGN KEY (account_id) REFERENCES bank_cards(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (card_capability_id) REFERENCES card_capabilities(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- (測試中)帳戶表子表 (收支帳 → 信用卡)
     CREATE TABLE credit_card_accounts (
         account_id                          BIGINT        PRIMARY KEY,
         financial_institution_id            BIGINT        NULL,
         payment_network_card_tier_id        BIGINT        NULL,
+        card_number                         VARCHAR(20)   NULL,
+        card_holder_name                    VARCHAR(100)  NULL,
+        credit_limit                        DECIMAL(18,8) NULL,                            -- 信用額度
+        expiry_date                         DATE          NULL,
+        is_virtual                          BOOLEAN       NOT NULL DEFAULT FALSE,          -- 是否為虛擬卡
         cycle_day                           TINYINT       NOT NULL,		                   -- 結帳日 (1~31)
         due_day                             TINYINT       NOT NULL,                        -- 繳款日 (1~31)
-        credit_limit                        DECIMAL(18,8) NULL,                            -- 信用額度
         annual_fee                          DECIMAL(18,8) NULL,                            -- 年費
         is_auto_pay                         BOOLEAN       DEFAULT FALSE,                   -- 是否自動扣款
         auto_pay_account_id                 BIGINT        NULL,                            -- 自動扣款帳戶
@@ -1406,6 +1449,52 @@
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (auto_pay_account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 信用卡能力關聯表
+    CREATE TABLE credit_card_has_capabilities (
+        account_id                       BIGINT        NOT NULL,
+        card_capability_id               BIGINT        NOT NULL,
+        is_active                        BOOLEAN       DEFAULT TRUE,
+        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
+        PRIMARY KEY (account_id, card_capability_id),
+        FOREIGN KEY (account_id) REFERENCES credit_card_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (card_capability_id) REFERENCES card_capabilities(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- (測試中)卡片發行類型表
+    CREATE TABLE card_issuance_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        name                             VARCHAR(50)    NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- 卡片發行表
+    CREATE TABLE card_issuances (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        previous_card_issuance_id        BIGINT        NULL,
+        account_id                       BIGINT        NOT NULL,
+        card_issuance_type_id            BIGINT        NOT NULL,
+        card_number                      VARCHAR(20)   NULL,
+    
+        issued_date                      DATE          NOT NULL,                    -- 發行時間
+        activated_date                   DATE          NULL,                        -- 啟用時間
+        expiry_date                      DATE          NULL,                        -- 有效時間
+        terminated_date                  DATE          NULL,                        -- 終止時間
+
+        created_date                     DATETIME      NOT NULL,
+        updated_date                     DATETIME      NOT NULL,
+        deleted_date                     DATETIME      NULL,
+
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (card_issuance_type_id) REFERENCES card_issuance_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (previous_card_issuance_id) REFERENCES card_issuances(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
     
     -- 帳戶表子表 (投資帳 → 股票、ETF、基金、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
@@ -1698,11 +1787,11 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 分類類型表
+    -- (測試中)分類類型表
     CREATE TABLE category_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- income、expense、transfer
-        name                             VARCHAR(50)   NOT NULL,                        -- 收入、支出、轉帳
+        name                             VARCHAR(50)   NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -1713,8 +1802,12 @@
     CREATE TABLE category_groups (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
-        name                             VARCHAR(50)   NOT NULL,                        -- 大分類名稱
         category_type_id                 BIGINT        NOT NULL,                        -- 分類類型
+        code                             VARCHAR(30)   NOT NULL,                        -- 大分類代號
+        name                             VARCHAR(50)   NOT NULL,                        -- 大分類名稱
+
+        is_system                        BOOLEAN       NOT NULL DEFAULT FALSE,
+        is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
         
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
@@ -1730,7 +1823,10 @@
     CREATE TABLE categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         category_group_id                BIGINT        NOT NULL,		                -- (對應大分類)
+        code                             VARCHAR(30)   NOT NULL,                        -- 小分類代號
         name                             VARCHAR(50)   NOT NULL,                        -- 小分類名稱
+        is_system                        BOOLEAN       NOT NULL DEFAULT FALSE,
+        is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
