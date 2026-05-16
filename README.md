@@ -1000,10 +1000,12 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- cashflow、investment、debt、receivable、fixed_asset、inventory
         name                             VARCHAR(50)    NOT NULL,                        -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
+        icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)帳本表
@@ -1296,6 +1298,7 @@
                                                                                         -- 應收帳下的借出款 lent，
                                                                                         -- 固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
                                                                                         -- 存貨帳下的生活用品或是備品
+        icon_id                          BIGINT        NULL,
         direction                        TINYINT       NOT NULL,                        -- 正向 / 負向
         note                             VARCHAR(255),
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -1304,7 +1307,8 @@
 
         CHECK (direction IN (1, -1)),
         UNIQUE (ledger_type_id, code),
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)帳戶表
