@@ -2341,6 +2341,7 @@
             "USE finance_app;",
             "SET NAMES utf8mb4;",
             "SET FOREIGN_KEY_CHECKS = 0;",
+            "DELETE FROM files WHERE entity_type_id = ( SELECT id FROM entity_types WHERE code='countries' );",
             "TRUNCATE TABLE country_languages;",
             "TRUNCATE TABLE country_timezones;",
             "TRUNCATE TABLE currency_countries;",
