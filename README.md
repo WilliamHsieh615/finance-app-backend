@@ -1886,13 +1886,14 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
     
-    -- 大分類表
+    -- (測試中)大分類表
     CREATE TABLE category_groups (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
         category_type_id                 BIGINT        NOT NULL,                        -- 分類類型
         code                             VARCHAR(30)   NOT NULL,                        -- 大分類代號
         name                             VARCHAR(50)   NOT NULL,                        -- 大分類名稱
+        icon_id                          BIGINT        NULL,
 
         is_system                        BOOLEAN       NOT NULL DEFAULT FALSE,
         is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
@@ -1904,15 +1905,17 @@
         UNIQUE(ledger_id, name),
         
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (category_type_id) REFERENCES category_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (category_type_id) REFERENCES category_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
-    -- 小分類表
+    -- (測試中)小分類表
     CREATE TABLE categories (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         category_group_id                BIGINT        NOT NULL,		                -- (對應大分類)
         code                             VARCHAR(30)   NOT NULL,                        -- 小分類代號
         name                             VARCHAR(50)   NOT NULL,                        -- 小分類名稱
+        icon_id                          BIGINT        NULL,
         is_system                        BOOLEAN       NOT NULL DEFAULT FALSE,
         is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
@@ -1920,7 +1923,8 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(category_group_id, name),
         INDEX(category_group_id),
-        FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 商店類型表
