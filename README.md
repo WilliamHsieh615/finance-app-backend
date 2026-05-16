@@ -2357,13 +2357,56 @@
             iso2 = c.get('iso2')
             if not iso2: continue
 
+            flag_path = f"/flags/{iso2.lower()}.png"
+
+            # --- 1. 處理國旗 ---
+            sql_statements.append(
+                f"""
+            INSERT INTO files (
+                user_id,
+                resource_provider_id,
+                storage_provider_id,
+                entity_type_id,
+                entity_id,
+                file_role_id,
+                original_name,
+                storage_key,
+                file_path,
+                file_type_id,
+                is_public,
+                is_system,
+                is_active,
+                created_date,
+                updated_date
+            )
+            SELECT
+                NULL,
+                (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+                (SELECT id FROM storage_providers WHERE code='LOCAL' LIMIT 1),
+                (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+                c.id,
+                (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+                '{iso2.lower()}.png',
+                'flags/{iso2.lower()}.png',
+                '{flag_path}',
+                (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+                TRUE,
+                TRUE,
+                TRUE,
+                NOW(),
+                NOW()
+            FROM countries c
+            WHERE c.iso2 = '{iso2}';
+            """
+            )
+
             # --- 1. 處理國家 ---
             native_name = c.get('native') or c.get('name')
             sql_statements.append(
-                f"INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) "
+                f"INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) "
                 f"VALUES ({format_sql_value(iso2)}, {format_sql_value(c.get('iso3'))}, {format_sql_value(c.get('numeric_code'))}, "
                 f"{format_sql_value(c.get('phone_code'))}, {format_sql_value(c.get('name'))}, "
-                f"{format_sql_value(native_name)}, 'https://flagcdn.com/w320/{iso2.lower()}.png', NOW(), NOW());"
+                f"{format_sql_value(native_name)}, NOW(), NOW());"
             )
 
             # --- 2. 收集貨幣 ---
