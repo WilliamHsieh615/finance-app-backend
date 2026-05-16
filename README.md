@@ -104,10 +104,11 @@
     -- (測試中)圖示表
     CREATE TABLE icons (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        file_id                          BIGINT         NULL,
+        resource_provider_id             BIGINT         NOT NULL,
+        file_id                          BIGINT         NULL,                            -- 圖片型icon需要綁file_id，文字型icon不用
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼 (FOOD、INVESTMENT、HOUSE、INSURANCE)
         name                             VARCHAR(100)   NOT NULL,                        -- 名稱 (Food、Investment)
-        icon_value                       VARCHAR(255)   NULL,                            -- 圖示 (wallet、house、chart-column)                           -- 
+        icon_value                       VARCHAR(255)   NULL,                            -- 圖示 (圖片型icon此沒有值，文字型icon就有值)
         hex_color                        VARCHAR(10)    NULL,                            -- 圖示十六進位色彩碼
         background_color                 VARCHAR(10)    NULL,                            -- 背景顏色
         is_system                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否來自系統
@@ -115,6 +116,7 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
     
