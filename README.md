@@ -2,7 +2,7 @@
 
     USE finance_app;
 
-    -- 資源提供者
+    -- (測試中)資源提供者
     CREATE TABLE resource_providers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (EMOJI、LUCIDE、MATERIAL、CUSTOM_UPLOAD)
@@ -15,7 +15,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 儲存提供者
+    -- (測試中)儲存提供者
     CREATE TABLE storage_providers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
@@ -28,7 +28,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 實體類型表(用於資料表對應資料表)
+    -- (測試中)實體類型表(用於資料表對應資料表)
     CREATE TABLE entity_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 資料表代號
@@ -38,7 +38,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 檔案角色
+    -- (測試中)檔案角色
     CREATE TABLE file_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
@@ -49,7 +49,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
     
-    -- 檔案類型表
+    -- (測試中)檔案類型表
     CREATE TABLE file_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF、SVG、WEBP)
@@ -64,7 +64,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 檔案表
+    -- (測試中)檔案表
     CREATE TABLE files (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NULL,                            -- 誰上傳的檔案
@@ -100,7 +100,7 @@
         FOREIGN KEY (file_type_id) REFERENCES file_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 圖示表
+    -- (測試中)圖示表
     CREATE TABLE icons (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         file_id                          BIGINT         NULL,
