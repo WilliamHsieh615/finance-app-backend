@@ -74,7 +74,7 @@
         entity_id                        BIGINT         NOT NULL,                        -- 對應表中哪一筆資料的id
         file_role_id                     BIGINT         NOT NULL,                        -- 檔案的角色
         original_name                    VARCHAR(255)   NOT NULL,                        -- 使用者原始檔名
-        storage_key                      VARCHAR(255)   NOT NULL,                        -- 系統儲存檔名(UUID)
+        storage_key                      VARCHAR(255)   NULL,                            -- 系統儲存檔名(UUID)
         file_path                        VARCHAR(500)   NOT NULL,                        -- 檔案連結
         thumbnail_path                   VARCHAR(500)   NULL,                            -- 縮圖連結
         file_type_id                     BIGINT         NOT NULL,                        -- 檔案類型 JPG、PNG、GIF、TXT 
