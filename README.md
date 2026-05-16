@@ -2357,9 +2357,17 @@
             iso2 = c.get('iso2')
             if not iso2: continue
 
-            flag_path = f"/flags/{iso2.lower()}.png"
+            # --- 1. 處理國家 ---
+            native_name = c.get('native') or c.get('name')
+            sql_statements.append(
+                f"INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) "
+                f"VALUES ({format_sql_value(iso2)}, {format_sql_value(c.get('iso3'))}, {format_sql_value(c.get('numeric_code'))}, "
+                f"{format_sql_value(c.get('phone_code'))}, {format_sql_value(c.get('name'))}, "
+                f"{format_sql_value(native_name)}, NOW(), NOW());"
+            )
 
-            # --- 1. 處理國旗 ---
+            # --- 2. 處理國旗 ---
+            flag_url = f"https://flagcdn.com/w320/{iso2.lower()}.png"
             sql_statements.append(
                 f"""
             INSERT INTO files (
@@ -2382,13 +2390,13 @@
             SELECT
                 NULL,
                 (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
-                (SELECT id FROM storage_providers WHERE code='LOCAL' LIMIT 1),
+                (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
                 (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
                 c.id,
                 (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
                 '{iso2.lower()}.png',
-                'flags/{iso2.lower()}.png',
-                '{flag_path}',
+                NULL,
+                '{flag_url}',
                 (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
                 TRUE,
                 TRUE,
@@ -2400,16 +2408,7 @@
             """
             )
 
-            # --- 1. 處理國家 ---
-            native_name = c.get('native') or c.get('name')
-            sql_statements.append(
-                f"INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) "
-                f"VALUES ({format_sql_value(iso2)}, {format_sql_value(c.get('iso3'))}, {format_sql_value(c.get('numeric_code'))}, "
-                f"{format_sql_value(c.get('phone_code'))}, {format_sql_value(c.get('name'))}, "
-                f"{format_sql_value(native_name)}, NOW(), NOW());"
-            )
-
-            # --- 2. 收集貨幣 ---
+            # --- 3. 收集貨幣 ---
             curr_code = c.get('currency')
             if curr_code and curr_code not in seen_currencies:
                 seen_currencies[curr_code] = {
@@ -2419,7 +2418,7 @@
             if curr_code:
                 country_currency_map.append((iso2, curr_code))
 
-            # --- 3. 收集時區 ---
+            # --- 4. 收集時區 ---
             tzs = c.get('timezones', [])
             for index, tz in enumerate(tzs):
                 iana_name = tz.get('zoneName')
@@ -2434,7 +2433,7 @@
                     is_default = "TRUE" if index == 0 else "FALSE"
                     country_timezone_map.append((iso2, iana_name, is_default))
 
-            # --- 4. 收集語言 ---
+            # --- 5. 收集語言 ---
             # 處理格式可能是 "en,es,fr" 的字串
             raw_langs = c.get('languages', "")
             if isinstance(raw_langs, str):
