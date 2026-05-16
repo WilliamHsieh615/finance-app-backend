@@ -1,419 +1,9675 @@
+USE finance_app;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+DELETE FROM files WHERE entity_type_id = ( SELECT id FROM entity_types WHERE code='countries' );
+TRUNCATE TABLE country_languages;
 TRUNCATE TABLE country_timezones;
 TRUNCATE TABLE currency_countries;
+TRUNCATE TABLE languages;
 TRUNCATE TABLE timezones;
 TRUNCATE TABLE currencies;
 TRUNCATE TABLE countries;
 SET FOREIGN_KEY_CHECKS = 1;
 
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AF', 'AFG', '004', NULL, 'Afghanistan', 'افغانستان', 'https://flagcdn.com/w320/af.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AX', 'ALA', '248', NULL, 'Aland Islands', 'Åland', 'https://flagcdn.com/w320/ax.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AL', 'ALB', '008', NULL, 'Albania', 'Shqipëria', 'https://flagcdn.com/w320/al.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('DZ', 'DZA', '012', NULL, 'Algeria', 'الجزائر', 'https://flagcdn.com/w320/dz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AS', 'ASM', '016', NULL, 'American Samoa', 'American Samoa', 'https://flagcdn.com/w320/as.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AD', 'AND', '020', NULL, 'Andorra', 'Andorra', 'https://flagcdn.com/w320/ad.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AO', 'AGO', '024', NULL, 'Angola', 'Angola', 'https://flagcdn.com/w320/ao.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AI', 'AIA', '660', NULL, 'Anguilla', 'Anguilla', 'https://flagcdn.com/w320/ai.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AQ', 'ATA', '010', NULL, 'Antarctica', 'Antarctica', 'https://flagcdn.com/w320/aq.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AG', 'ATG', '028', NULL, 'Antigua and Barbuda', 'Antigua and Barbuda', 'https://flagcdn.com/w320/ag.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AR', 'ARG', '032', NULL, 'Argentina', 'Argentina', 'https://flagcdn.com/w320/ar.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AM', 'ARM', '051', NULL, 'Armenia', 'Հայաստան', 'https://flagcdn.com/w320/am.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AW', 'ABW', '533', NULL, 'Aruba', 'Aruba', 'https://flagcdn.com/w320/aw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AU', 'AUS', '036', NULL, 'Australia', 'Australia', 'https://flagcdn.com/w320/au.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AT', 'AUT', '040', NULL, 'Austria', 'Österreich', 'https://flagcdn.com/w320/at.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AZ', 'AZE', '031', NULL, 'Azerbaijan', 'Azərbaycan', 'https://flagcdn.com/w320/az.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BH', 'BHR', '048', NULL, 'Bahrain', '‏البحرين', 'https://flagcdn.com/w320/bh.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BD', 'BGD', '050', NULL, 'Bangladesh', 'Bangladesh', 'https://flagcdn.com/w320/bd.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BB', 'BRB', '052', NULL, 'Barbados', 'Barbados', 'https://flagcdn.com/w320/bb.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BY', 'BLR', '112', NULL, 'Belarus', 'Белару́сь', 'https://flagcdn.com/w320/by.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BE', 'BEL', '056', NULL, 'Belgium', 'België', 'https://flagcdn.com/w320/be.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BZ', 'BLZ', '084', NULL, 'Belize', 'Belize', 'https://flagcdn.com/w320/bz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BJ', 'BEN', '204', NULL, 'Benin', 'Bénin', 'https://flagcdn.com/w320/bj.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BM', 'BMU', '060', NULL, 'Bermuda', 'Bermuda', 'https://flagcdn.com/w320/bm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BT', 'BTN', '064', NULL, 'Bhutan', 'ʼbrug-yul', 'https://flagcdn.com/w320/bt.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BO', 'BOL', '068', NULL, 'Bolivia', 'Bolivia', 'https://flagcdn.com/w320/bo.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BQ', 'BES', '535', NULL, 'Bonaire, Sint Eustatius and Saba', 'Caribisch Nederland', 'https://flagcdn.com/w320/bq.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BA', 'BIH', '070', NULL, 'Bosnia and Herzegovina', 'Bosna i Hercegovina', 'https://flagcdn.com/w320/ba.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BW', 'BWA', '072', NULL, 'Botswana', 'Botswana', 'https://flagcdn.com/w320/bw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BV', 'BVT', '074', NULL, 'Bouvet Island', 'Bouvetøya', 'https://flagcdn.com/w320/bv.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BR', 'BRA', '076', NULL, 'Brazil', 'Brasil', 'https://flagcdn.com/w320/br.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IO', 'IOT', '086', NULL, 'British Indian Ocean Territory', 'British Indian Ocean Territory', 'https://flagcdn.com/w320/io.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BN', 'BRN', '096', NULL, 'Brunei', 'Negara Brunei Darussalam', 'https://flagcdn.com/w320/bn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BG', 'BGR', '100', NULL, 'Bulgaria', 'България', 'https://flagcdn.com/w320/bg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BF', 'BFA', '854', NULL, 'Burkina Faso', 'Burkina Faso', 'https://flagcdn.com/w320/bf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BI', 'BDI', '108', NULL, 'Burundi', 'Burundi', 'https://flagcdn.com/w320/bi.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KH', 'KHM', '116', NULL, 'Cambodia', 'Kâmpŭchéa', 'https://flagcdn.com/w320/kh.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CM', 'CMR', '120', NULL, 'Cameroon', 'Cameroon', 'https://flagcdn.com/w320/cm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CA', 'CAN', '124', NULL, 'Canada', 'Canada', 'https://flagcdn.com/w320/ca.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CV', 'CPV', '132', NULL, 'Cape Verde', 'Cabo Verde', 'https://flagcdn.com/w320/cv.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KY', 'CYM', '136', NULL, 'Cayman Islands', 'Cayman Islands', 'https://flagcdn.com/w320/ky.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CF', 'CAF', '140', NULL, 'Central African Republic', 'Ködörösêse tî Bêafrîka', 'https://flagcdn.com/w320/cf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TD', 'TCD', '148', NULL, 'Chad', 'Tchad', 'https://flagcdn.com/w320/td.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CL', 'CHL', '152', NULL, 'Chile', 'Chile', 'https://flagcdn.com/w320/cl.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CN', 'CHN', '156', NULL, 'China', '中国', 'https://flagcdn.com/w320/cn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CX', 'CXR', '162', NULL, 'Christmas Island', 'Christmas Island', 'https://flagcdn.com/w320/cx.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CC', 'CCK', '166', NULL, 'Cocos (Keeling) Islands', 'Cocos (Keeling) Islands', 'https://flagcdn.com/w320/cc.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CO', 'COL', '170', NULL, 'Colombia', 'Colombia', 'https://flagcdn.com/w320/co.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KM', 'COM', '174', NULL, 'Comoros', 'Komori', 'https://flagcdn.com/w320/km.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CG', 'COG', '178', NULL, 'Congo', 'République du Congo', 'https://flagcdn.com/w320/cg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CK', 'COK', '184', NULL, 'Cook Islands', 'Cook Islands', 'https://flagcdn.com/w320/ck.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CR', 'CRI', '188', NULL, 'Costa Rica', 'Costa Rica', 'https://flagcdn.com/w320/cr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('HR', 'HRV', '191', NULL, 'Croatia', 'Hrvatska', 'https://flagcdn.com/w320/hr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CU', 'CUB', '192', NULL, 'Cuba', 'Cuba', 'https://flagcdn.com/w320/cu.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CW', 'CUW', '531', NULL, 'Curaçao', 'Curaçao', 'https://flagcdn.com/w320/cw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CY', 'CYP', '196', NULL, 'Cyprus', 'Κύπρος', 'https://flagcdn.com/w320/cy.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CZ', 'CZE', '203', NULL, 'Czech Republic', 'Česká republika', 'https://flagcdn.com/w320/cz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CD', 'COD', '180', NULL, 'Democratic Republic of the Congo', 'République démocratique du Congo', 'https://flagcdn.com/w320/cd.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('DK', 'DNK', '208', NULL, 'Denmark', 'Danmark', 'https://flagcdn.com/w320/dk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('DJ', 'DJI', '262', NULL, 'Djibouti', 'Djibouti', 'https://flagcdn.com/w320/dj.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('DM', 'DMA', '212', NULL, 'Dominica', 'Dominica', 'https://flagcdn.com/w320/dm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('DO', 'DOM', '214', NULL, 'Dominican Republic', 'República Dominicana', 'https://flagcdn.com/w320/do.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('EC', 'ECU', '218', NULL, 'Ecuador', 'Ecuador', 'https://flagcdn.com/w320/ec.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('EG', 'EGY', '818', NULL, 'Egypt', 'مصر‎', 'https://flagcdn.com/w320/eg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SV', 'SLV', '222', NULL, 'El Salvador', 'El Salvador', 'https://flagcdn.com/w320/sv.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GQ', 'GNQ', '226', NULL, 'Equatorial Guinea', 'Guinea Ecuatorial', 'https://flagcdn.com/w320/gq.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ER', 'ERI', '232', NULL, 'Eritrea', 'ኤርትራ', 'https://flagcdn.com/w320/er.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('EE', 'EST', '233', NULL, 'Estonia', 'Eesti', 'https://flagcdn.com/w320/ee.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SZ', 'SWZ', '748', NULL, 'Eswatini', 'Swaziland', 'https://flagcdn.com/w320/sz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ET', 'ETH', '231', NULL, 'Ethiopia', 'ኢትዮጵያ', 'https://flagcdn.com/w320/et.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('FK', 'FLK', '238', NULL, 'Falkland Islands', 'Falkland Islands', 'https://flagcdn.com/w320/fk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('FO', 'FRO', '234', NULL, 'Faroe Islands', 'Føroyar', 'https://flagcdn.com/w320/fo.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('FJ', 'FJI', '242', NULL, 'Fiji Islands', 'Fiji', 'https://flagcdn.com/w320/fj.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('FI', 'FIN', '246', NULL, 'Finland', 'Suomi', 'https://flagcdn.com/w320/fi.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('FR', 'FRA', '250', NULL, 'France', 'France', 'https://flagcdn.com/w320/fr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GF', 'GUF', '254', NULL, 'French Guiana', 'Guyane française', 'https://flagcdn.com/w320/gf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PF', 'PYF', '258', NULL, 'French Polynesia', 'Polynésie française', 'https://flagcdn.com/w320/pf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TF', 'ATF', '260', NULL, 'French Southern Territories', 'Territoire des Terres australes et antarctiques fr', 'https://flagcdn.com/w320/tf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GA', 'GAB', '266', NULL, 'Gabon', 'Gabon', 'https://flagcdn.com/w320/ga.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GE', 'GEO', '268', NULL, 'Georgia', 'საქართველო', 'https://flagcdn.com/w320/ge.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('DE', 'DEU', '276', NULL, 'Germany', 'Deutschland', 'https://flagcdn.com/w320/de.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GH', 'GHA', '288', NULL, 'Ghana', 'Ghana', 'https://flagcdn.com/w320/gh.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GI', 'GIB', '292', NULL, 'Gibraltar', 'Gibraltar', 'https://flagcdn.com/w320/gi.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GR', 'GRC', '300', NULL, 'Greece', 'Ελλάδα', 'https://flagcdn.com/w320/gr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GL', 'GRL', '304', NULL, 'Greenland', 'Kalaallit Nunaat', 'https://flagcdn.com/w320/gl.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GD', 'GRD', '308', NULL, 'Grenada', 'Grenada', 'https://flagcdn.com/w320/gd.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GP', 'GLP', '312', NULL, 'Guadeloupe', 'Guadeloupe', 'https://flagcdn.com/w320/gp.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GU', 'GUM', '316', NULL, 'Guam', 'Guam', 'https://flagcdn.com/w320/gu.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GT', 'GTM', '320', NULL, 'Guatemala', 'Guatemala', 'https://flagcdn.com/w320/gt.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GG', 'GGY', '831', NULL, 'Guernsey', 'Guernsey', 'https://flagcdn.com/w320/gg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GN', 'GIN', '324', NULL, 'Guinea', 'Guinée', 'https://flagcdn.com/w320/gn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GW', 'GNB', '624', NULL, 'Guinea-Bissau', 'Guiné-Bissau', 'https://flagcdn.com/w320/gw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GY', 'GUY', '328', NULL, 'Guyana', 'Guyana', 'https://flagcdn.com/w320/gy.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('HT', 'HTI', '332', NULL, 'Haiti', 'Haïti', 'https://flagcdn.com/w320/ht.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('HM', 'HMD', '334', NULL, 'Heard Island and McDonald Islands', 'Heard Island and McDonald Islands', 'https://flagcdn.com/w320/hm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('HN', 'HND', '340', NULL, 'Honduras', 'Honduras', 'https://flagcdn.com/w320/hn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('HK', 'HKG', '344', NULL, 'Hong Kong S.A.R.', '香港', 'https://flagcdn.com/w320/hk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('HU', 'HUN', '348', NULL, 'Hungary', 'Magyarország', 'https://flagcdn.com/w320/hu.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IS', 'ISL', '352', NULL, 'Iceland', 'Ísland', 'https://flagcdn.com/w320/is.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IN', 'IND', '356', NULL, 'India', 'भारत', 'https://flagcdn.com/w320/in.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ID', 'IDN', '360', NULL, 'Indonesia', 'Indonesia', 'https://flagcdn.com/w320/id.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IR', 'IRN', '364', NULL, 'Iran', 'ایران', 'https://flagcdn.com/w320/ir.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IQ', 'IRQ', '368', NULL, 'Iraq', 'العراق', 'https://flagcdn.com/w320/iq.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IE', 'IRL', '372', NULL, 'Ireland', 'Éire', 'https://flagcdn.com/w320/ie.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IL', 'ISR', '376', NULL, 'Israel', 'יִשְׂרָאֵל', 'https://flagcdn.com/w320/il.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IT', 'ITA', '380', NULL, 'Italy', 'Italia', 'https://flagcdn.com/w320/it.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CI', 'CIV', '384', NULL, 'Ivory Coast', 'Cote D''Ivoire', 'https://flagcdn.com/w320/ci.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('JM', 'JAM', '388', NULL, 'Jamaica', 'Jamaica', 'https://flagcdn.com/w320/jm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('JP', 'JPN', '392', NULL, 'Japan', '日本', 'https://flagcdn.com/w320/jp.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('JE', 'JEY', '832', NULL, 'Jersey', 'Jersey', 'https://flagcdn.com/w320/je.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('JO', 'JOR', '400', NULL, 'Jordan', 'الأردن', 'https://flagcdn.com/w320/jo.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KZ', 'KAZ', '398', NULL, 'Kazakhstan', 'Қазақстан', 'https://flagcdn.com/w320/kz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KE', 'KEN', '404', NULL, 'Kenya', 'Kenya', 'https://flagcdn.com/w320/ke.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KI', 'KIR', '296', NULL, 'Kiribati', 'Kiribati', 'https://flagcdn.com/w320/ki.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('XK', 'XKX', '926', NULL, 'Kosovo', 'Republika e Kosovës', 'https://flagcdn.com/w320/xk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KW', 'KWT', '414', NULL, 'Kuwait', 'الكويت', 'https://flagcdn.com/w320/kw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KG', 'KGZ', '417', NULL, 'Kyrgyzstan', 'Кыргызстан', 'https://flagcdn.com/w320/kg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LA', 'LAO', '418', NULL, 'Laos', 'ສປປລາວ', 'https://flagcdn.com/w320/la.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LV', 'LVA', '428', NULL, 'Latvia', 'Latvija', 'https://flagcdn.com/w320/lv.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LB', 'LBN', '422', NULL, 'Lebanon', 'لبنان', 'https://flagcdn.com/w320/lb.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LS', 'LSO', '426', NULL, 'Lesotho', 'Lesotho', 'https://flagcdn.com/w320/ls.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LR', 'LBR', '430', NULL, 'Liberia', 'Liberia', 'https://flagcdn.com/w320/lr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LY', 'LBY', '434', NULL, 'Libya', '‏ليبيا', 'https://flagcdn.com/w320/ly.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LI', 'LIE', '438', NULL, 'Liechtenstein', 'Liechtenstein', 'https://flagcdn.com/w320/li.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LT', 'LTU', '440', NULL, 'Lithuania', 'Lietuva', 'https://flagcdn.com/w320/lt.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LU', 'LUX', '442', NULL, 'Luxembourg', 'Luxembourg', 'https://flagcdn.com/w320/lu.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MO', 'MAC', '446', NULL, 'Macau S.A.R.', '澳門', 'https://flagcdn.com/w320/mo.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MG', 'MDG', '450', NULL, 'Madagascar', 'Madagasikara', 'https://flagcdn.com/w320/mg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MW', 'MWI', '454', NULL, 'Malawi', 'Malawi', 'https://flagcdn.com/w320/mw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MY', 'MYS', '458', NULL, 'Malaysia', 'Malaysia', 'https://flagcdn.com/w320/my.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MV', 'MDV', '462', NULL, 'Maldives', 'Maldives', 'https://flagcdn.com/w320/mv.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ML', 'MLI', '466', NULL, 'Mali', 'Mali', 'https://flagcdn.com/w320/ml.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MT', 'MLT', '470', NULL, 'Malta', 'Malta', 'https://flagcdn.com/w320/mt.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('IM', 'IMN', '833', NULL, 'Man (Isle of)', 'Isle of Man', 'https://flagcdn.com/w320/im.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MH', 'MHL', '584', NULL, 'Marshall Islands', 'M̧ajeļ', 'https://flagcdn.com/w320/mh.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MQ', 'MTQ', '474', NULL, 'Martinique', 'Martinique', 'https://flagcdn.com/w320/mq.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MR', 'MRT', '478', NULL, 'Mauritania', 'موريتانيا', 'https://flagcdn.com/w320/mr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MU', 'MUS', '480', NULL, 'Mauritius', 'Maurice', 'https://flagcdn.com/w320/mu.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('YT', 'MYT', '175', NULL, 'Mayotte', 'Mayotte', 'https://flagcdn.com/w320/yt.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MX', 'MEX', '484', NULL, 'Mexico', 'México', 'https://flagcdn.com/w320/mx.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('FM', 'FSM', '583', NULL, 'Micronesia', 'Micronesia', 'https://flagcdn.com/w320/fm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MD', 'MDA', '498', NULL, 'Moldova', 'Moldova', 'https://flagcdn.com/w320/md.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MC', 'MCO', '492', NULL, 'Monaco', 'Monaco', 'https://flagcdn.com/w320/mc.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MN', 'MNG', '496', NULL, 'Mongolia', 'Монгол улс', 'https://flagcdn.com/w320/mn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ME', 'MNE', '499', NULL, 'Montenegro', 'Црна Гора', 'https://flagcdn.com/w320/me.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MS', 'MSR', '500', NULL, 'Montserrat', 'Montserrat', 'https://flagcdn.com/w320/ms.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MA', 'MAR', '504', NULL, 'Morocco', 'المغرب', 'https://flagcdn.com/w320/ma.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MZ', 'MOZ', '508', NULL, 'Mozambique', 'Moçambique', 'https://flagcdn.com/w320/mz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MM', 'MMR', '104', NULL, 'Myanmar', 'မြန်မာ', 'https://flagcdn.com/w320/mm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NA', 'NAM', '516', NULL, 'Namibia', 'Namibia', 'https://flagcdn.com/w320/na.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NR', 'NRU', '520', NULL, 'Nauru', 'Nauru', 'https://flagcdn.com/w320/nr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NP', 'NPL', '524', NULL, 'Nepal', 'नेपाल', 'https://flagcdn.com/w320/np.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NL', 'NLD', '528', NULL, 'Netherlands', 'Nederland', 'https://flagcdn.com/w320/nl.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NC', 'NCL', '540', NULL, 'New Caledonia', 'Nouvelle-Calédonie', 'https://flagcdn.com/w320/nc.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NZ', 'NZL', '554', NULL, 'New Zealand', 'New Zealand', 'https://flagcdn.com/w320/nz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NI', 'NIC', '558', NULL, 'Nicaragua', 'Nicaragua', 'https://flagcdn.com/w320/ni.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NE', 'NER', '562', NULL, 'Niger', 'Niger', 'https://flagcdn.com/w320/ne.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NG', 'NGA', '566', NULL, 'Nigeria', 'Nigeria', 'https://flagcdn.com/w320/ng.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NU', 'NIU', '570', NULL, 'Niue', 'Niuē', 'https://flagcdn.com/w320/nu.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NF', 'NFK', '574', NULL, 'Norfolk Island', 'Norfolk Island', 'https://flagcdn.com/w320/nf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KP', 'PRK', '408', NULL, 'North Korea', '북한', 'https://flagcdn.com/w320/kp.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MK', 'MKD', '807', NULL, 'North Macedonia', 'Северна Македонија', 'https://flagcdn.com/w320/mk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MP', 'MNP', '580', NULL, 'Northern Mariana Islands', 'Northern Mariana Islands', 'https://flagcdn.com/w320/mp.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('NO', 'NOR', '578', NULL, 'Norway', 'Norge', 'https://flagcdn.com/w320/no.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('OM', 'OMN', '512', NULL, 'Oman', 'عمان', 'https://flagcdn.com/w320/om.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PK', 'PAK', '586', NULL, 'Pakistan', 'پاکستان', 'https://flagcdn.com/w320/pk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PW', 'PLW', '585', NULL, 'Palau', 'Palau', 'https://flagcdn.com/w320/pw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PS', 'PSE', '275', NULL, 'Palestinian Territory Occupied', 'فلسطين', 'https://flagcdn.com/w320/ps.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PA', 'PAN', '591', NULL, 'Panama', 'Panamá', 'https://flagcdn.com/w320/pa.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PG', 'PNG', '598', NULL, 'Papua New Guinea', 'Papua Niugini', 'https://flagcdn.com/w320/pg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PY', 'PRY', '600', NULL, 'Paraguay', 'Paraguay', 'https://flagcdn.com/w320/py.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PE', 'PER', '604', NULL, 'Peru', 'Perú', 'https://flagcdn.com/w320/pe.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PH', 'PHL', '608', NULL, 'Philippines', 'Pilipinas', 'https://flagcdn.com/w320/ph.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PN', 'PCN', '612', NULL, 'Pitcairn Island', 'Pitcairn Islands', 'https://flagcdn.com/w320/pn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PL', 'POL', '616', NULL, 'Poland', 'Polska', 'https://flagcdn.com/w320/pl.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PT', 'PRT', '620', NULL, 'Portugal', 'Portugal', 'https://flagcdn.com/w320/pt.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PR', 'PRI', '630', NULL, 'Puerto Rico', 'Puerto Rico', 'https://flagcdn.com/w320/pr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('QA', 'QAT', '634', NULL, 'Qatar', 'قطر', 'https://flagcdn.com/w320/qa.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('RE', 'REU', '638', NULL, 'Reunion', 'La Réunion', 'https://flagcdn.com/w320/re.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('RO', 'ROU', '642', NULL, 'Romania', 'România', 'https://flagcdn.com/w320/ro.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('RU', 'RUS', '643', NULL, 'Russia', 'Россия', 'https://flagcdn.com/w320/ru.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('RW', 'RWA', '646', NULL, 'Rwanda', 'Rwanda', 'https://flagcdn.com/w320/rw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SH', 'SHN', '654', NULL, 'Saint Helena', 'Saint Helena', 'https://flagcdn.com/w320/sh.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KN', 'KNA', '659', NULL, 'Saint Kitts and Nevis', 'Saint Kitts and Nevis', 'https://flagcdn.com/w320/kn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LC', 'LCA', '662', NULL, 'Saint Lucia', 'Saint Lucia', 'https://flagcdn.com/w320/lc.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('PM', 'SPM', '666', NULL, 'Saint Pierre and Miquelon', 'Saint-Pierre-et-Miquelon', 'https://flagcdn.com/w320/pm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('VC', 'VCT', '670', NULL, 'Saint Vincent and the Grenadines', 'Saint Vincent and the Grenadines', 'https://flagcdn.com/w320/vc.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BL', 'BLM', '652', NULL, 'Saint-Barthelemy', 'Saint-Barthélemy', 'https://flagcdn.com/w320/bl.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('MF', 'MAF', '663', NULL, 'Saint-Martin (French part)', 'Saint-Martin', 'https://flagcdn.com/w320/mf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('WS', 'WSM', '882', NULL, 'Samoa', 'Samoa', 'https://flagcdn.com/w320/ws.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SM', 'SMR', '674', NULL, 'San Marino', 'San Marino', 'https://flagcdn.com/w320/sm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ST', 'STP', '678', NULL, 'Sao Tome and Principe', 'São Tomé e Príncipe', 'https://flagcdn.com/w320/st.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SA', 'SAU', '682', NULL, 'Saudi Arabia', 'المملكة العربية السعودية', 'https://flagcdn.com/w320/sa.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SN', 'SEN', '686', NULL, 'Senegal', 'Sénégal', 'https://flagcdn.com/w320/sn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('RS', 'SRB', '688', NULL, 'Serbia', 'Србија', 'https://flagcdn.com/w320/rs.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SC', 'SYC', '690', NULL, 'Seychelles', 'Seychelles', 'https://flagcdn.com/w320/sc.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SL', 'SLE', '694', NULL, 'Sierra Leone', 'Sierra Leone', 'https://flagcdn.com/w320/sl.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SG', 'SGP', '702', NULL, 'Singapore', 'Singapore', 'https://flagcdn.com/w320/sg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SX', 'SXM', '534', NULL, 'Sint Maarten (Dutch part)', 'Sint Maarten', 'https://flagcdn.com/w320/sx.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SK', 'SVK', '703', NULL, 'Slovakia', 'Slovensko', 'https://flagcdn.com/w320/sk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SI', 'SVN', '705', NULL, 'Slovenia', 'Slovenija', 'https://flagcdn.com/w320/si.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SB', 'SLB', '090', NULL, 'Solomon Islands', 'Solomon Islands', 'https://flagcdn.com/w320/sb.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SO', 'SOM', '706', NULL, 'Somalia', 'Soomaaliya', 'https://flagcdn.com/w320/so.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ZA', 'ZAF', '710', NULL, 'South Africa', 'South Africa', 'https://flagcdn.com/w320/za.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GS', 'SGS', '239', NULL, 'South Georgia', 'South Georgia', 'https://flagcdn.com/w320/gs.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('KR', 'KOR', '410', NULL, 'South Korea', '대한민국', 'https://flagcdn.com/w320/kr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SS', 'SSD', '728', NULL, 'South Sudan', 'South Sudan', 'https://flagcdn.com/w320/ss.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ES', 'ESP', '724', NULL, 'Spain', 'España', 'https://flagcdn.com/w320/es.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('LK', 'LKA', '144', NULL, 'Sri Lanka', 'śrī laṃkāva', 'https://flagcdn.com/w320/lk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SD', 'SDN', '729', NULL, 'Sudan', 'السودان', 'https://flagcdn.com/w320/sd.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SR', 'SUR', '740', NULL, 'Suriname', 'Suriname', 'https://flagcdn.com/w320/sr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SJ', 'SJM', '744', NULL, 'Svalbard and Jan Mayen Islands', 'Svalbard og Jan Mayen', 'https://flagcdn.com/w320/sj.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SE', 'SWE', '752', NULL, 'Sweden', 'Sverige', 'https://flagcdn.com/w320/se.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('CH', 'CHE', '756', NULL, 'Switzerland', 'Schweiz', 'https://flagcdn.com/w320/ch.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('SY', 'SYR', '760', NULL, 'Syria', 'سوريا', 'https://flagcdn.com/w320/sy.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TW', 'TWN', '158', NULL, 'Taiwan', '臺灣', 'https://flagcdn.com/w320/tw.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TJ', 'TJK', '762', NULL, 'Tajikistan', 'Тоҷикистон', 'https://flagcdn.com/w320/tj.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TZ', 'TZA', '834', NULL, 'Tanzania', 'Tanzania', 'https://flagcdn.com/w320/tz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TH', 'THA', '764', NULL, 'Thailand', 'ประเทศไทย', 'https://flagcdn.com/w320/th.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('BS', 'BHS', '044', NULL, 'The Bahamas', 'Bahamas', 'https://flagcdn.com/w320/bs.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GM', 'GMB', '270', NULL, 'The Gambia', 'Gambia', 'https://flagcdn.com/w320/gm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TL', 'TLS', '626', NULL, 'Timor-Leste', 'Timor-Leste', 'https://flagcdn.com/w320/tl.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TG', 'TGO', '768', NULL, 'Togo', 'Togo', 'https://flagcdn.com/w320/tg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TK', 'TKL', '772', NULL, 'Tokelau', 'Tokelau', 'https://flagcdn.com/w320/tk.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TO', 'TON', '776', NULL, 'Tonga', 'Tonga', 'https://flagcdn.com/w320/to.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TT', 'TTO', '780', NULL, 'Trinidad and Tobago', 'Trinidad and Tobago', 'https://flagcdn.com/w320/tt.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TN', 'TUN', '788', NULL, 'Tunisia', 'تونس', 'https://flagcdn.com/w320/tn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TR', 'TUR', '792', NULL, 'Turkey', 'Türkiye', 'https://flagcdn.com/w320/tr.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TM', 'TKM', '795', NULL, 'Turkmenistan', 'Türkmenistan', 'https://flagcdn.com/w320/tm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TC', 'TCA', '796', NULL, 'Turks and Caicos Islands', 'Turks and Caicos Islands', 'https://flagcdn.com/w320/tc.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('TV', 'TUV', '798', NULL, 'Tuvalu', 'Tuvalu', 'https://flagcdn.com/w320/tv.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('UG', 'UGA', '800', NULL, 'Uganda', 'Uganda', 'https://flagcdn.com/w320/ug.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('UA', 'UKR', '804', NULL, 'Ukraine', 'Україна', 'https://flagcdn.com/w320/ua.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('AE', 'ARE', '784', NULL, 'United Arab Emirates', 'دولة الإمارات العربية المتحدة', 'https://flagcdn.com/w320/ae.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('GB', 'GBR', '826', NULL, 'United Kingdom', 'United Kingdom', 'https://flagcdn.com/w320/gb.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('US', 'USA', '840', NULL, 'United States', 'United States', 'https://flagcdn.com/w320/us.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('UM', 'UMI', '581', NULL, 'United States Minor Outlying Islands', 'United States Minor Outlying Islands', 'https://flagcdn.com/w320/um.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('UY', 'URY', '858', NULL, 'Uruguay', 'Uruguay', 'https://flagcdn.com/w320/uy.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('UZ', 'UZB', '860', NULL, 'Uzbekistan', 'O‘zbekiston', 'https://flagcdn.com/w320/uz.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('VU', 'VUT', '548', NULL, 'Vanuatu', 'Vanuatu', 'https://flagcdn.com/w320/vu.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('VA', 'VAT', '336', NULL, 'Vatican City State (Holy See)', 'Vaticano', 'https://flagcdn.com/w320/va.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('VE', 'VEN', '862', NULL, 'Venezuela', 'Venezuela', 'https://flagcdn.com/w320/ve.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('VN', 'VNM', '704', NULL, 'Vietnam', 'Việt Nam', 'https://flagcdn.com/w320/vn.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('VG', 'VGB', '092', NULL, 'Virgin Islands (British)', 'British Virgin Islands', 'https://flagcdn.com/w320/vg.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('VI', 'VIR', '850', NULL, 'Virgin Islands (US)', 'United States Virgin Islands', 'https://flagcdn.com/w320/vi.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('WF', 'WLF', '876', NULL, 'Wallis and Futuna Islands', 'Wallis et Futuna', 'https://flagcdn.com/w320/wf.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('EH', 'ESH', '732', NULL, 'Western Sahara', 'الصحراء الغربية', 'https://flagcdn.com/w320/eh.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('YE', 'YEM', '887', NULL, 'Yemen', 'اليَمَن', 'https://flagcdn.com/w320/ye.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ZM', 'ZMB', '894', NULL, 'Zambia', 'Zambia', 'https://flagcdn.com/w320/zm.png', NOW(), NOW());
-INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, image_url, created_date, updated_date) VALUES ('ZW', 'ZWE', '716', NULL, 'Zimbabwe', 'Zimbabwe', 'https://flagcdn.com/w320/zw.png', NOW(), NOW());
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AF', 'AFG', '004', NULL, 'Afghanistan', 'افغانستان', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'af.png',
+            NULL,
+            'https://flagcdn.com/w320/af.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AX', 'ALA', '248', NULL, 'Aland Islands', 'Åland', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ax.png',
+            NULL,
+            'https://flagcdn.com/w320/ax.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AX';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AL', 'ALB', '008', NULL, 'Albania', 'Shqipëria', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'al.png',
+            NULL,
+            'https://flagcdn.com/w320/al.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('DZ', 'DZA', '012', NULL, 'Algeria', 'الجزائر', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'dz.png',
+            NULL,
+            'https://flagcdn.com/w320/dz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'DZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AS', 'ASM', '016', NULL, 'American Samoa', 'American Samoa', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'as.png',
+            NULL,
+            'https://flagcdn.com/w320/as.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AD', 'AND', '020', NULL, 'Andorra', 'Andorra', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ad.png',
+            NULL,
+            'https://flagcdn.com/w320/ad.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AD';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AO', 'AGO', '024', NULL, 'Angola', 'Angola', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ao.png',
+            NULL,
+            'https://flagcdn.com/w320/ao.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AI', 'AIA', '660', NULL, 'Anguilla', 'Anguilla', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ai.png',
+            NULL,
+            'https://flagcdn.com/w320/ai.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AQ', 'ATA', '010', NULL, 'Antarctica', 'Antarctica', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'aq.png',
+            NULL,
+            'https://flagcdn.com/w320/aq.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AQ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AG', 'ATG', '028', NULL, 'Antigua and Barbuda', 'Antigua and Barbuda', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ag.png',
+            NULL,
+            'https://flagcdn.com/w320/ag.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AR', 'ARG', '032', NULL, 'Argentina', 'Argentina', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ar.png',
+            NULL,
+            'https://flagcdn.com/w320/ar.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AM', 'ARM', '051', NULL, 'Armenia', 'Հայաստան', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'am.png',
+            NULL,
+            'https://flagcdn.com/w320/am.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AW', 'ABW', '533', NULL, 'Aruba', 'Aruba', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'aw.png',
+            NULL,
+            'https://flagcdn.com/w320/aw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AU', 'AUS', '036', NULL, 'Australia', 'Australia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'au.png',
+            NULL,
+            'https://flagcdn.com/w320/au.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AT', 'AUT', '040', NULL, 'Austria', 'Österreich', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'at.png',
+            NULL,
+            'https://flagcdn.com/w320/at.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AZ', 'AZE', '031', NULL, 'Azerbaijan', 'Azərbaycan', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'az.png',
+            NULL,
+            'https://flagcdn.com/w320/az.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BH', 'BHR', '048', NULL, 'Bahrain', '‏البحرين', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bh.png',
+            NULL,
+            'https://flagcdn.com/w320/bh.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BD', 'BGD', '050', NULL, 'Bangladesh', 'Bangladesh', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bd.png',
+            NULL,
+            'https://flagcdn.com/w320/bd.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BD';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BB', 'BRB', '052', NULL, 'Barbados', 'Barbados', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bb.png',
+            NULL,
+            'https://flagcdn.com/w320/bb.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BB';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BY', 'BLR', '112', NULL, 'Belarus', 'Белару́сь', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'by.png',
+            NULL,
+            'https://flagcdn.com/w320/by.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BE', 'BEL', '056', NULL, 'Belgium', 'België', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'be.png',
+            NULL,
+            'https://flagcdn.com/w320/be.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BZ', 'BLZ', '084', NULL, 'Belize', 'Belize', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bz.png',
+            NULL,
+            'https://flagcdn.com/w320/bz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BJ', 'BEN', '204', NULL, 'Benin', 'Bénin', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bj.png',
+            NULL,
+            'https://flagcdn.com/w320/bj.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BJ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BM', 'BMU', '060', NULL, 'Bermuda', 'Bermuda', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bm.png',
+            NULL,
+            'https://flagcdn.com/w320/bm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BT', 'BTN', '064', NULL, 'Bhutan', 'ʼbrug-yul', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bt.png',
+            NULL,
+            'https://flagcdn.com/w320/bt.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BO', 'BOL', '068', NULL, 'Bolivia', 'Bolivia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bo.png',
+            NULL,
+            'https://flagcdn.com/w320/bo.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BQ', 'BES', '535', NULL, 'Bonaire, Sint Eustatius and Saba', 'Caribisch Nederland', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bq.png',
+            NULL,
+            'https://flagcdn.com/w320/bq.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BQ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BA', 'BIH', '070', NULL, 'Bosnia and Herzegovina', 'Bosna i Hercegovina', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ba.png',
+            NULL,
+            'https://flagcdn.com/w320/ba.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BW', 'BWA', '072', NULL, 'Botswana', 'Botswana', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bw.png',
+            NULL,
+            'https://flagcdn.com/w320/bw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BV', 'BVT', '074', NULL, 'Bouvet Island', 'Bouvetøya', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bv.png',
+            NULL,
+            'https://flagcdn.com/w320/bv.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BV';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BR', 'BRA', '076', NULL, 'Brazil', 'Brasil', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'br.png',
+            NULL,
+            'https://flagcdn.com/w320/br.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IO', 'IOT', '086', NULL, 'British Indian Ocean Territory', 'British Indian Ocean Territory', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'io.png',
+            NULL,
+            'https://flagcdn.com/w320/io.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BN', 'BRN', '096', NULL, 'Brunei', 'Negara Brunei Darussalam', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bn.png',
+            NULL,
+            'https://flagcdn.com/w320/bn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BG', 'BGR', '100', NULL, 'Bulgaria', 'България', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bg.png',
+            NULL,
+            'https://flagcdn.com/w320/bg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BF', 'BFA', '854', NULL, 'Burkina Faso', 'Burkina Faso', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bf.png',
+            NULL,
+            'https://flagcdn.com/w320/bf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BI', 'BDI', '108', NULL, 'Burundi', 'Burundi', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bi.png',
+            NULL,
+            'https://flagcdn.com/w320/bi.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KH', 'KHM', '116', NULL, 'Cambodia', 'Kâmpŭchéa', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'kh.png',
+            NULL,
+            'https://flagcdn.com/w320/kh.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CM', 'CMR', '120', NULL, 'Cameroon', 'Cameroon', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cm.png',
+            NULL,
+            'https://flagcdn.com/w320/cm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CA', 'CAN', '124', NULL, 'Canada', 'Canada', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ca.png',
+            NULL,
+            'https://flagcdn.com/w320/ca.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CV', 'CPV', '132', NULL, 'Cape Verde', 'Cabo Verde', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cv.png',
+            NULL,
+            'https://flagcdn.com/w320/cv.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CV';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KY', 'CYM', '136', NULL, 'Cayman Islands', 'Cayman Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ky.png',
+            NULL,
+            'https://flagcdn.com/w320/ky.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CF', 'CAF', '140', NULL, 'Central African Republic', 'Ködörösêse tî Bêafrîka', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cf.png',
+            NULL,
+            'https://flagcdn.com/w320/cf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TD', 'TCD', '148', NULL, 'Chad', 'Tchad', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'td.png',
+            NULL,
+            'https://flagcdn.com/w320/td.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TD';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CL', 'CHL', '152', NULL, 'Chile', 'Chile', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cl.png',
+            NULL,
+            'https://flagcdn.com/w320/cl.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CN', 'CHN', '156', NULL, 'China', '中国', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cn.png',
+            NULL,
+            'https://flagcdn.com/w320/cn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CX', 'CXR', '162', NULL, 'Christmas Island', 'Christmas Island', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cx.png',
+            NULL,
+            'https://flagcdn.com/w320/cx.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CX';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CC', 'CCK', '166', NULL, 'Cocos (Keeling) Islands', 'Cocos (Keeling) Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cc.png',
+            NULL,
+            'https://flagcdn.com/w320/cc.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CO', 'COL', '170', NULL, 'Colombia', 'Colombia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'co.png',
+            NULL,
+            'https://flagcdn.com/w320/co.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KM', 'COM', '174', NULL, 'Comoros', 'Komori', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'km.png',
+            NULL,
+            'https://flagcdn.com/w320/km.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CG', 'COG', '178', NULL, 'Congo', 'République du Congo', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cg.png',
+            NULL,
+            'https://flagcdn.com/w320/cg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CK', 'COK', '184', NULL, 'Cook Islands', 'Cook Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ck.png',
+            NULL,
+            'https://flagcdn.com/w320/ck.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CR', 'CRI', '188', NULL, 'Costa Rica', 'Costa Rica', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cr.png',
+            NULL,
+            'https://flagcdn.com/w320/cr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('HR', 'HRV', '191', NULL, 'Croatia', 'Hrvatska', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'hr.png',
+            NULL,
+            'https://flagcdn.com/w320/hr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'HR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CU', 'CUB', '192', NULL, 'Cuba', 'Cuba', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cu.png',
+            NULL,
+            'https://flagcdn.com/w320/cu.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CW', 'CUW', '531', NULL, 'Curaçao', 'Curaçao', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cw.png',
+            NULL,
+            'https://flagcdn.com/w320/cw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CY', 'CYP', '196', NULL, 'Cyprus', 'Κύπρος', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cy.png',
+            NULL,
+            'https://flagcdn.com/w320/cy.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CZ', 'CZE', '203', NULL, 'Czech Republic', 'Česká republika', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cz.png',
+            NULL,
+            'https://flagcdn.com/w320/cz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CD', 'COD', '180', NULL, 'Democratic Republic of the Congo', 'République démocratique du Congo', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'cd.png',
+            NULL,
+            'https://flagcdn.com/w320/cd.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CD';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('DK', 'DNK', '208', NULL, 'Denmark', 'Danmark', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'dk.png',
+            NULL,
+            'https://flagcdn.com/w320/dk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'DK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('DJ', 'DJI', '262', NULL, 'Djibouti', 'Djibouti', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'dj.png',
+            NULL,
+            'https://flagcdn.com/w320/dj.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'DJ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('DM', 'DMA', '212', NULL, 'Dominica', 'Dominica', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'dm.png',
+            NULL,
+            'https://flagcdn.com/w320/dm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'DM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('DO', 'DOM', '214', NULL, 'Dominican Republic', 'República Dominicana', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'do.png',
+            NULL,
+            'https://flagcdn.com/w320/do.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'DO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('EC', 'ECU', '218', NULL, 'Ecuador', 'Ecuador', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ec.png',
+            NULL,
+            'https://flagcdn.com/w320/ec.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'EC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('EG', 'EGY', '818', NULL, 'Egypt', 'مصر‎', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'eg.png',
+            NULL,
+            'https://flagcdn.com/w320/eg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'EG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SV', 'SLV', '222', NULL, 'El Salvador', 'El Salvador', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sv.png',
+            NULL,
+            'https://flagcdn.com/w320/sv.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SV';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GQ', 'GNQ', '226', NULL, 'Equatorial Guinea', 'Guinea Ecuatorial', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gq.png',
+            NULL,
+            'https://flagcdn.com/w320/gq.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GQ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ER', 'ERI', '232', NULL, 'Eritrea', 'ኤርትራ', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'er.png',
+            NULL,
+            'https://flagcdn.com/w320/er.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ER';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('EE', 'EST', '233', NULL, 'Estonia', 'Eesti', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ee.png',
+            NULL,
+            'https://flagcdn.com/w320/ee.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'EE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SZ', 'SWZ', '748', NULL, 'Eswatini', 'Swaziland', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sz.png',
+            NULL,
+            'https://flagcdn.com/w320/sz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ET', 'ETH', '231', NULL, 'Ethiopia', 'ኢትዮጵያ', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'et.png',
+            NULL,
+            'https://flagcdn.com/w320/et.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ET';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('FK', 'FLK', '238', NULL, 'Falkland Islands', 'Falkland Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'fk.png',
+            NULL,
+            'https://flagcdn.com/w320/fk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'FK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('FO', 'FRO', '234', NULL, 'Faroe Islands', 'Føroyar', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'fo.png',
+            NULL,
+            'https://flagcdn.com/w320/fo.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'FO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('FJ', 'FJI', '242', NULL, 'Fiji Islands', 'Fiji', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'fj.png',
+            NULL,
+            'https://flagcdn.com/w320/fj.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'FJ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('FI', 'FIN', '246', NULL, 'Finland', 'Suomi', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'fi.png',
+            NULL,
+            'https://flagcdn.com/w320/fi.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'FI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('FR', 'FRA', '250', NULL, 'France', 'France', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'fr.png',
+            NULL,
+            'https://flagcdn.com/w320/fr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'FR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GF', 'GUF', '254', NULL, 'French Guiana', 'Guyane française', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gf.png',
+            NULL,
+            'https://flagcdn.com/w320/gf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PF', 'PYF', '258', NULL, 'French Polynesia', 'Polynésie française', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pf.png',
+            NULL,
+            'https://flagcdn.com/w320/pf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TF', 'ATF', '260', NULL, 'French Southern Territories', 'Territoire des Terres australes et antarctiques fr', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tf.png',
+            NULL,
+            'https://flagcdn.com/w320/tf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GA', 'GAB', '266', NULL, 'Gabon', 'Gabon', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ga.png',
+            NULL,
+            'https://flagcdn.com/w320/ga.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GE', 'GEO', '268', NULL, 'Georgia', 'საქართველო', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ge.png',
+            NULL,
+            'https://flagcdn.com/w320/ge.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('DE', 'DEU', '276', NULL, 'Germany', 'Deutschland', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'de.png',
+            NULL,
+            'https://flagcdn.com/w320/de.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'DE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GH', 'GHA', '288', NULL, 'Ghana', 'Ghana', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gh.png',
+            NULL,
+            'https://flagcdn.com/w320/gh.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GI', 'GIB', '292', NULL, 'Gibraltar', 'Gibraltar', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gi.png',
+            NULL,
+            'https://flagcdn.com/w320/gi.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GR', 'GRC', '300', NULL, 'Greece', 'Ελλάδα', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gr.png',
+            NULL,
+            'https://flagcdn.com/w320/gr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GL', 'GRL', '304', NULL, 'Greenland', 'Kalaallit Nunaat', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gl.png',
+            NULL,
+            'https://flagcdn.com/w320/gl.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GD', 'GRD', '308', NULL, 'Grenada', 'Grenada', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gd.png',
+            NULL,
+            'https://flagcdn.com/w320/gd.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GD';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GP', 'GLP', '312', NULL, 'Guadeloupe', 'Guadeloupe', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gp.png',
+            NULL,
+            'https://flagcdn.com/w320/gp.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GP';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GU', 'GUM', '316', NULL, 'Guam', 'Guam', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gu.png',
+            NULL,
+            'https://flagcdn.com/w320/gu.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GT', 'GTM', '320', NULL, 'Guatemala', 'Guatemala', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gt.png',
+            NULL,
+            'https://flagcdn.com/w320/gt.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GG', 'GGY', '831', NULL, 'Guernsey', 'Guernsey', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gg.png',
+            NULL,
+            'https://flagcdn.com/w320/gg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GN', 'GIN', '324', NULL, 'Guinea', 'Guinée', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gn.png',
+            NULL,
+            'https://flagcdn.com/w320/gn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GW', 'GNB', '624', NULL, 'Guinea-Bissau', 'Guiné-Bissau', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gw.png',
+            NULL,
+            'https://flagcdn.com/w320/gw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GY', 'GUY', '328', NULL, 'Guyana', 'Guyana', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gy.png',
+            NULL,
+            'https://flagcdn.com/w320/gy.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('HT', 'HTI', '332', NULL, 'Haiti', 'Haïti', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ht.png',
+            NULL,
+            'https://flagcdn.com/w320/ht.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'HT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('HM', 'HMD', '334', NULL, 'Heard Island and McDonald Islands', 'Heard Island and McDonald Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'hm.png',
+            NULL,
+            'https://flagcdn.com/w320/hm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'HM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('HN', 'HND', '340', NULL, 'Honduras', 'Honduras', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'hn.png',
+            NULL,
+            'https://flagcdn.com/w320/hn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'HN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('HK', 'HKG', '344', NULL, 'Hong Kong S.A.R.', '香港', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'hk.png',
+            NULL,
+            'https://flagcdn.com/w320/hk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'HK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('HU', 'HUN', '348', NULL, 'Hungary', 'Magyarország', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'hu.png',
+            NULL,
+            'https://flagcdn.com/w320/hu.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'HU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IS', 'ISL', '352', NULL, 'Iceland', 'Ísland', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'is.png',
+            NULL,
+            'https://flagcdn.com/w320/is.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IN', 'IND', '356', NULL, 'India', 'भारत', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'in.png',
+            NULL,
+            'https://flagcdn.com/w320/in.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ID', 'IDN', '360', NULL, 'Indonesia', 'Indonesia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'id.png',
+            NULL,
+            'https://flagcdn.com/w320/id.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ID';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IR', 'IRN', '364', NULL, 'Iran', 'ایران', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ir.png',
+            NULL,
+            'https://flagcdn.com/w320/ir.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IQ', 'IRQ', '368', NULL, 'Iraq', 'العراق', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'iq.png',
+            NULL,
+            'https://flagcdn.com/w320/iq.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IQ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IE', 'IRL', '372', NULL, 'Ireland', 'Éire', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ie.png',
+            NULL,
+            'https://flagcdn.com/w320/ie.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IL', 'ISR', '376', NULL, 'Israel', 'יִשְׂרָאֵל', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'il.png',
+            NULL,
+            'https://flagcdn.com/w320/il.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IT', 'ITA', '380', NULL, 'Italy', 'Italia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'it.png',
+            NULL,
+            'https://flagcdn.com/w320/it.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CI', 'CIV', '384', NULL, 'Ivory Coast', 'Cote D''Ivoire', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ci.png',
+            NULL,
+            'https://flagcdn.com/w320/ci.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('JM', 'JAM', '388', NULL, 'Jamaica', 'Jamaica', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'jm.png',
+            NULL,
+            'https://flagcdn.com/w320/jm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'JM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('JP', 'JPN', '392', NULL, 'Japan', '日本', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'jp.png',
+            NULL,
+            'https://flagcdn.com/w320/jp.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'JP';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('JE', 'JEY', '832', NULL, 'Jersey', 'Jersey', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'je.png',
+            NULL,
+            'https://flagcdn.com/w320/je.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'JE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('JO', 'JOR', '400', NULL, 'Jordan', 'الأردن', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'jo.png',
+            NULL,
+            'https://flagcdn.com/w320/jo.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'JO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KZ', 'KAZ', '398', NULL, 'Kazakhstan', 'Қазақстан', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'kz.png',
+            NULL,
+            'https://flagcdn.com/w320/kz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KE', 'KEN', '404', NULL, 'Kenya', 'Kenya', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ke.png',
+            NULL,
+            'https://flagcdn.com/w320/ke.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KI', 'KIR', '296', NULL, 'Kiribati', 'Kiribati', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ki.png',
+            NULL,
+            'https://flagcdn.com/w320/ki.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('XK', 'XKX', '926', NULL, 'Kosovo', 'Republika e Kosovës', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'xk.png',
+            NULL,
+            'https://flagcdn.com/w320/xk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'XK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KW', 'KWT', '414', NULL, 'Kuwait', 'الكويت', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'kw.png',
+            NULL,
+            'https://flagcdn.com/w320/kw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KG', 'KGZ', '417', NULL, 'Kyrgyzstan', 'Кыргызстан', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'kg.png',
+            NULL,
+            'https://flagcdn.com/w320/kg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LA', 'LAO', '418', NULL, 'Laos', 'ສປປລາວ', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'la.png',
+            NULL,
+            'https://flagcdn.com/w320/la.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LV', 'LVA', '428', NULL, 'Latvia', 'Latvija', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'lv.png',
+            NULL,
+            'https://flagcdn.com/w320/lv.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LV';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LB', 'LBN', '422', NULL, 'Lebanon', 'لبنان', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'lb.png',
+            NULL,
+            'https://flagcdn.com/w320/lb.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LB';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LS', 'LSO', '426', NULL, 'Lesotho', 'Lesotho', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ls.png',
+            NULL,
+            'https://flagcdn.com/w320/ls.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LR', 'LBR', '430', NULL, 'Liberia', 'Liberia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'lr.png',
+            NULL,
+            'https://flagcdn.com/w320/lr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LY', 'LBY', '434', NULL, 'Libya', '‏ليبيا', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ly.png',
+            NULL,
+            'https://flagcdn.com/w320/ly.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LI', 'LIE', '438', NULL, 'Liechtenstein', 'Liechtenstein', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'li.png',
+            NULL,
+            'https://flagcdn.com/w320/li.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LT', 'LTU', '440', NULL, 'Lithuania', 'Lietuva', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'lt.png',
+            NULL,
+            'https://flagcdn.com/w320/lt.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LU', 'LUX', '442', NULL, 'Luxembourg', 'Luxembourg', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'lu.png',
+            NULL,
+            'https://flagcdn.com/w320/lu.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MO', 'MAC', '446', NULL, 'Macau S.A.R.', '澳門', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mo.png',
+            NULL,
+            'https://flagcdn.com/w320/mo.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MG', 'MDG', '450', NULL, 'Madagascar', 'Madagasikara', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mg.png',
+            NULL,
+            'https://flagcdn.com/w320/mg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MW', 'MWI', '454', NULL, 'Malawi', 'Malawi', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mw.png',
+            NULL,
+            'https://flagcdn.com/w320/mw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MY', 'MYS', '458', NULL, 'Malaysia', 'Malaysia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'my.png',
+            NULL,
+            'https://flagcdn.com/w320/my.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MV', 'MDV', '462', NULL, 'Maldives', 'Maldives', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mv.png',
+            NULL,
+            'https://flagcdn.com/w320/mv.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MV';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ML', 'MLI', '466', NULL, 'Mali', 'Mali', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ml.png',
+            NULL,
+            'https://flagcdn.com/w320/ml.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ML';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MT', 'MLT', '470', NULL, 'Malta', 'Malta', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mt.png',
+            NULL,
+            'https://flagcdn.com/w320/mt.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('IM', 'IMN', '833', NULL, 'Man (Isle of)', 'Isle of Man', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'im.png',
+            NULL,
+            'https://flagcdn.com/w320/im.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'IM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MH', 'MHL', '584', NULL, 'Marshall Islands', 'M̧ajeļ', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mh.png',
+            NULL,
+            'https://flagcdn.com/w320/mh.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MQ', 'MTQ', '474', NULL, 'Martinique', 'Martinique', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mq.png',
+            NULL,
+            'https://flagcdn.com/w320/mq.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MQ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MR', 'MRT', '478', NULL, 'Mauritania', 'موريتانيا', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mr.png',
+            NULL,
+            'https://flagcdn.com/w320/mr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MU', 'MUS', '480', NULL, 'Mauritius', 'Maurice', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mu.png',
+            NULL,
+            'https://flagcdn.com/w320/mu.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('YT', 'MYT', '175', NULL, 'Mayotte', 'Mayotte', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'yt.png',
+            NULL,
+            'https://flagcdn.com/w320/yt.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'YT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MX', 'MEX', '484', NULL, 'Mexico', 'México', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mx.png',
+            NULL,
+            'https://flagcdn.com/w320/mx.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MX';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('FM', 'FSM', '583', NULL, 'Micronesia', 'Micronesia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'fm.png',
+            NULL,
+            'https://flagcdn.com/w320/fm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'FM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MD', 'MDA', '498', NULL, 'Moldova', 'Moldova', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'md.png',
+            NULL,
+            'https://flagcdn.com/w320/md.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MD';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MC', 'MCO', '492', NULL, 'Monaco', 'Monaco', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mc.png',
+            NULL,
+            'https://flagcdn.com/w320/mc.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MN', 'MNG', '496', NULL, 'Mongolia', 'Монгол улс', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mn.png',
+            NULL,
+            'https://flagcdn.com/w320/mn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ME', 'MNE', '499', NULL, 'Montenegro', 'Црна Гора', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'me.png',
+            NULL,
+            'https://flagcdn.com/w320/me.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ME';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MS', 'MSR', '500', NULL, 'Montserrat', 'Montserrat', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ms.png',
+            NULL,
+            'https://flagcdn.com/w320/ms.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MA', 'MAR', '504', NULL, 'Morocco', 'المغرب', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ma.png',
+            NULL,
+            'https://flagcdn.com/w320/ma.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MZ', 'MOZ', '508', NULL, 'Mozambique', 'Moçambique', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mz.png',
+            NULL,
+            'https://flagcdn.com/w320/mz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MM', 'MMR', '104', NULL, 'Myanmar', 'မြန်မာ', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mm.png',
+            NULL,
+            'https://flagcdn.com/w320/mm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NA', 'NAM', '516', NULL, 'Namibia', 'Namibia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'na.png',
+            NULL,
+            'https://flagcdn.com/w320/na.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NR', 'NRU', '520', NULL, 'Nauru', 'Nauru', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'nr.png',
+            NULL,
+            'https://flagcdn.com/w320/nr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NP', 'NPL', '524', NULL, 'Nepal', 'नेपाल', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'np.png',
+            NULL,
+            'https://flagcdn.com/w320/np.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NP';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NL', 'NLD', '528', NULL, 'Netherlands', 'Nederland', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'nl.png',
+            NULL,
+            'https://flagcdn.com/w320/nl.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NC', 'NCL', '540', NULL, 'New Caledonia', 'Nouvelle-Calédonie', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'nc.png',
+            NULL,
+            'https://flagcdn.com/w320/nc.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NZ', 'NZL', '554', NULL, 'New Zealand', 'New Zealand', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'nz.png',
+            NULL,
+            'https://flagcdn.com/w320/nz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NI', 'NIC', '558', NULL, 'Nicaragua', 'Nicaragua', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ni.png',
+            NULL,
+            'https://flagcdn.com/w320/ni.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NE', 'NER', '562', NULL, 'Niger', 'Niger', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ne.png',
+            NULL,
+            'https://flagcdn.com/w320/ne.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NG', 'NGA', '566', NULL, 'Nigeria', 'Nigeria', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ng.png',
+            NULL,
+            'https://flagcdn.com/w320/ng.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NU', 'NIU', '570', NULL, 'Niue', 'Niuē', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'nu.png',
+            NULL,
+            'https://flagcdn.com/w320/nu.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NF', 'NFK', '574', NULL, 'Norfolk Island', 'Norfolk Island', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'nf.png',
+            NULL,
+            'https://flagcdn.com/w320/nf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KP', 'PRK', '408', NULL, 'North Korea', '북한', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'kp.png',
+            NULL,
+            'https://flagcdn.com/w320/kp.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KP';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MK', 'MKD', '807', NULL, 'North Macedonia', 'Северна Македонија', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mk.png',
+            NULL,
+            'https://flagcdn.com/w320/mk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MP', 'MNP', '580', NULL, 'Northern Mariana Islands', 'Northern Mariana Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mp.png',
+            NULL,
+            'https://flagcdn.com/w320/mp.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MP';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('NO', 'NOR', '578', NULL, 'Norway', 'Norge', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'no.png',
+            NULL,
+            'https://flagcdn.com/w320/no.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'NO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('OM', 'OMN', '512', NULL, 'Oman', 'عمان', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'om.png',
+            NULL,
+            'https://flagcdn.com/w320/om.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'OM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PK', 'PAK', '586', NULL, 'Pakistan', 'پاکستان', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pk.png',
+            NULL,
+            'https://flagcdn.com/w320/pk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PW', 'PLW', '585', NULL, 'Palau', 'Palau', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pw.png',
+            NULL,
+            'https://flagcdn.com/w320/pw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PS', 'PSE', '275', NULL, 'Palestinian Territory Occupied', 'فلسطين', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ps.png',
+            NULL,
+            'https://flagcdn.com/w320/ps.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PA', 'PAN', '591', NULL, 'Panama', 'Panamá', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pa.png',
+            NULL,
+            'https://flagcdn.com/w320/pa.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PG', 'PNG', '598', NULL, 'Papua New Guinea', 'Papua Niugini', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pg.png',
+            NULL,
+            'https://flagcdn.com/w320/pg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PY', 'PRY', '600', NULL, 'Paraguay', 'Paraguay', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'py.png',
+            NULL,
+            'https://flagcdn.com/w320/py.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PE', 'PER', '604', NULL, 'Peru', 'Perú', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pe.png',
+            NULL,
+            'https://flagcdn.com/w320/pe.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PH', 'PHL', '608', NULL, 'Philippines', 'Pilipinas', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ph.png',
+            NULL,
+            'https://flagcdn.com/w320/ph.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PN', 'PCN', '612', NULL, 'Pitcairn Island', 'Pitcairn Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pn.png',
+            NULL,
+            'https://flagcdn.com/w320/pn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PL', 'POL', '616', NULL, 'Poland', 'Polska', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pl.png',
+            NULL,
+            'https://flagcdn.com/w320/pl.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PT', 'PRT', '620', NULL, 'Portugal', 'Portugal', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pt.png',
+            NULL,
+            'https://flagcdn.com/w320/pt.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PR', 'PRI', '630', NULL, 'Puerto Rico', 'Puerto Rico', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pr.png',
+            NULL,
+            'https://flagcdn.com/w320/pr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('QA', 'QAT', '634', NULL, 'Qatar', 'قطر', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'qa.png',
+            NULL,
+            'https://flagcdn.com/w320/qa.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'QA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('RE', 'REU', '638', NULL, 'Reunion', 'La Réunion', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            're.png',
+            NULL,
+            'https://flagcdn.com/w320/re.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'RE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('RO', 'ROU', '642', NULL, 'Romania', 'România', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ro.png',
+            NULL,
+            'https://flagcdn.com/w320/ro.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'RO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('RU', 'RUS', '643', NULL, 'Russia', 'Россия', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ru.png',
+            NULL,
+            'https://flagcdn.com/w320/ru.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'RU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('RW', 'RWA', '646', NULL, 'Rwanda', 'Rwanda', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'rw.png',
+            NULL,
+            'https://flagcdn.com/w320/rw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'RW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SH', 'SHN', '654', NULL, 'Saint Helena', 'Saint Helena', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sh.png',
+            NULL,
+            'https://flagcdn.com/w320/sh.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KN', 'KNA', '659', NULL, 'Saint Kitts and Nevis', 'Saint Kitts and Nevis', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'kn.png',
+            NULL,
+            'https://flagcdn.com/w320/kn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LC', 'LCA', '662', NULL, 'Saint Lucia', 'Saint Lucia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'lc.png',
+            NULL,
+            'https://flagcdn.com/w320/lc.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('PM', 'SPM', '666', NULL, 'Saint Pierre and Miquelon', 'Saint-Pierre-et-Miquelon', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'pm.png',
+            NULL,
+            'https://flagcdn.com/w320/pm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'PM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('VC', 'VCT', '670', NULL, 'Saint Vincent and the Grenadines', 'Saint Vincent and the Grenadines', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'vc.png',
+            NULL,
+            'https://flagcdn.com/w320/vc.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'VC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BL', 'BLM', '652', NULL, 'Saint-Barthelemy', 'Saint-Barthélemy', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bl.png',
+            NULL,
+            'https://flagcdn.com/w320/bl.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('MF', 'MAF', '663', NULL, 'Saint-Martin (French part)', 'Saint-Martin', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'mf.png',
+            NULL,
+            'https://flagcdn.com/w320/mf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'MF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('WS', 'WSM', '882', NULL, 'Samoa', 'Samoa', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ws.png',
+            NULL,
+            'https://flagcdn.com/w320/ws.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'WS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SM', 'SMR', '674', NULL, 'San Marino', 'San Marino', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sm.png',
+            NULL,
+            'https://flagcdn.com/w320/sm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ST', 'STP', '678', NULL, 'Sao Tome and Principe', 'São Tomé e Príncipe', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'st.png',
+            NULL,
+            'https://flagcdn.com/w320/st.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ST';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SA', 'SAU', '682', NULL, 'Saudi Arabia', 'المملكة العربية السعودية', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sa.png',
+            NULL,
+            'https://flagcdn.com/w320/sa.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SN', 'SEN', '686', NULL, 'Senegal', 'Sénégal', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sn.png',
+            NULL,
+            'https://flagcdn.com/w320/sn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('RS', 'SRB', '688', NULL, 'Serbia', 'Србија', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'rs.png',
+            NULL,
+            'https://flagcdn.com/w320/rs.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'RS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SC', 'SYC', '690', NULL, 'Seychelles', 'Seychelles', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sc.png',
+            NULL,
+            'https://flagcdn.com/w320/sc.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SL', 'SLE', '694', NULL, 'Sierra Leone', 'Sierra Leone', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sl.png',
+            NULL,
+            'https://flagcdn.com/w320/sl.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SG', 'SGP', '702', NULL, 'Singapore', 'Singapore', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sg.png',
+            NULL,
+            'https://flagcdn.com/w320/sg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SX', 'SXM', '534', NULL, 'Sint Maarten (Dutch part)', 'Sint Maarten', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sx.png',
+            NULL,
+            'https://flagcdn.com/w320/sx.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SX';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SK', 'SVK', '703', NULL, 'Slovakia', 'Slovensko', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sk.png',
+            NULL,
+            'https://flagcdn.com/w320/sk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SI', 'SVN', '705', NULL, 'Slovenia', 'Slovenija', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'si.png',
+            NULL,
+            'https://flagcdn.com/w320/si.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SB', 'SLB', '090', NULL, 'Solomon Islands', 'Solomon Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sb.png',
+            NULL,
+            'https://flagcdn.com/w320/sb.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SB';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SO', 'SOM', '706', NULL, 'Somalia', 'Soomaaliya', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'so.png',
+            NULL,
+            'https://flagcdn.com/w320/so.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ZA', 'ZAF', '710', NULL, 'South Africa', 'South Africa', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'za.png',
+            NULL,
+            'https://flagcdn.com/w320/za.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ZA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GS', 'SGS', '239', NULL, 'South Georgia', 'South Georgia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gs.png',
+            NULL,
+            'https://flagcdn.com/w320/gs.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('KR', 'KOR', '410', NULL, 'South Korea', '대한민국', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'kr.png',
+            NULL,
+            'https://flagcdn.com/w320/kr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'KR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SS', 'SSD', '728', NULL, 'South Sudan', 'South Sudan', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ss.png',
+            NULL,
+            'https://flagcdn.com/w320/ss.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ES', 'ESP', '724', NULL, 'Spain', 'España', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'es.png',
+            NULL,
+            'https://flagcdn.com/w320/es.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ES';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('LK', 'LKA', '144', NULL, 'Sri Lanka', 'śrī laṃkāva', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'lk.png',
+            NULL,
+            'https://flagcdn.com/w320/lk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'LK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SD', 'SDN', '729', NULL, 'Sudan', 'السودان', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sd.png',
+            NULL,
+            'https://flagcdn.com/w320/sd.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SD';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SR', 'SUR', '740', NULL, 'Suriname', 'Suriname', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sr.png',
+            NULL,
+            'https://flagcdn.com/w320/sr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SJ', 'SJM', '744', NULL, 'Svalbard and Jan Mayen Islands', 'Svalbard og Jan Mayen', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sj.png',
+            NULL,
+            'https://flagcdn.com/w320/sj.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SJ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SE', 'SWE', '752', NULL, 'Sweden', 'Sverige', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'se.png',
+            NULL,
+            'https://flagcdn.com/w320/se.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('CH', 'CHE', '756', NULL, 'Switzerland', 'Schweiz', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ch.png',
+            NULL,
+            'https://flagcdn.com/w320/ch.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'CH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('SY', 'SYR', '760', NULL, 'Syria', 'سوريا', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'sy.png',
+            NULL,
+            'https://flagcdn.com/w320/sy.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'SY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TW', 'TWN', '158', NULL, 'Taiwan', '臺灣', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tw.png',
+            NULL,
+            'https://flagcdn.com/w320/tw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TW';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TJ', 'TJK', '762', NULL, 'Tajikistan', 'Тоҷикистон', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tj.png',
+            NULL,
+            'https://flagcdn.com/w320/tj.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TJ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TZ', 'TZA', '834', NULL, 'Tanzania', 'Tanzania', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tz.png',
+            NULL,
+            'https://flagcdn.com/w320/tz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TH', 'THA', '764', NULL, 'Thailand', 'ประเทศไทย', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'th.png',
+            NULL,
+            'https://flagcdn.com/w320/th.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('BS', 'BHS', '044', NULL, 'The Bahamas', 'Bahamas', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'bs.png',
+            NULL,
+            'https://flagcdn.com/w320/bs.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'BS';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GM', 'GMB', '270', NULL, 'The Gambia', 'Gambia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gm.png',
+            NULL,
+            'https://flagcdn.com/w320/gm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TL', 'TLS', '626', NULL, 'Timor-Leste', 'Timor-Leste', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tl.png',
+            NULL,
+            'https://flagcdn.com/w320/tl.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TL';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TG', 'TGO', '768', NULL, 'Togo', 'Togo', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tg.png',
+            NULL,
+            'https://flagcdn.com/w320/tg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TK', 'TKL', '772', NULL, 'Tokelau', 'Tokelau', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tk.png',
+            NULL,
+            'https://flagcdn.com/w320/tk.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TK';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TO', 'TON', '776', NULL, 'Tonga', 'Tonga', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'to.png',
+            NULL,
+            'https://flagcdn.com/w320/to.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TO';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TT', 'TTO', '780', NULL, 'Trinidad and Tobago', 'Trinidad and Tobago', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tt.png',
+            NULL,
+            'https://flagcdn.com/w320/tt.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TT';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TN', 'TUN', '788', NULL, 'Tunisia', 'تونس', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tn.png',
+            NULL,
+            'https://flagcdn.com/w320/tn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TR', 'TUR', '792', NULL, 'Turkey', 'Türkiye', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tr.png',
+            NULL,
+            'https://flagcdn.com/w320/tr.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TR';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TM', 'TKM', '795', NULL, 'Turkmenistan', 'Türkmenistan', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tm.png',
+            NULL,
+            'https://flagcdn.com/w320/tm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TC', 'TCA', '796', NULL, 'Turks and Caicos Islands', 'Turks and Caicos Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tc.png',
+            NULL,
+            'https://flagcdn.com/w320/tc.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TC';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('TV', 'TUV', '798', NULL, 'Tuvalu', 'Tuvalu', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'tv.png',
+            NULL,
+            'https://flagcdn.com/w320/tv.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'TV';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('UG', 'UGA', '800', NULL, 'Uganda', 'Uganda', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ug.png',
+            NULL,
+            'https://flagcdn.com/w320/ug.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'UG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('UA', 'UKR', '804', NULL, 'Ukraine', 'Україна', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ua.png',
+            NULL,
+            'https://flagcdn.com/w320/ua.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'UA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('AE', 'ARE', '784', NULL, 'United Arab Emirates', 'دولة الإمارات العربية المتحدة', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ae.png',
+            NULL,
+            'https://flagcdn.com/w320/ae.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'AE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('GB', 'GBR', '826', NULL, 'United Kingdom', 'United Kingdom', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'gb.png',
+            NULL,
+            'https://flagcdn.com/w320/gb.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'GB';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('US', 'USA', '840', NULL, 'United States', 'United States', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'us.png',
+            NULL,
+            'https://flagcdn.com/w320/us.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'US';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('UM', 'UMI', '581', NULL, 'United States Minor Outlying Islands', 'United States Minor Outlying Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'um.png',
+            NULL,
+            'https://flagcdn.com/w320/um.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'UM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('UY', 'URY', '858', NULL, 'Uruguay', 'Uruguay', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'uy.png',
+            NULL,
+            'https://flagcdn.com/w320/uy.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'UY';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('UZ', 'UZB', '860', NULL, 'Uzbekistan', 'O‘zbekiston', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'uz.png',
+            NULL,
+            'https://flagcdn.com/w320/uz.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'UZ';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('VU', 'VUT', '548', NULL, 'Vanuatu', 'Vanuatu', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'vu.png',
+            NULL,
+            'https://flagcdn.com/w320/vu.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'VU';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('VA', 'VAT', '336', NULL, 'Vatican City State (Holy See)', 'Vaticano', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'va.png',
+            NULL,
+            'https://flagcdn.com/w320/va.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'VA';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('VE', 'VEN', '862', NULL, 'Venezuela', 'Venezuela', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            've.png',
+            NULL,
+            'https://flagcdn.com/w320/ve.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'VE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('VN', 'VNM', '704', NULL, 'Vietnam', 'Việt Nam', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'vn.png',
+            NULL,
+            'https://flagcdn.com/w320/vn.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'VN';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('VG', 'VGB', '092', NULL, 'Virgin Islands (British)', 'British Virgin Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'vg.png',
+            NULL,
+            'https://flagcdn.com/w320/vg.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'VG';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('VI', 'VIR', '850', NULL, 'Virgin Islands (US)', 'United States Virgin Islands', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'vi.png',
+            NULL,
+            'https://flagcdn.com/w320/vi.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'VI';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('WF', 'WLF', '876', NULL, 'Wallis and Futuna Islands', 'Wallis et Futuna', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'wf.png',
+            NULL,
+            'https://flagcdn.com/w320/wf.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'WF';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('EH', 'ESH', '732', NULL, 'Western Sahara', 'الصحراء الغربية', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'eh.png',
+            NULL,
+            'https://flagcdn.com/w320/eh.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'EH';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('YE', 'YEM', '887', NULL, 'Yemen', 'اليَمَن', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'ye.png',
+            NULL,
+            'https://flagcdn.com/w320/ye.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'YE';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ZM', 'ZMB', '894', NULL, 'Zambia', 'Zambia', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'zm.png',
+            NULL,
+            'https://flagcdn.com/w320/zm.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ZM';
+        
+INSERT INTO countries (iso2, iso3, iso_numeric, phone_code, name, native_name, created_date, updated_date) VALUES ('ZW', 'ZWE', '716', NULL, 'Zimbabwe', 'Zimbabwe', NOW(), NOW());
+
+        INSERT INTO files (
+            user_id,
+            resource_provider_id,
+            storage_provider_id,
+            entity_type_id,
+            entity_id,
+            file_role_id,
+            original_name,
+            storage_key,
+            file_path,
+            file_type_id,
+            is_public,
+            is_system,
+            is_active,
+            created_date,
+            updated_date
+        )
+        SELECT
+            NULL,
+            (SELECT id FROM resource_providers WHERE code='FLAGCDN' LIMIT 1),
+            (SELECT id FROM storage_providers WHERE code='EXTERNAL' LIMIT 1),
+            (SELECT id FROM entity_types WHERE code='countries' LIMIT 1),
+            c.id,
+            (SELECT id FROM file_roles WHERE code='FLAG' LIMIT 1),
+            'zw.png',
+            NULL,
+            'https://flagcdn.com/w320/zw.png',
+            (SELECT id FROM file_types WHERE code='PNG' LIMIT 1),
+            TRUE,
+            TRUE,
+            TRUE,
+            NOW(),
+            NOW()
+        FROM countries c
+        WHERE c.iso2 = 'ZW';
+        
 
 -- Insert Currencies
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AFN', 'Afghan afghani', '؋', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('EUR', 'Euro', '€', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ALL', 'Albanian lek', 'Lek', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DZD', 'Algerian dinar', 'دج', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('USD', 'United States dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AOA', 'Angolan kwanza', 'Kz', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XCD', 'Eastern Caribbean dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AAD', 'Antarctican dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ARS', 'Argentine peso', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AMD', 'Armenian dram', '֏', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AWG', 'Aruban florin', 'ƒ', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AUD', 'Australian dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AZN', 'Azerbaijani manat', 'm', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BHD', 'Bahraini dinar', '.د.ب', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BDT', 'Bangladeshi taka', '৳', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BBD', 'Barbadian dollar', 'Bds$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BYN', 'Belarusian ruble', 'Br', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BZD', 'Belize dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XOF', 'West African CFA franc', 'CFA', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BMD', 'Bermudian dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BTN', 'Bhutanese ngultrum', 'Nu.', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BOB', 'Bolivian boliviano', 'Bs.', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BAM', 'Bosnia and Herzegovina convertible mark', 'KM', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BWP', 'Botswana pula', 'P', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NOK', 'Norwegian krone', 'ko', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BRL', 'Brazilian real', 'R$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BND', 'Brunei dollar', 'B$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BGN', 'Bulgarian lev', 'Лв.', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BIF', 'Burundian franc', 'FBu', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KHR', 'Cambodian riel', 'KHR', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XAF', 'Central African CFA franc', 'FCFA', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CAD', 'Canadian dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CVE', 'Cape Verdean escudo', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KYD', 'Cayman Islands dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CLP', 'Chilean peso', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CNY', 'Chinese yuan', '¥', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('COP', 'Colombian peso', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KMF', 'Comorian franc', 'CF', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CDF', 'Congolese Franc', 'FC', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NZD', 'New Zealand dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CRC', 'Costa Rican colón', '₡', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CUP', 'Cuban peso', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ANG', 'Netherlands Antillean guilder', 'ƒ', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CZK', 'Czech koruna', 'Kč', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DKK', 'Danish krone', 'Kr.', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DJF', 'Djiboutian franc', 'Fdj', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DOP', 'Dominican peso', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('EGP', 'Egyptian pound', 'ج.م', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ERN', 'Eritrean nakfa', 'Nfk', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SZL', 'Lilangeni', 'E', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ETB', 'Ethiopian birr', 'Nkf', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('FKP', 'Falkland Islands pound', '£', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('FJD', 'Fijian dollar', 'FJ$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XPF', 'CFP franc', '₣', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GEL', 'Georgian lari', 'ლ', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GHS', 'Ghanaian cedi', 'GH₵', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GIP', 'Gibraltar pound', '£', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GTQ', 'Guatemalan quetzal', 'Q', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GBP', 'British pound', '£', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GNF', 'Guinean franc', 'FG', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GYD', 'Guyanese dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HTG', 'Haitian gourde', 'G', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HNL', 'Honduran lempira', 'L', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HKD', 'Hong Kong dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HUF', 'Hungarian forint', 'Ft', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ISK', 'Icelandic króna', 'ko', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('INR', 'Indian rupee', '₹', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('IDR', 'Indonesian rupiah', 'Rp', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('IRR', 'Iranian rial', '﷼', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('IQD', 'Iraqi dinar', 'د.ع', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ILS', 'Israeli new shekel', '₪', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('JMD', 'Jamaican dollar', 'J$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('JPY', 'Japanese yen', '¥', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('JOD', 'Jordanian dinar', 'ا.د', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KZT', 'Kazakhstani tenge', 'лв', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KES', 'Kenyan shilling', 'KSh', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KWD', 'Kuwaiti dinar', 'ك.د', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KGS', 'Kyrgyzstani som', 'лв', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LAK', 'Lao kip', '₭', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LBP', 'Lebanese pound', '£', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LSL', 'Lesotho loti', 'L', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LRD', 'Liberian dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LYD', 'Libyan dinar', 'د.ل', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CHF', 'Swiss franc', 'CHf', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MOP', 'Macanese pataca', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MGA', 'Malagasy ariary', 'Ar', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MWK', 'Malawian kwacha', 'MK', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MYR', 'Malaysian ringgit', 'RM', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MVR', 'Maldivian rufiyaa', 'Rf', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MRU', 'Mauritanian ouguiya', 'UM', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MUR', 'Mauritian rupee', '₨', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MXN', 'Mexican peso', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MDL', 'Moldovan leu', 'L', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MNT', 'Mongolian tögrög', '₮', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MAD', 'Moroccan dirham', 'DH', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MZN', 'Mozambican metical', 'MT', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MMK', 'Burmese kyat', 'K', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NAD', 'Namibian dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NPR', 'Nepalese rupee', '₨', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NIO', 'Nicaraguan córdoba', 'C$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NGN', 'Nigerian naira', '₦', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KPW', 'North Korean Won', '₩', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MKD', 'Denar', 'ден', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('OMR', 'Omani rial', '.ع.ر', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PKR', 'Pakistani rupee', '₨', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PAB', 'Panamanian balboa', 'B/.', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PGK', 'Papua New Guinean kina', 'K', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PYG', 'Paraguayan guarani', '₲', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PEN', 'Peruvian sol', 'S/.', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PHP', 'Philippine peso', '₱', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PLN', 'Polish złoty', 'zł', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('QAR', 'Qatari riyal', 'ق.ر', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RON', 'Romanian leu', 'lei', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RUB', 'Russian ruble', '₽', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RWF', 'Rwandan franc', 'FRw', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SHP', 'Saint Helena pound', '£', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('WST', 'Samoan tālā', 'SAT', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('STN', 'Dobra', 'Db', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SAR', 'Saudi riyal', '﷼', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RSD', 'Serbian dinar', 'din', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SCR', 'Seychellois rupee', 'SRe', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SLL', 'Sierra Leonean leone', 'Le', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SGD', 'Singapore dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SBD', 'Solomon Islands dollar', 'Si$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SOS', 'Somali shilling', 'Sh.so.', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ZAR', 'South African rand', 'R', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KRW', 'Won', '₩', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SSP', 'South Sudanese pound', '£', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LKR', 'Sri Lankan rupee', 'Rs', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SDG', 'Sudanese pound', '.س.ج', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SRD', 'Surinamese dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SEK', 'Swedish krona', 'ko', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SYP', 'Syrian pound', 'LS', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TWD', 'New Taiwan dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TJS', 'Tajikistani somoni', 'SM', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TZS', 'Tanzanian shilling', 'TSh', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('THB', 'Thai baht', '฿', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BSD', 'Bahamian dollar', 'B$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GMD', 'Gambian dalasi', 'D', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TOP', 'Tongan paʻanga', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TTD', 'Trinidad and Tobago dollar', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TND', 'Tunisian dinar', 'ت.د', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TRY', 'Turkish lira', '₺', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TMT', 'Turkmenistan manat', 'T', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UGX', 'Ugandan shilling', 'USh', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UAH', 'Ukrainian hryvnia', '₴', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AED', 'United Arab Emirates dirham', 'إ.د', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UYU', 'Uruguayan peso', '$', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UZS', 'Uzbekistani soʻm', 'лв', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('VUV', 'Vanuatu vatu', 'VT', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('VES', 'Bolívar', 'Bs', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('VND', 'Vietnamese đồng', '₫', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('YER', 'Yemeni rial', '﷼', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ZMW', 'Zambian kwacha', 'ZK', NOW(), NOW());
-INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ZWL', 'Zimbabwe Dollar', '$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AFN', 'Afghan afghani','؋', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('EUR', 'Euro','€', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ALL', 'Albanian lek','Lek', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DZD', 'Algerian dinar','دج', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('USD', 'United States dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AOA', 'Angolan kwanza','Kz', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XCD', 'Eastern Caribbean dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AAD', 'Antarctican dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ARS', 'Argentine peso','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AMD', 'Armenian dram','֏', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AWG', 'Aruban florin','ƒ', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AUD', 'Australian dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AZN', 'Azerbaijani manat','m', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BHD', 'Bahraini dinar','.د.ب', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BDT', 'Bangladeshi taka','৳', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BBD', 'Barbadian dollar','Bds$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BYN', 'Belarusian ruble','Br', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BZD', 'Belize dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XOF', 'West African CFA franc','CFA', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BMD', 'Bermudian dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BTN', 'Bhutanese ngultrum','Nu.', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BOB', 'Bolivian boliviano','Bs.', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BAM', 'Bosnia and Herzegovina convertible mark','KM', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BWP', 'Botswana pula','P', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NOK', 'Norwegian krone','ko', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BRL', 'Brazilian real','R$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BND', 'Brunei dollar','B$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BGN', 'Bulgarian lev','Лв.', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BIF', 'Burundian franc','FBu', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KHR', 'Cambodian riel','KHR', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XAF', 'Central African CFA franc','FCFA', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CAD', 'Canadian dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CVE', 'Cape Verdean escudo','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KYD', 'Cayman Islands dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CLP', 'Chilean peso','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CNY', 'Chinese yuan','¥', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('COP', 'Colombian peso','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KMF', 'Comorian franc','CF', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CDF', 'Congolese Franc','FC', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NZD', 'New Zealand dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CRC', 'Costa Rican colón','₡', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CUP', 'Cuban peso','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ANG', 'Netherlands Antillean guilder','ƒ', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CZK', 'Czech koruna','Kč', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DKK', 'Danish krone','Kr.', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DJF', 'Djiboutian franc','Fdj', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('DOP', 'Dominican peso','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('EGP', 'Egyptian pound','ج.م', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ERN', 'Eritrean nakfa','Nfk', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SZL', 'Lilangeni','E', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ETB', 'Ethiopian birr','Nkf', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('FKP', 'Falkland Islands pound','£', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('FJD', 'Fijian dollar','FJ$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('XPF', 'CFP franc','₣', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GEL', 'Georgian lari','ლ', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GHS', 'Ghanaian cedi','GH₵', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GIP', 'Gibraltar pound','£', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GTQ', 'Guatemalan quetzal','Q', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GBP', 'British pound','£', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GNF', 'Guinean franc','FG', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GYD', 'Guyanese dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HTG', 'Haitian gourde','G', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HNL', 'Honduran lempira','L', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HKD', 'Hong Kong dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('HUF', 'Hungarian forint','Ft', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ISK', 'Icelandic króna','ko', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('INR', 'Indian rupee','₹', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('IDR', 'Indonesian rupiah','Rp', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('IRR', 'Iranian rial','﷼', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('IQD', 'Iraqi dinar','د.ع', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ILS', 'Israeli new shekel','₪', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('JMD', 'Jamaican dollar','J$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('JPY', 'Japanese yen','¥', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('JOD', 'Jordanian dinar','ا.د', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KZT', 'Kazakhstani tenge','лв', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KES', 'Kenyan shilling','KSh', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KWD', 'Kuwaiti dinar','ك.د', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KGS', 'Kyrgyzstani som','лв', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LAK', 'Lao kip','₭', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LBP', 'Lebanese pound','£', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LSL', 'Lesotho loti','L', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LRD', 'Liberian dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LYD', 'Libyan dinar','د.ل', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('CHF', 'Swiss franc','CHf', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MOP', 'Macanese pataca','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MGA', 'Malagasy ariary','Ar', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MWK', 'Malawian kwacha','MK', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MYR', 'Malaysian ringgit','RM', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MVR', 'Maldivian rufiyaa','Rf', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MRU', 'Mauritanian ouguiya','UM', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MUR', 'Mauritian rupee','₨', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MXN', 'Mexican peso','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MDL', 'Moldovan leu','L', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MNT', 'Mongolian tögrög','₮', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MAD', 'Moroccan dirham','DH', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MZN', 'Mozambican metical','MT', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MMK', 'Burmese kyat','K', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NAD', 'Namibian dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NPR', 'Nepalese rupee','₨', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NIO', 'Nicaraguan córdoba','C$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('NGN', 'Nigerian naira','₦', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KPW', 'North Korean Won','₩', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('MKD', 'Denar','ден', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('OMR', 'Omani rial','.ع.ر', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PKR', 'Pakistani rupee','₨', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PAB', 'Panamanian balboa','B/.', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PGK', 'Papua New Guinean kina','K', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PYG', 'Paraguayan guarani','₲', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PEN', 'Peruvian sol','S/.', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PHP', 'Philippine peso','₱', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('PLN', 'Polish złoty','zł', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('QAR', 'Qatari riyal','ق.ر', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RON', 'Romanian leu','lei', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RUB', 'Russian ruble','₽', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RWF', 'Rwandan franc','FRw', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SHP', 'Saint Helena pound','£', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('WST', 'Samoan tālā','SAT', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('STN', 'Dobra','Db', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SAR', 'Saudi riyal','﷼', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('RSD', 'Serbian dinar','din', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SCR', 'Seychellois rupee','SRe', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SLL', 'Sierra Leonean leone','Le', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SGD', 'Singapore dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SBD', 'Solomon Islands dollar','Si$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SOS', 'Somali shilling','Sh.so.', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ZAR', 'South African rand','R', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('KRW', 'Won','₩', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SSP', 'South Sudanese pound','£', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('LKR', 'Sri Lankan rupee','Rs', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SDG', 'Sudanese pound','.س.ج', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SRD', 'Surinamese dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SEK', 'Swedish krona','ko', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('SYP', 'Syrian pound','LS', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TWD', 'New Taiwan dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TJS', 'Tajikistani somoni','SM', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TZS', 'Tanzanian shilling','TSh', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('THB', 'Thai baht','฿', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('BSD', 'Bahamian dollar','B$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('GMD', 'Gambian dalasi','D', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TOP', 'Tongan paʻanga','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TTD', 'Trinidad and Tobago dollar','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TND', 'Tunisian dinar','ت.د', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TRY', 'Turkish lira','₺', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('TMT', 'Turkmenistan manat','T', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UGX', 'Ugandan shilling','USh', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UAH', 'Ukrainian hryvnia','₴', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('AED', 'United Arab Emirates dirham','إ.د', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UYU', 'Uruguayan peso','$', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('UZS', 'Uzbekistani soʻm','лв', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('VUV', 'Vanuatu vatu','VT', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('VES', 'Bolívar','Bs', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('VND', 'Vietnamese đồng','₫', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('YER', 'Yemeni rial','﷼', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ZMW', 'Zambian kwacha','ZK', NOW(), NOW());
+INSERT INTO currencies (code, name, symbol, created_date, updated_date) VALUES ('ZWL', 'Zimbabwe Dollar','$', NOW(), NOW());
+
+-- Insert Languages
 
 -- Insert Timezones
 INSERT INTO timezones (code, iana_name, name, utc_offset, has_dst, created_date, updated_date) VALUES ('AFT', 'Asia/Kabul', 'Afghanistan Time', 16200, FALSE, NOW(), NOW());
@@ -1528,3 +10784,5 @@ INSERT INTO country_timezones (country_id, timezone_id, is_default, created_date
 INSERT INTO country_timezones (country_id, timezone_id, is_default, created_date, updated_date) SELECT (SELECT id FROM countries WHERE iso2='YE' LIMIT 1), (SELECT id FROM timezones WHERE iana_name='Asia/Aden' LIMIT 1), TRUE, NOW(), NOW();
 INSERT INTO country_timezones (country_id, timezone_id, is_default, created_date, updated_date) SELECT (SELECT id FROM countries WHERE iso2='ZM' LIMIT 1), (SELECT id FROM timezones WHERE iana_name='Africa/Lusaka' LIMIT 1), TRUE, NOW(), NOW();
 INSERT INTO country_timezones (country_id, timezone_id, is_default, created_date, updated_date) SELECT (SELECT id FROM countries WHERE iso2='ZW' LIMIT 1), (SELECT id FROM timezones WHERE iana_name='Africa/Harare' LIMIT 1), TRUE, NOW(), NOW();
+
+-- Insert Country-Language Mapping
