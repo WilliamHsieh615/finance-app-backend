@@ -1,6 +1,121 @@
 # FinFun：方方面面記帳，讓理財變有趣
 
     USE finance_app;
+
+    -- 資源提供者
+    CREATE TABLE resource_providers (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (EMOJI、LUCIDE、MATERIAL、CUSTOM_UPLOAD)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
+        is_active                        BOOLEAN        DEFAULT TRUE,
+        resource_url                     VARCHAR(255)   NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 儲存提供者
+    CREATE TABLE storage_providers (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        is_active                        BOOLEAN        DEFAULT TRUE,
+        provider_url                     VARCHAR(255)   NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 實體類型表(用於資料表對應資料表)
+    CREATE TABLE entity_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 資料表代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 資料表名稱
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 檔案角色
+    CREATE TABLE file_roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+    
+    -- 檔案類型表
+    CREATE TABLE file_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF、SVG、WEBP)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (JPEG Image、PNG Image、PDF File)
+        mime_type                        VARCHAR(100)   NOT NULL,                        -- 格式類型 (text/plain、image/jpeg、image/png、application/pdf)
+        extension                        VARCHAR(20)    NOT NULL,                        -- 副檔名 (.jpg、.png、.pdf)
+        is_image                         BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否是影像
+        is_previewable                   BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否可以預覽
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 檔案表
+    CREATE TABLE files (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NULL,                            -- 誰上傳的檔案
+        resource_provider_id             BIGINT         NULL,                            -- 資源提供者 (EMOJI、LUCIDE、MATERIAL、CUSTOM_UPLOAD)
+        storage_provider_id              BIGINT         NOT NULL,                        -- 儲存空間提供者 LOCAL、S3、CLOUDINARY、GCS
+        entity_type_id                   BIGINT         NOT NULL,                        -- 使用在哪一張表
+        entity_id                        BIGINT         NOT NULL,                        -- 對應表中哪一筆資料的id
+        file_role_id                     BIGINT         NOT NULL,                        -- 檔案的角色
+        original_name                    VARCHAR(255)   NOT NULL,                        -- 使用者原始檔名
+        storage_key                      VARCHAR(255)   NOT NULL,                        -- 系統儲存檔名(UUID)
+        file_path                        VARCHAR(500)   NOT NULL,                        -- 檔案連結
+        thumbnail_path                   VARCHAR(500)   NULL,                            -- 縮圖連結
+        file_type_id                     BIGINT         NOT NULL,                        -- 檔案類型 JPG、PNG、GIF、TXT 
+        file_size                        BIGINT         NULL,                            -- 檔案大小
+        width                            INT            NULL,                            -- 圖片寬
+        height                           INT            NULL,                            -- 圖片高
+        checksum                         VARCHAR(100)   NULL,                            -- 雜湊值 SHA256、MD5(把檔案或圖片變成一串代碼)
+        is_public                        BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否公開
+        sort_order                       INT            NOT NULL DEFAULT 0,              -- 排序順序
+        is_system                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否來自系統
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        INDEX idx_entity (entity_type_id, entity_id),
+        INDEX idx_user (user_id),
+        INDEX idx_role (file_role_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (storage_provider_id) REFERENCES storage_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (file_role_id) REFERENCES file_roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (file_type_id) REFERENCES file_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 圖示表
+    CREATE TABLE icons (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        file_id                          BIGINT         NULL,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼 (FOOD、INVESTMENT、HOUSE、INSURANCE)
+        name                             VARCHAR(100)   NOT NULL,                        -- 名稱 (Food、Investment)
+        icon_value                       VARCHAR(255)   NULL,                            -- 圖示 (wallet、house、chart-column)                           -- 
+        hex_color                        VARCHAR(10)    NULL,                            -- 圖示十六進位色彩碼
+        background_color                 VARCHAR(10)    NULL,                            -- 背景顏色
+        is_system                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否來自系統
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE SET NULL ON UPDATE CASCADE
+    );
     
     -- (測試中)國別表
     CREATE TABLE countries (
@@ -305,7 +420,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (exchange_rate_source_id, base_currency_id, quote_currency_id, rate_datetime),
-        INDEX idx_exchange_rate_lookup (base_currency_id, quote_currency_id),
+        INDEX (base_currency_id, quote_currency_id),
         CHECK (base_currency_id <> quote_currency_id),
         FOREIGN KEY (exchange_rate_source_id) REFERENCES exchange_rate_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -423,7 +538,6 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APPLE、GOOGLE)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        image_url                        VARCHAR(255)   NULL,                            -- logo
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -435,7 +549,6 @@
         distribution_platform_company_id BIGINT         NOT NULL,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APP_STORE、GOOGLE_PLAY)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        image_url                        VARCHAR(255)   NULL,                            -- logo
         is_active                        BOOLEAN        DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -766,36 +879,6 @@
         FOREIGN KEY (refund_transaction_status_id) REFERENCES refund_transaction_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 檔案類型表
-    CREATE TABLE file_types (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF)
-        name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (JPEG image、PNG image、PDF file)
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 檔案表
-    CREATE TABLE files (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT         NULL,                            -- 誰上傳的檔案
-        entity_type                      VARCHAR(50)    NOT NULL,                        -- 使用在的表 users、ledgers、accounts、category_groups、categories、merchants
-        entity_id                        BIGINT         NOT NULL,                        -- 對應表的id
-        file_role                        VARCHAR(50),                                    -- 檔案的角色 avatar、logo、cover、receipt
-        file_url                         VARCHAR(255)   NOT NULL, 
-        file_type_id                     BIGINT         NOT NULL,                        -- 檔案類型 JPG、PNG、GIF、TXT 
-        file_size                        BIGINT,                                         -- 檔案大小 
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        INDEX idx_files_entity (entity_type, entity_id),
-        INDEX idx_files_user (user_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (file_type_id) REFERENCES file_types(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
     -- 投資市場類型表
     CREATE TABLE market_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -989,7 +1072,6 @@
         name                             VARCHAR(50)   NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
         country_id                       BIGINT        NULL,                            -- 所屬國家
         timezone_id                      BIGINT        NULL,                            -- 時區
-        image_url                        VARCHAR(255)  NULL,
         note                             VARCHAR(255),
         
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
@@ -1015,7 +1097,6 @@
         is_active                        BOOLEAN       DEFAULT TRUE,                    -- 是否仍可交易
 
         unit_id                          BIGINT        NULL,                            -- 商品單位 (口、股、張)
-        image_url                        VARCHAR(255)  NULL,
         note                             VARCHAR(255),
 
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
