@@ -89,9 +89,10 @@
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        INDEX idx_entity (entity_type_id, entity_id),
-        INDEX idx_user (user_id),
-        INDEX idx_role (file_role_id),
+        INDEX (entity_type_id, entity_id),
+        INDEX (user_id),
+        INDEX (file_role_id),
+        UNIQUE(entity_type_id, entity_id, file_role_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (storage_provider_id) REFERENCES storage_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
