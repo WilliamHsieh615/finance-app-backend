@@ -956,7 +956,7 @@
     );
 
     -- (測試中)流向頻率表(付款、收款、配息、不配息)
-    CREATE TABLE flow_frequencys (
+    CREATE TABLE flow_frequencies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         flow_type_id                     BIGINT         NOT NULL,
         frequency_id                     BIGINT         NOT NULL,
@@ -1138,7 +1138,7 @@
         
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (dividend_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (dividend_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -1179,7 +1179,7 @@
 
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (coupon_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (coupon_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (bond_type_id) REFERENCES bond_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -1417,7 +1417,7 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (bank_account_type_id) REFERENCES bank_account_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- (測試中)支付網路類型表
@@ -1635,7 +1635,7 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (負債帳 → 房貸、車貸、信貸）
@@ -1655,7 +1655,7 @@
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (repayment_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (repayment_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (應收帳款)
@@ -1673,7 +1673,7 @@
         CHECK (cycle_day BETWEEN 1 AND 31),
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (recovery_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (recovery_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 固定資產分類表
@@ -1853,7 +1853,7 @@
         FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 交易來源種類表
+    -- (測試中)交易來源種類表
     CREATE TABLE transaction_source_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)   NOT NULL UNIQUE,                 -- MANUAL、CONTRACT、IMPORT
@@ -1864,15 +1864,19 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 交易來源表 (可自動生成交易)
+    -- (測試中)交易來源表 (可自動生成交易)
     CREATE TABLE transaction_sources (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         transaction_source_type_id       BIGINT        NOT NULL,
+        entity_type_id                   BIGINT        NULL,                            -- 對應合約表或其他匯入的表
         source_id                        BIGINT        NULL,                            -- transaction_source_type 為 MANUAL 時 = NULL
                                                                                            transaction_source_type 為 CONTRACT 時 = contract_id
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME      NULL,                             -- 刪除時間 (由後端寫入)
+
+        FOREIGN KEY (transaction_source_type_id) REFERENCES transaction_source_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- (測試中)分類類型表
@@ -1930,7 +1934,7 @@
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
-    -- 商店類型表
+    -- (測試中)商店類型表
     CREATE TABLE merchant_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)   NOT NULL UNIQUE,                 -- restaurant、supermarket、utility
@@ -1941,7 +1945,7 @@
         deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 交易商店表 
+    -- (測試中)交易商店表 
     CREATE TABLE merchants (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT        NULL,                            -- 國別 (系統預設帶出該國別的商店)
@@ -1963,10 +1967,10 @@
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
-    -- 交易類型表
+    -- (測試中)交易類型表
     CREATE TABLE transaction_types (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        ledger_id                        BIGINT        NOT NULL,
+        ledger_type_id                        BIGINT        NOT NULL,
         code                             VARCHAR(30)   NOT NULL,	                    -- 代號
         name                             VARCHAR(50)   NOT NULL,                        -- 交易類型名稱 (如：
                                                                                         -- 收支活動 (income / expense / buy / sell)
@@ -1983,11 +1987,22 @@
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
         
-        UNIQUE (ledger_id, code),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
+        UNIQUE (ledger_type_id, code),
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 交易表
+    -- (測試中)交易狀態表
+    CREATE TABLE transaction_statuses (
+        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)   NOT NULL UNIQUE,
+        name                             VARCHAR(50)   NOT NULL,
+        note                             VARCHAR(255),
+        created_date                     DATETIME      NOT NULL,
+        updated_date                     DATETIME      NOT NULL,
+        deleted_date                     DATETIME      NULL
+    );
+
+    -- (測試中)交易表
     CREATE TABLE transactions (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
@@ -2005,6 +2020,7 @@
 
         transaction_date                 DATETIME      NOT NULL,                        -- 交易日
         note                             VARCHAR(255),
+        transaction_status_id            BIGINT        NOT NULL,                        -- 交易狀態
 
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -2019,10 +2035,11 @@
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 交易關聯表 (不同交易之間的關聯)
+    -- (測試中)交易關聯表 (不同交易之間的關聯)
     CREATE TABLE transaction_links (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         transaction_id                   BIGINT        NOT NULL,
@@ -2033,12 +2050,11 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(transaction_id, related_transaction_id),
-        CHECK (transaction_id <> related_transaction_id),                               -- (後端應避免雙向連結)
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (related_transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 交易表子表 (收支)
+    -- (測試中)交易表子表 (收支)
     CREATE TABLE cashflow_transaction_details (
         transaction_id                   BIGINT        PRIMARY KEY,
         category_id                      BIGINT        NOT NULL,
@@ -2056,7 +2072,7 @@
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 重複交易表
+    -- (測試中)重複交易表
     CREATE TABLE recurring_transactions (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         ledger_id                        BIGINT        NOT NULL,
@@ -2073,11 +2089,14 @@
         exchange_rate_used               DECIMAL(18,8) NULL,                            -- 當下換算匯率 (外幣交易使用)
 
         recurrence_frequency_id          BIGINT        NOT NULL,                        -- 週期規則(如 一月一次、每日一次 等等，應由後端設定)
+        next_run_date                    DATE          NULL,                            -- 下次執行日期
+        last_run_date                    DATE          NULL,                            -- 上次執行日期
         start_date                       DATE          NOT NULL,
         end_date                         DATE          NULL,
         is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
 
         note                             VARCHAR(255),
+        transaction_status_id            BIGINT        NOT NULL,
 
         created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -2087,16 +2106,18 @@
         INDEX(account_id),
         INDEX(ledger_id),
         INDEX(recurrence_frequency_id),
+        INDEX(next_run_date, is_active),
         
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (recurrence_frequency_id) REFERENCES flow_frequencys(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (recurrence_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 重複交易關聯表 (不同交易之間的關聯)
+    -- (測試中)重複交易關聯表 (不同交易之間的關聯)
     CREATE TABLE recurring_transaction_links (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         recurring_transaction_id         BIGINT        NOT NULL,
@@ -2107,12 +2128,11 @@
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
-        CHECK (recurring_transaction_id <> related_recurring_transaction_id),           -- (後端應避免雙向連結)
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 重複交易子表 (收支)
+    -- (測試中)重複交易子表 (收支)
     CREATE TABLE cashflow_recurring_transaction_details (
         recurring_transaction_id         BIGINT        PRIMARY KEY,
         category_id                      BIGINT        NOT NULL,
