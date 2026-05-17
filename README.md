@@ -1889,11 +1889,13 @@
     -- (測試中)大分類表
     CREATE TABLE category_groups (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        ledger_id                        BIGINT        NOT NULL,
+        user_id                          BIGINT        NULL,                            -- 使用者名稱 (使用者可以自訂大分類與小分類)
+        ledger_type_id                   BIGINT        NOT NULL,
         category_type_id                 BIGINT        NOT NULL,                        -- 分類類型
         code                             VARCHAR(30)   NOT NULL,                        -- 大分類代號
         name                             VARCHAR(50)   NOT NULL,                        -- 大分類名稱
         icon_id                          BIGINT        NULL,
+        note                             VARCHAR(255),
 
         is_system                        BOOLEAN       NOT NULL DEFAULT FALSE,
         is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
@@ -1902,9 +1904,9 @@
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE(ledger_id, name),
-        
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        UNIQUE(user_id, ledger_type_id, code),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (category_type_id) REFERENCES category_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
@@ -1916,12 +1918,13 @@
         code                             VARCHAR(30)   NOT NULL,                        -- 小分類代號
         name                             VARCHAR(50)   NOT NULL,                        -- 小分類名稱
         icon_id                          BIGINT        NULL,
+        note                             VARCHAR(255),
         is_system                        BOOLEAN       NOT NULL DEFAULT FALSE,
         is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
         created_date                     DATETIME      NOT NULL,		                -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(category_group_id, name),
+        UNIQUE(category_group_id, code),
         INDEX(category_group_id),
         FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
@@ -1941,19 +1944,23 @@
     -- 交易商店表 
     CREATE TABLE merchants (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        country_id                       BIGINT        NULL,
-        ledger_id                        BIGINT        NOT NULL,
+        country_id                       BIGINT        NULL,                            -- 國別 (系統預設帶出該國別的商店)
+        user_id                          BIGINT        NULL,                            -- 使用者名稱 (使用者可以自訂商店)
         merchant_type_id                 BIGINT        NOT NULL,                        -- 商店 / 公司類型
+        code                             VARCHAR(50)   NOT NULL,                        -- 商店 / 公司代號
         name                             VARCHAR(100)  NOT NULL,                        -- 商店 / 公司名稱
+        icon_id                          BIGINT        NULL,
+        note                             VARCHAR(255),
+        is_system                        BOOLEAN       NOT NULL DEFAULT FALSE,
+        is_active                        BOOLEAN       NOT NULL DEFAULT TRUE,
         created_date                     DATETIME      NOT NULL,	                    -- 建立時間 (由後端寫入)
         updated_date                     DATETIME      NOT NULL,	                    -- 更新時間 (由後端寫入)
         deleted_date                     DATETIME      NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(ledger_id, name),
-        INDEX(ledger_id),
-        INDEX(merchant_type_id),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        UNIQUE(user_id, code),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 交易類型表
