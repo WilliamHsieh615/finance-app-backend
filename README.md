@@ -281,17 +281,6 @@
         FOREIGN KEY (financial_institution_type_group_id) REFERENCES financial_institution_type_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 金融機構能力表 (業務範圍)
-    CREATE TABLE financial_institution_capabilities (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
-        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        note                             VARCHAR(255),
-        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
     -- (測試中)金融機構集團表
     CREATE TABLE financial_institution_groups (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -328,6 +317,47 @@
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_type_id) REFERENCES financial_institution_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 金融機構識別碼類型表
+    CREATE TABLE financial_institution_identifier_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (SWIFT、BANK_CODE、TAX_ID、STOCK_CODE、ROUTING_NUMBER、IBAN_PREFIX、LICENSE_NO)
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 金融機構識別碼表
+    CREATE TABLE financial_institution_identifiers (
+        id                                       BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        country_id                               BIGINT         NULL,
+        financial_institution_group_id           BIGINT         NULL,
+        financial_institution_id                 BIGINT         NULL,
+        financial_institution_identifier_type_id BIGINT         NOT NULL,
+        identifier_value                         VARCHAR(100)   NOT NULL,
+        is_primary                               BOOLEAN        DEFAULT FALSE,
+        created_date                             DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                             DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                             DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        UNIQUE(financial_institution_identifier_type_id, identifier_value),
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_identifier_type_id) REFERENCES financial_institution_identifier_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 金融機構能力表 (業務範圍)
+    CREATE TABLE financial_institution_capabilities (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 金融機構在某個國家的能力關聯表 (金融機構在某國家的業務範圍)
