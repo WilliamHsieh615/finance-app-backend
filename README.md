@@ -289,7 +289,6 @@
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構集團名稱 (例如：國泰金控、富邦金控)
         legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構集團正式名稱
         is_active                        BOOLEAN        DEFAULT TRUE,
-        image_url                        VARCHAR(255)   NULL,                            -- 金融機構集團logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -319,7 +318,7 @@
         FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 金融機構識別碼類型表
+    -- (測試中)金融機構識別碼類型表
     CREATE TABLE financial_institution_identifier_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (SWIFT、BANK_CODE、TAX_ID、STOCK_CODE、ROUTING_NUMBER、IBAN_PREFIX、LICENSE_NO)
