@@ -307,7 +307,6 @@
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華銀行、台本富邦銀行、國泰人壽、IB、Binance)
         legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構正式名稱
         is_active                        BOOLEAN        DEFAULT TRUE,
-        image_url                        VARCHAR(255)   NULL,                            -- 金融機構logo
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL,                        -- 建立時間 (由後端寫入)
         updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
@@ -329,7 +328,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- 金融機構識別碼表
+    -- (測試中)金融機構識別碼表
     CREATE TABLE financial_institution_identifiers (
         id                                       BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                               BIGINT         NULL,
