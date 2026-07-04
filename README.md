@@ -11,7 +11,7 @@
         resource_url                     VARCHAR(255)   NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -24,7 +24,7 @@
         provider_url                     VARCHAR(255)   NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -34,7 +34,7 @@
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 資料表代號
         name                             VARCHAR(50)    NOT NULL,                        -- 資料表名稱
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -45,7 +45,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
     
@@ -60,7 +60,7 @@
         is_previewable                   BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否可以預覽
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -87,7 +87,7 @@
         is_system                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否來自系統
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         INDEX (entity_type_id, entity_id),
         INDEX (user_id),
@@ -114,7 +114,7 @@
         is_system                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否來自系統
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE SET NULL ON UPDATE CASCADE
@@ -133,7 +133,7 @@
         image_url                        VARCHAR(255)   NULL,                            -- 國旗
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -147,7 +147,7 @@
         has_dst                          BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否有夏令時間
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                 -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -160,7 +160,7 @@
         is_default                       BOOLEAN        DEFAULT TRUE,                    -- 是否為預設時區
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (country_id, timezone_id),
@@ -176,7 +176,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 貨幣名稱 (新台幣、美元、日幣...)
         symbol                           VARCHAR(10)    NULL,                            -- 貨幣符號 (NT$、$、¥、€、£、₩、₽...)
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -187,7 +187,7 @@
         currency_id                      BIGINT         NOT NULL,
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (currency_id, country_id),
@@ -202,7 +202,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -216,7 +216,7 @@
         is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設語言
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (country_id, language_id),
@@ -232,7 +232,7 @@
         field_name                       VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (entity_type, entity_id, field_name)
     );
@@ -249,7 +249,7 @@
         is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (translation_key_id, language_id, version),
@@ -264,7 +264,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -276,7 +276,7 @@
         name                                VARCHAR(50)    NOT NULL,                        -- 名稱
         note                                VARCHAR(255),
         created_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                        DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                        DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (financial_institution_type_group_id) REFERENCES financial_institution_type_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -291,7 +291,7 @@
         is_active                        BOOLEAN        DEFAULT TRUE,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(country_id, code),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -309,7 +309,7 @@
         is_active                        BOOLEAN        DEFAULT TRUE,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(country_id, code),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -324,7 +324,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -338,7 +338,7 @@
         identifier_value                         VARCHAR(100)   NOT NULL,
         is_primary                               BOOLEAN        DEFAULT FALSE,
         created_date                             DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                             DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                             DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                             DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(financial_institution_identifier_type_id, identifier_value),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -354,7 +354,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -370,7 +370,7 @@
         effective_to                        DATE           NULL,
 
         created_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                        DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                        DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(country_id, financial_institution_id, financial_institution_capability_id, effective_from),
@@ -386,21 +386,21 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 金融機構集團變更表
     CREATE TABLE financial_institution_group_changes (
-        id                                    BIGINT       AUTO_INCREMENT PRIMARY KEY,
-        financial_institution_change_type_id  BIGINT       NOT NULL,
-        source_financial_institution_group_id BIGINT       NOT NULL,
-        target_financial_institution_group_id BIGINT       NULL,
-        effective_date                        DATE         NULL,
+        id                                    BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        financial_institution_change_type_id  BIGINT         NOT NULL,
+        source_financial_institution_group_id BIGINT         NOT NULL,
+        target_financial_institution_group_id BIGINT         NULL,
+        effective_date                        DATE           NULL,
         note                                  VARCHAR(255),
         created_date                          DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                          DATETIME     NOT NULL,                     -- 更新時間 (由後端寫入)
-        deleted_date                          DATETIME     NULL,                         -- 刪除時間 (由後端寫入)
+        updated_date                          DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                          DATETIME       NULL,                         -- 刪除時間 (由後端寫入)
         FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (source_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (target_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -408,15 +408,15 @@
     
     -- 金融機構變更表
     CREATE TABLE financial_institution_changes (
-        id                                   BIGINT     AUTO_INCREMENT PRIMARY KEY,
-        financial_institution_change_type_id BIGINT     NOT NULL,
-        source_financial_institution_id      BIGINT     NOT NULL,
-        target_financial_institution_id      BIGINT     NULL,
-        effective_date                       DATE       NULL,
+        id                                   BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        financial_institution_change_type_id BIGINT         NOT NULL,
+        source_financial_institution_id      BIGINT         NOT NULL,
+        target_financial_institution_id      BIGINT         NULL,
+        effective_date                       DATE           NULL,
         note                                 VARCHAR(255),
         created_date                         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                         DATETIME   NOT NULL,                        -- 更新時間 (由後端寫入)
-        deleted_date                         DATETIME   NULL,                            -- 刪除時間 (由後端寫入)
+        updated_date                         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                         DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (source_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (target_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -430,7 +430,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -447,7 +447,7 @@
         rate_datetime                    DATETIME       NOT NULL,                        -- 匯率時間
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (exchange_rate_source_id, base_currency_id, quote_currency_id, rate_datetime),
@@ -476,7 +476,7 @@
         sms_verified                     BOOLEAN        DEFAULT FALSE,                   -- 簡訊驗證
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -489,7 +489,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、使用者
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -499,7 +499,7 @@
         user_id                          BIGINT         NOT NULL,
         role_id                          BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (user_id, role_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -513,7 +513,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -525,7 +525,7 @@
         referral_code_type_id            BIGINT         NOT NULL,
         is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (referral_code_type_id) REFERENCES referral_code_types(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -538,7 +538,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -554,7 +554,7 @@
         reward_granted                   BOOLEAN        DEFAULT FALSE,                   -- 推薦獎金是否已發放
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         completed_date                   DATETIME       NULL,
 
         UNIQUE (referee_id, referral_code_id),
@@ -570,7 +570,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APPLE、GOOGLE)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
     );
 
@@ -582,7 +582,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         is_active                        BOOLEAN        DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (distribution_platform_company_id) REFERENCES distribution_platform_companies(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -595,7 +595,7 @@
         name                             VARCHAR(50)    NOT NULL,
         duration_days                    INT            NOT NULL,                        -- 訂閱時效 (30天、365天)
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (distribution_platform_id, code),
         FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -612,7 +612,7 @@
         end_date                         DATE           NOT NULL,
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (subscription_plan_id, country_id, currency_id, start_date, end_date),
@@ -628,7 +628,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (啟動、過期、取消)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -646,7 +646,7 @@
         auto_renew                       BOOLEAN        DEFAULT TRUE,                    -- 是否自動續費
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -662,7 +662,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -688,7 +688,7 @@
         original_transaction_number      VARCHAR(100)   NULL,                            -- 訂閱起點編號 (訂閱平台提供)
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (distribution_platform_id, provider_transaction_number),
@@ -706,7 +706,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (百分比、固定)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -727,7 +727,7 @@
         start_date                       DATE           NOT NULL,                        -- 開始日
         end_date                         DATE           NOT NULL,                        -- 到期日
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (discount_type_id) REFERENCES discount_types(id)
     );
@@ -738,7 +738,7 @@
         user_id                          BIGINT         NOT NULL,
         discount_id                      BIGINT         NOT NULL, 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (user_id, discount_id),
         UNIQUE (discount_id, order_id),
@@ -754,7 +754,7 @@
         order_id                         BIGINT         NOT NULL,
         used_date                        DATETIME       NOT NULL,                        -- 使用時間
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (discount_id) REFERENCES discounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -768,7 +768,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 加值稅、營業稅
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
     );
 
@@ -791,7 +791,7 @@
         effective_to                     DATE           NULL,                            -- 有限時間(迄)
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
 
@@ -806,7 +806,7 @@
         tax_id                           BIGINT         NOT NULL,
         tax_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計稅金
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (order_id, tax_id),
         FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -820,7 +820,7 @@
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
     );
 
@@ -845,7 +845,7 @@
         effective_to                     DATE           NULL,                            -- 有限時間(迄)
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -861,7 +861,7 @@
         fee_id                           BIGINT         NOT NULL,
         fee_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計費用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (order_id, fee_id),
         FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -875,7 +875,7 @@
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
     );
 
@@ -886,7 +886,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 待退款、退款成功、退款失敗
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
     );
 
@@ -902,7 +902,7 @@
         refund_transaction_status_id     BIGINT         NOT NULL,
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -917,7 +917,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (地理、經濟、金融、政治)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -929,7 +929,7 @@
         market_type_id                   BIGINT         NOT NULL,                        -- 市場種類
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name),
         FOREIGN KEY (market_type_id) REFERENCES market_types(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -941,7 +941,7 @@
         market_id                        BIGINT         NOT NULL,
         country_id                       BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (market_id, country_id),
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -950,15 +950,15 @@
 
     -- 債務人表
     CREATE TABLE debtors (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        name                             VARCHAR(100)  NOT NULL,
-        phone                            VARCHAR(50)   NULL,
-        email                            VARCHAR(100)  NULL,
-        address                          VARCHAR(255)  NULL,
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        name                             VARCHAR(100)   NOT NULL,
+        phone                            VARCHAR(50)    NULL,
+        email                            VARCHAR(100)   NULL,
+        address                          VARCHAR(255)   NULL,
         notes                            VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME      NOT NULL,		                -- 更新時間 (由後端寫入)
-        deleted_date                     DATETIME      NULL                             -- 刪除時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- (測試中)流向類型表
@@ -968,7 +968,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 你還錢給他(債務面)、他支付給你(投資面)、他把錢還給你(債務面)、你支付給他(投資面)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -979,7 +979,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -992,7 +992,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(code, flow_type_id, frequency_id),
         FOREIGN KEY (flow_type_id) REFERENCES flow_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1006,7 +1006,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 存貨、金融商品、商品期貨
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1018,7 +1018,7 @@
         unit_type_id                     BIGINT         NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (unit_type_id) REFERENCES unit_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -1031,7 +1031,7 @@
         icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
@@ -1050,7 +1050,7 @@
         archived_date                    DATETIME       NULL,                            -- 封存時間
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(user_id, name),
@@ -1066,7 +1066,7 @@
         name                             VARCHAR(50)    NOT NULL,                       -- 擁有者、管理員、可編輯、只能看、
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
     );
 
@@ -1078,7 +1078,7 @@
         ledger_member_role_id            BIGINT         NOT NULL,                       -- 權限設定
         joined_date                      DATETIME       NOT NULL,                       -- 加入時間
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
         UNIQUE (user_id, ledger_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1094,7 +1094,7 @@
         is_derivative                    BOOLEAN        DEFAULT FALSE,                   -- 是否為衍生性商品
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1108,7 +1108,7 @@
         note                             VARCHAR(255),
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1133,7 +1133,7 @@
         note                             VARCHAR(255),
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(code, exchange_id),
@@ -1151,7 +1151,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 股票型、債券型、平衡型、貨幣市場型、指數型、其他
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1178,7 +1178,7 @@
         country_id                       BIGINT         NOT NULL,                        -- 所屬國家
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -1190,7 +1190,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 政府債、公司債、市政債
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
     
@@ -1226,7 +1226,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 買權 Call Option、賣權 Put Option
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1249,7 +1249,7 @@
         price_date                       DATE           NOT NULL,
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                 -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
         INDEX(investment_product_id, price_date),
         INDEX(price_date),
@@ -1267,7 +1267,7 @@
         scale_max                        INT NOT NULL,                                  -- 5 / 10
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -1284,7 +1284,7 @@
         rank_order                       INT            NOT NULL,                        -- 排序用 (1 = 最安全)
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
         UNIQUE(risk_rating_system_id, code),
@@ -1302,7 +1302,7 @@
         effective_to                     DATE           NULL,
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(investment_product_id, risk_rating_system_id, effective_from),
@@ -1330,7 +1330,7 @@
         direction                        TINYINT        NOT NULL,                        -- 正向 / 負向
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         CHECK (direction IN (1, -1)),
@@ -1353,7 +1353,7 @@
         note                             VARCHAR(255),                                  -- 備註
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(ledger_id, name),
@@ -1372,7 +1372,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 固定、流動
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1385,7 +1385,7 @@
         start_date                       DATE           NOT NULL,                        -- 開始日
         end_date                         DATE           NULL,                            -- 到期日
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         INDEX(account_id, start_date, end_date),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1399,7 +1399,7 @@
         tax_id                           BIGINT         NOT NULL,
         tax_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計稅金
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (account_id, tax_id),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1413,7 +1413,7 @@
         fee_id                           BIGINT         NOT NULL,
         fee_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計費用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (account_id, fee_id),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1427,7 +1427,7 @@
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1455,7 +1455,7 @@
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
     );
 
@@ -1470,7 +1470,7 @@
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payment_network_type_id) REFERENCES payment_network_types(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1484,7 +1484,7 @@
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
     );
 
@@ -1498,7 +1498,7 @@
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,
         UNIQUE(payment_network_id, card_tier_id),
         FOREIGN KEY (payment_network_id) REFERENCES payment_networks(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1512,7 +1512,7 @@
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
     );
 
@@ -1537,7 +1537,7 @@
         card_capability_id               BIGINT         NOT NULL,
         is_active                        BOOLEAN        DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (account_id, card_capability_id),
         FOREIGN KEY (account_id) REFERENCES bank_cards(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1573,7 +1573,7 @@
         card_capability_id               BIGINT         NOT NULL,
         is_active                        BOOLEAN        DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (account_id, card_capability_id),
         FOREIGN KEY (account_id) REFERENCES credit_card_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1587,7 +1587,7 @@
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
     );
 
@@ -1605,7 +1605,7 @@
         terminated_date                  DATE           NULL,                        -- 終止時間
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1640,7 +1640,7 @@
         last_updated_price_date          DATETIME       NOT NULL,                        -- 報價更新時間
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
         UNIQUE(account_id, investment_product_id),
 
@@ -1711,7 +1711,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (房屋、車輛、家電、電子產品)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1722,7 +1722,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1751,7 +1751,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (食品、飲品、消耗品、備件、辦公用品)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1762,7 +1762,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (先進先出法、後進先出法、加權平均法)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1788,7 +1788,7 @@
         name                             VARCHAR(50)    NOT NULL,                       -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
     );
     
@@ -1804,7 +1804,7 @@
         end_date                         DATE           NULL,                           -- 到期日
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1827,7 +1827,7 @@
         name                             VARCHAR(50)    NOT NULL,                       -- 名稱 (等額本息或本息平均、等額本金或本金平均、只還利息)
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                       -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
     );
 
@@ -1888,7 +1888,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 手動、合約、匯入
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1900,7 +1900,7 @@
         source_id                        BIGINT         NULL,                            -- transaction_source_type 為 MANUAL 時 = NULL
                                                                                            transaction_source_type 為 CONTRACT 時 = contract_id
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (transaction_source_type_id) REFERENCES transaction_source_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1914,7 +1914,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
     
@@ -1933,7 +1933,7 @@
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(user_id, ledger_type_id, code),
@@ -1954,7 +1954,7 @@
         is_system                        BOOLEAN        NOT NULL DEFAULT FALSE,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(category_group_id, code),
         INDEX(category_group_id),
@@ -1969,7 +1969,7 @@
         name                             VARCHAR(100)   NOT NULL,                        -- 餐廳、超市、公共事業
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
@@ -1986,7 +1986,7 @@
         is_system                        BOOLEAN        NOT NULL DEFAULT FALSE,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,	                    -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(user_id, code),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -2012,7 +2012,7 @@
         note                             VARCHAR(255),
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
         
         UNIQUE (ledger_type_id, code),
@@ -2026,7 +2026,7 @@
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
     );
 
@@ -2051,7 +2051,7 @@
         transaction_status_id            BIGINT         NOT NULL,                        -- 交易狀態
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
         INDEX (account_id, transaction_date),
@@ -2074,7 +2074,7 @@
         related_transaction_id           BIGINT         NOT NULL,
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(transaction_id, related_transaction_id),
@@ -2127,7 +2127,7 @@
         transaction_status_id            BIGINT         NOT NULL,
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         INDEX(start_date),
@@ -2152,7 +2152,7 @@
         related_recurring_transaction_id BIGINT         NOT NULL,
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
@@ -2177,7 +2177,7 @@
         name                             VARCHAR(50)    NOT NULL,
         color                            VARCHAR(20),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (ledger_id, name),
         FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -2189,7 +2189,7 @@
         transaction_id                   BIGINT         NOT NULL,
         tag_id                           BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (transaction_id, tag_id),
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -2202,7 +2202,7 @@
         recurring_transaction_id         BIGINT         NOT NULL,
         tag_id                           BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (recurring_transaction_id, tag_id),
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -2224,7 +2224,7 @@
         safety_amount                    DECIMAL(18,8)  NULL,                            -- 安全金額 (低於安全金額可設定提醒)
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (ledger_id, name),
@@ -2242,7 +2242,7 @@
         spent_amount                     DECIMAL(18,8)  DEFAULT 0,                       -- 已花費金額（可快取）
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,                        -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (general_budget_id, category_id),
@@ -2257,23 +2257,23 @@
         name                             VARCHAR(100)   NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL,		                 -- 更新時間 (由後端寫入)
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 帳戶調整表 (會計用)
     CREATE TABLE account_adjustments (
-        id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
-        account_id                       BIGINT        NOT NULL,
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT         NOT NULL,
 
-        before_balance                   DECIMAL(18,8) NOT NULL,                        -- 調整前餘額
-        after_balance                    DECIMAL(18,8) NOT NULL,                        -- 調整後餘額
+        before_balance                   DECIMAL(18,8)  NOT NULL,                        -- 調整前餘額
+        after_balance                    DECIMAL(18,8)  NOT NULL,                        -- 調整後餘額
 
-        account_adjustment_reason_id     BIGINT        NOT NULL,
+        account_adjustment_reason_id     BIGINT         NOT NULL,
         note                             VARCHAR(255),
 
-        created_by                       BIGINT        NOT NULL,                        -- 誰做的調整
-        created_date                     DATETIME      NOT NULL,                        -- 建立時間 (由後端寫入)
+        created_by                       BIGINT         NOT NULL,                        -- 誰做的調整
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
