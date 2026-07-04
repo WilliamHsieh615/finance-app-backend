@@ -1,4 +1,4 @@
-# FinFun：方方面面記帳，讓理財變有趣
+# FinFun｜讓理財變得更有趣
 
     USE finance_app;
 
