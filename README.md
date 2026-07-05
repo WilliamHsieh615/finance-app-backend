@@ -175,6 +175,16 @@
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 貨幣碼 (TWD、USD、JPY...)
         name                             VARCHAR(100)   NOT NULL,                        -- 貨幣名稱 (新台幣、美元、日幣...)
         symbol                           VARCHAR(10)    NULL,                            -- 貨幣符號 (NT$、$、¥、€、£、₩、₽...)
+        decimal_places                   DECIMAL(18,8)  NULL,                            -- 該貨幣最小法定單位（用於前端顯示
+                                                                                            例如：TWD 0.01
+                                                                                                 USD 0.01
+                                                                                                 EUR 0.01
+                                                                                                 JPY 1
+                                                                                                 KRW 1
+                                                                                                 VND 1
+                                                                                                 KWD 0.001
+                                                                                                 BHD 0.001
+                                                                                                 BTC 0.00000001）
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -2385,6 +2395,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- BILL_DUE、BUDGET_OVER、SUBSCRIPTION_EXPIRED、PRICE_ALERT
         name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -2395,13 +2406,15 @@
     CREATE TABLE notifications (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         notification_type_id             BIGINT         NOT NULL,
+        
         entity_type_id                   BIGINT         NULL,
         entity_id                        BIGINT         NULL,
+        
         title                            VARCHAR(100)   NOT NULL,
         message                          VARCHAR(500)   NOT NULL,
         payload                          JSON           NULL,
-        frequency_id                     BIGINT         NULL,                            -- 週期性通知使用(提醒頻率)
-        scheduled_date                   DATETIME       NULL,                            -- 一次性通知使用(提醒日)
+        
+        created_by                       BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,
@@ -2410,28 +2423,136 @@
         INDEX(entity_type_id, entity_id),
         FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 提醒排程狀態表
+    CREATE TABLE notification_schedule_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- ACTIVE、PAUSED、FINISHED、CANCELLED
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 提醒排程表
+    CREATE TABLE notification_schedules (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        notification_id                  BIGINT         NOT NULL,
+        frequency_id                     BIGINT         NULL,                            -- 週期性通知使用(提醒頻率)
+        scheduled_date                   DATETIME       NULL,                            -- 一次性通知使用(提醒日)
+
+        is_repeat                        BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否週期性重複提醒
+        is_reminder                      BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否單次重複提醒
+        
+        max_notify_count                 INT            NULL,                            -- 最多重複提醒幾次
+        notify_count                     INT            DEFAULT 0,                       -- 目前已提醒幾次
+        next_notify_date                 DATETIME       NULL,                            -- 下一次提醒日
+        last_notify_date                 DATETIME       NULL,                            -- 上次提醒日
+        
+        max_reminder_count               INT            NULL,                            -- 最多單次重複提醒幾次
+        reminder_count                   INT            DEFAULT 0,                       -- 目前單次已提醒幾次
+        next_reminder_date               DATETIME       NULL,                            -- 下一次單次重複提醒日
+        
+        notification_schedule_status_id  BIGINT         NOT NULL,
+        
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (frequency_id) REFERENCES frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (notification_schedule_status_id) REFERENCES notification_schedule_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 提醒狀態表
+    CREATE TABLE notification_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- PENDING、SENT、READ、FAILED、CANCELLED
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- 使用者提醒關聯表
-    CREATE TABLE user_has_notifications (
+    CREATE TABLE user_notifications (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         notification_id                  BIGINT         NOT NULL,
-
-        is_read                          BOOLEAN NOT NULL DEFAULT FALSE,
-        read_date                        DATETIME NULL,
-        is_sent                          BOOLEAN NOT NULL DEFAULT FALSE,
-        sent_date                        DATETIME NULL,
-
-        created_date                     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date DATETIME NULL,
-
+        notification_status_id           BIGINT         NOT NULL,
+        notification_status_date         DATETIME       NOT NULL,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
         UNIQUE(user_id, notification_id),
-        INDEX(user_id, is_read),
+        INDEX(notification_status_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_status_id) REFERENCES notification_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 提醒通路表
+    CREATE TABLE notification_channels (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- APP_PUSH、EMAIL、SMS、LINE、WEBHOOK
+        name                             VARCHAR(100)   NOT NULL,
+        sort_order                       INT            NOT NULL DEFAULT 0,              -- 排序順序
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 使用者提醒通路設定表
+    CREATE TABLE user_notification_channel_settings (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        notification_type_id             BIGINT         NOT NULL,
+        notification_channel_id          BIGINT         NOT NULL,
+        is_enabled                       BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE(user_id, notification_channel_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_channel_id) REFERENCES notification_channels(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 提醒寄送狀態表
+    CREATE TABLE notification_send_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- PENDING、SUCCESS、FAILED、RETRY、CANCELLED
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- 提醒寄送紀錄表
+    CREATE TABLE notification_send_logs (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_notification_id             BIGINT         NOT NULL,
+        notification_schedule_id         BIGINT         NOT NULL,
+        notification_channel_id          BIGINT         NOT NULL,
+        notification_send_status_id      BIGINT         NOT NULL,
+        sent_date                        DATETIME       NOT NULL,
+        error_message                    VARCHAR(255)   NULL,
+        provider_response                VARCHAR(500)   NULL,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        
+        INDEX(user_notification_id),
+        INDEX(notification_schedule_id),
+        FOREIGN KEY (user_notification_id) REFERENCES user_notifications(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_schedule_id) REFERENCES notification_schedules(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_channel_id) REFERENCES notification_channels(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_send_status_id) REFERENCES notification_send_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶調整原因表
