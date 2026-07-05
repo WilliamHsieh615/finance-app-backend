@@ -2442,20 +2442,44 @@
         FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 登入紀錄表
-    CREATE TABLE login_histories (
+    -- 使用者登入狀態表
+    CREATE TABLE user_login_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼（SUCCESS、INVALID_PASSWORD、USER_NOT_FOUND、ACCOUNT_LOCKED
+                                                                                                 ACCOUNT_DISABLED、EMAIL_NOT_VERIFIED、TOKEN_EXPIRED
+                                                                                                 REFRESH_TOKEN_EXPIRED、MFA_REQUIRED、MFA_FAILED、UNKNOWN_ERROR）
+        name                             VARCHAR(100)   NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 使用者登入紀錄表
+    CREATE TABLE user_login_logs (
         id                               BIGINT        AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT        NULL,
         email                            VARCHAR(255)  NOT NULL,
-        
+        user_login_status_id             BIGINT        NOT NULL,
         login_time                       DATETIME      NOT NULL,
-        user_agent                       VARCHAR(255),
-        ip_address                       VARCHAR(45),
-        success                          BOOLEAN       NOT NULL DEFAULT FALSE,
+        logout_time                      DATETIME      NULL,
+        ip_address                       VARCHAR(45)   NULL,
+        user_agent                       VARCHAR(500)  NULL,
+        device_name                      VARCHAR(100)  NULL,
+        os_name                          VARCHAR(50)   NULL,
+        browser_name                     VARCHAR(50)   NULL,
+        country_id                       BIGINT        NULL,
+        city                             VARCHAR(100)  NULL,
 
         INDEX(user_id, login_time),
+        INDEX(email),
+        INDEX(ip_address),
+        INDEX(user_login_status_id),
 
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (user_login_status_id) REFERENCES user_login_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
 
