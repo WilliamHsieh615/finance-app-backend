@@ -227,14 +227,15 @@
     -- 翻譯鍵表
     CREATE TABLE translation_keys (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        entity_type                      VARCHAR(50)    NOT NULL, 
-        entity_id                        BIGINT         NOT NULL,
-        field_name                       VARCHAR(50)    NOT NULL,
+        entity_type_id                   BIGINT         NOT NULL,                        -- 使用在哪一張表
+        entity_id                        BIGINT         NOT NULL,                        -- 對應表中哪一筆資料的id
+        field_code                       VARCHAR(50)    NOT NULL,                        -- 代號
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE (entity_type, entity_id, field_name)
+        UNIQUE (entity_type_id, entity_id, field_name),
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 翻譯表
