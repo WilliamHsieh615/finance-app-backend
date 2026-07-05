@@ -1563,7 +1563,7 @@
 
     -- 帳戶表子表 (收支帳 → 銀行卡) 
     CREATE TABLE bank_cards (
-        account_id                       BIGINT         NOT NULL,
+        account_id                       BIGINT         PRIMARY KEY,
         payment_network_card_tier_id     BIGINT         NULL,
         name                             VARCHAR(100)   NOT NULL,
         card_number                      VARCHAR(20)    NULL,
@@ -2310,37 +2310,6 @@
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 帳戶調整理由表
-    CREATE TABLE account_adjustment_reasons (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼
-        name                             VARCHAR(100)   NOT NULL,                        -- 名稱
-        note                             VARCHAR(255),
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
-        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
-    );
-
-    -- 帳戶調整表 (會計用)
-    CREATE TABLE account_adjustments (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        account_id                       BIGINT         NOT NULL,
-
-        before_balance                   DECIMAL(18,8)  NOT NULL,                        -- 調整前餘額
-        after_balance                    DECIMAL(18,8)  NOT NULL,                        -- 調整後餘額
-
-        account_adjustment_reason_id     BIGINT         NOT NULL,
-        note                             VARCHAR(255),
-
-        created_by                       BIGINT         NOT NULL,                        -- 誰做的調整
-        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
     -- 使用者餘額快照表 (可作總資產、總負債或淨資產 圓餅圖或曲線圖)
     CREATE TABLE user_balance_snapshots (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -2409,6 +2378,68 @@
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 帳戶調整原因表
+    CREATE TABLE account_adjustment_reasons (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼
+        name                             VARCHAR(100)   NOT NULL,                        -- 名稱
+        note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 帳戶調整表 (會計用)
+    CREATE TABLE account_adjustments (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        account_id                       BIGINT         NOT NULL,
+        account_adjustment_reason_id     BIGINT         NOT NULL,
+        adjustment_amount                DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        note                             VARCHAR(255),
+        created_by                       BIGINT         NOT NULL,                        -- 誰做的調整
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 稽核活動類型表
+    CREATE TABLE audit_action_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- CREATE、UPDATE、SOFT_DELETE、RESTORE、LOGIN、EXPORT
+        name                             VARCHAR(100)   NOT NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 稽核紀錄表
+    CREATE TABLE audit_logs (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NULL,
+        audit_action_type_id             BIGINT         NOT NULL,
+        entity_type_id                   BIGINT         NOT NULL,
+        entity_id                        BIGINT         NOT NULL,
+
+        old_value                        JSON           NULL,
+        new_value                        JSON           NULL,
+
+        ip_address                       VARCHAR(45)    NULL,
+        user_agent                       VARCHAR(255)   NULL,
+        note                             VARCHAR(255),
+        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        INDEX(user_id, created_date),
+        INDEX(entity_type_id, entity_id),
+        INDEX(audit_action_type_id, created_date),
+
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (audit_action_type_id) REFERENCES audit_action_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 登入紀錄表
