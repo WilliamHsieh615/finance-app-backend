@@ -2543,6 +2543,7 @@
         notification_channel_id          BIGINT         NOT NULL,
         notification_send_status_id      BIGINT         NOT NULL,
         notification_send_status_date    DATETIME       NOT NULL,
+        retry_no                         INT            NOT NULL DEFAULT 0               -- 單次重寄的寄次(第幾次)
         error_message                    VARCHAR(255)   NULL,
         provider_response                JSON           NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
