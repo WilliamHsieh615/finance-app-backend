@@ -95,7 +95,7 @@
         INDEX (entity_type_id, entity_id),
         INDEX (user_id),
         INDEX (file_role_id),
-        UNIQUE(entity_type_id, entity_id, file_role_id),
+        UNIQUE(entity_type_id, entity_id, file_role_id, sort_order),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (storage_provider_id) REFERENCES storage_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1170,7 +1170,7 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE(code, exchange_id),
+        UNIQUE(market_id, exchange_id, code),
         FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1418,7 +1418,9 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         account_id                       BIGINT         NOT NULL,
         interest_rate_type_id            BIGINT         NOT NULL,
-        interest_rate                    DECIMAL(18,8)  NOT NULL,                        -- 利率 %
+        base_rate                        DECIMAL(18,8)  NOT NULL COMMENT '基準利率(%)',
+        spread_rate                      DECIMAL(18,8)  NOT NULL COMMENT '加碼利率(%)',
+        effective_apr                    DECIMAL(18,8)  NOT NULL COMMENT '總費用年百分率(%)',
         start_date                       DATE           NOT NULL,                        -- 開始日
         end_date                         DATE           NULL,                            -- 到期日
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -2041,7 +2043,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE(user_id, code),
+        UNIQUE(user_id, country_id, code),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -2240,7 +2242,7 @@
     );
 
     -- 交易與標籤關聯表
-    CREATE TABLE transaction_tag_links (
+    CREATE TABLE transaction_has_tags (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         transaction_id                   BIGINT         NOT NULL,
         tag_id                           BIGINT         NOT NULL,
@@ -2253,7 +2255,7 @@
     );
 
     -- 重複交易與標籤關聯表
-    CREATE TABLE recurring_transaction_tag_links (
+    CREATE TABLE recurring_transaction_has_tags (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         recurring_transaction_id         BIGINT         NOT NULL,
         tag_id                           BIGINT         NOT NULL,
