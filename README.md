@@ -54,7 +54,7 @@
     -- (測試中)檔案類型表
     CREATE TABLE file_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF、SVG、WEBP)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF、SVG、WEBP)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (JPEG Image、PNG Image、PDF File)
         mime_type                        VARCHAR(100)   NOT NULL,                        -- 格式類型 (text/plain、image/jpeg、image/png、application/pdf)
         extension                        VARCHAR(20)    NOT NULL,                        -- 副檔名 (.jpg、.png、.pdf)
@@ -140,7 +140,7 @@
     -- (測試中)時區表
     CREATE TABLE timezones (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL,                        -- 時區代碼 (UTC、EST、CST)
+        code                             VARCHAR(50)    NOT NULL,                        -- 時區代碼 (UTC、EST、CST)
         iana_name                        VARCHAR(50)    NOT NULL UNIQUE,                 -- IANA 時區名稱 (Etc/UTC、America/New_York、Asia/Taipei)
         name                             VARCHAR(100),                                   -- 名稱 (協調世界時間、美國東部時間、中原標準時間)
         utc_offset                       int            NOT NULL,                        -- 偏移 (存秒數)，為時區參考值，方便後端計算，實際為 IANA 計算
@@ -172,7 +172,7 @@
     -- (測試中)貨幣表
     CREATE TABLE currencies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             CHAR(3)        NOT NULL UNIQUE,                 -- 貨幣碼 (TWD、USD、JPY...)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 貨幣碼 (TWD、USD、JPY...)
         name                             VARCHAR(50)    NOT NULL,                        -- 貨幣名稱 (新台幣、美元、日幣...)
         symbol                           VARCHAR(10)    NULL,                            -- 貨幣符號 (NT$、$、¥、€、£、₩、₽...)
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -198,7 +198,7 @@
     -- (測試中)語言表
     CREATE TABLE languages (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(10)    NOT NULL UNIQUE,                 -- 代號
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -261,7 +261,7 @@
     -- (測試中)金融機構大類表
     CREATE TABLE financial_institution_type_groups (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (BANK, BROKER, INSURANCE, EXCHANGE, CRYPTO)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (BANK, BROKER, INSURANCE, EXCHANGE, CRYPTO)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -274,7 +274,7 @@
     CREATE TABLE financial_institution_types (
         id                                  BIGINT         AUTO_INCREMENT PRIMARY KEY,
         financial_institution_type_group_id BIGINT         NOT NULL,
-        code                                VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        code                                VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
         name                                VARCHAR(50)    NOT NULL,                        -- 名稱
         note                                VARCHAR(255),
         is_active                           BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -323,7 +323,7 @@
     -- (測試中)金融機構識別碼類型表
     CREATE TABLE financial_institution_identifier_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (SWIFT、BANK_CODE、TAX_ID、STOCK_CODE、ROUTING_NUMBER、IBAN_PREFIX、LICENSE_NO)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (SWIFT、BANK_CODE、TAX_ID、STOCK_CODE、ROUTING_NUMBER、IBAN_PREFIX、LICENSE_NO)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -354,7 +354,7 @@
     -- 金融機構能力表 (業務範圍)
     CREATE TABLE financial_institution_capabilities (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -387,7 +387,7 @@
     -- 金融機構變更類型表
     CREATE TABLE financial_institution_change_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號(MERGER、ACQUISITION、RENAME、SPLIT、DISSOLUTION、LICENSE_REVOKED)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號(MERGER、ACQUISITION、RENAME、SPLIT、DISSOLUTION、LICENSE_REVOKED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -431,7 +431,7 @@
     CREATE TABLE exchange_rate_sources (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         financial_institution_id         BIGINT         NULL,
-        code                             CHAR(3)        NOT NULL UNIQUE,                 -- 代碼 (ECB、yahoo)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼 (ECB、yahoo)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -491,7 +491,7 @@
     -- (測試中)角色表
     CREATE TABLE roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, USER
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, USER
         name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、使用者
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -517,7 +517,7 @@
     -- 推薦碼類型表
     CREATE TABLE referral_code_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (USER、CAMPAIGN、INFLUENCER)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (USER、CAMPAIGN、INFLUENCER)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -530,7 +530,7 @@
     CREATE TABLE referral_codes (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NULL,                            -- 擁有者
-        code                             VARCHAR(20)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         referral_code_type_id            BIGINT         NOT NULL,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -543,7 +543,7 @@
     -- 使用者推薦狀態表
     CREATE TABLE user_referral_statuses (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、COMPLETED、INVALID)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (PENDING、COMPLETED、INVALID)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -577,7 +577,7 @@
     -- 發行平台公司表
     CREATE TABLE distribution_platform_companies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APPLE、GOOGLE)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (APPLE、GOOGLE)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -589,7 +589,7 @@
     CREATE TABLE distribution_platforms (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         distribution_platform_company_id BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APP_STORE、GOOGLE_PLAY)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (APP_STORE、GOOGLE_PLAY)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -602,7 +602,7 @@
     CREATE TABLE subscription_plans (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         distribution_platform_id         BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL       ,                 -- FREE, PRO, PREMIUM
+        code                             VARCHAR(50)    NOT NULL       ,                 -- FREE, PRO, PREMIUM
         name                             VARCHAR(50)    NOT NULL,
         duration_days                    INT            NOT NULL,                        -- 訂閱時效 (30天、365天)
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -636,7 +636,9 @@
     -- 使用者訂閱狀態表
     CREATE TABLE user_subscription_statuses (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (ACTIVE、EXPIRED、CANCELLED)
+        code                             VARCHAR(50)
+        
+        NOT NULL UNIQUE,                 -- 代號 (ACTIVE、EXPIRED、CANCELLED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (啟動、過期、取消)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -671,7 +673,7 @@
     -- 訂單狀態表
     CREATE TABLE order_statuses (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、SUCCESS、FAILED、REFUNDED)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (PENDING、SUCCESS、FAILED、REFUNDED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -716,7 +718,7 @@
     -- 折扣類型表
     CREATE TABLE discount_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PERCENTAGE、FIXED)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (PERCENTAGE、FIXED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (百分比、固定)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -729,7 +731,7 @@
     CREATE TABLE discounts (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         discount_type_id                 BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         amount                           DECIMAL(18,8)  NOT NULL,                        -- 金額
         total_usage_limit                INT,                                            -- 總使用次數限制
@@ -781,7 +783,7 @@
     -- 稅種表
     CREATE TABLE tax_types (
         id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VAT、SALES_TAX
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- VAT、SALES_TAX
         name                             VARCHAR(50)    NOT NULL,                        -- 加值稅、營業稅
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -796,7 +798,7 @@
         country_id                       BIGINT         NOT NULL,
         tax_type_id                      BIGINT         NOT NULL,
 
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,    
         rate                             DECIMAL(18,8)  NULL,                            -- 稅率 (與稅費二選一填寫)
         amount                           DECIMAL(18,8)  NULL,                            -- 稅費 (與稅率二選一填寫)
@@ -834,7 +836,7 @@
     -- 費用類型表
     CREATE TABLE fee_types (
         id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -851,7 +853,7 @@
         distribution_platform_id         BIGINT         NULL,
         fee_type_id                      BIGINT         NOT NULL,
         
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         rate                             DECIMAL(18,8)  NULL,                            -- 費率 (與費用二選一填寫)
         amount                           DECIMAL(18,8)  NULL,                            -- 費用 (與費率二選一填寫)
@@ -890,7 +892,7 @@
     -- 退款原因表
     CREATE TABLE refund_transaction_reasons (
         id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -902,7 +904,7 @@
     -- 退款狀態表
     CREATE TABLE refund_transaction_statuses (
         id                               BIGINT         PRIMARY KEY AUTO_INCREMENT,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- PENDING、SUCCESS、FAILED
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- PENDING、SUCCESS、FAILED
         name                             VARCHAR(50)    NOT NULL,                        -- 待退款、退款成功、退款失敗
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -934,7 +936,7 @@
     -- 投資市場類型表
     CREATE TABLE market_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (GEOGRAPHIC、ECONOMIC、FINANCIAL、POLITICS)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (GEOGRAPHIC、ECONOMIC、FINANCIAL、POLITICS)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (地理、經濟、金融、政治)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -946,7 +948,7 @@
     -- 投資市場表
     CREATE TABLE markets (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 市場代號 (TW、US、JP、CN、EU、EM、EMERGING、DEVELOPED、ASIA_TIGERS)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 市場代號 (TW、US、JP、CN、EU、EM、EMERGING、DEVELOPED、ASIA_TIGERS)
         name                             VARCHAR(50)    NOT NULL,                        -- 市場名稱 (台灣、美國、日本、中國、歐洲、新興市場、開發中國家、亞洲四小龍)
         market_type_id                   BIGINT         NOT NULL,                        -- 市場種類
         note                             VARCHAR(255),
@@ -989,7 +991,7 @@
     -- (測試中)流向類型表
     CREATE TABLE flow_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- REPAYMENT、PAYOUT、RECOVERY、PAYMENT 
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- REPAYMENT、PAYOUT、RECOVERY、PAYMENT 
         name                             VARCHAR(50)    NOT NULL,                        -- 你還錢給他(債務面)、他支付給你(投資面)、他把錢還給你(債務面)、你支付給他(投資面)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1001,7 +1003,7 @@
     -- (測試中)頻率表
     CREATE TABLE frequencies (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL,                        -- 代號
+        code                             VARCHAR(50)    NOT NULL,                        -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1015,7 +1017,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         flow_type_id                     BIGINT         NOT NULL,
         frequency_id                     BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL,                        -- 代號
+        code                             VARCHAR(50)    NOT NULL,                        -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1030,7 +1032,7 @@
     -- 單位類型表
     CREATE TABLE unit_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- inventory、financial、commodity
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- inventory、financial、commodity
         name                             VARCHAR(50)    NOT NULL,                        -- 存貨、金融商品、商品期貨
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1042,7 +1044,7 @@
     -- 單位表
     CREATE TABLE units (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 單位代碼 (例如 pkg、bottle、piece、contract、share、oz、barrel)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 單位代碼 (例如 pkg、bottle、piece、contract、share、oz、barrel)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (例如 包、瓶、個、合約、股、盎司、桶)
         unit_type_id                     BIGINT         NOT NULL,
         note                             VARCHAR(255),
@@ -1056,7 +1058,7 @@
     -- (測試中)帳本種類表
     CREATE TABLE ledger_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- cashflow、investment、debt、receivable、fixed_asset、inventory
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- cashflow、investment、debt、receivable、fixed_asset、inventory
         name                             VARCHAR(50)    NOT NULL,                        -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
         icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
@@ -1093,7 +1095,7 @@
     -- 帳本成員角色表
     CREATE TABLE ledger_member_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                -- OWNER、ADMIN、EDITOR、VIEWER
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                -- OWNER、ADMIN、EDITOR、VIEWER
         name                             VARCHAR(50)    NOT NULL,                       -- 擁有者、管理員、可編輯、只能看、
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,          -- 是否啟用
@@ -1122,7 +1124,7 @@
     -- 投資產品種類表
     CREATE TABLE investment_product_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- stock、etf、fund、bond、crypto、forex、gold、futures、option
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- stock、etf、fund、bond、crypto、forex、gold、futures、option
         name                             VARCHAR(50)    NOT NULL,                        -- 股票、ETF、基金、債券、虛擬貨幣、外匯、黃金、期貨、選擇權
         is_derivative                    BOOLEAN        DEFAULT FALSE,                   -- 是否為衍生性商品
         note                             VARCHAR(255),
@@ -1135,7 +1137,7 @@
     -- 交易所表
     CREATE TABLE exchanges (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
         name                             VARCHAR(50)    NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
         country_id                       BIGINT         NULL,                            -- 所屬國家
         timezone_id                      BIGINT         NULL,                            -- 時區
@@ -1181,7 +1183,7 @@
     -- 基金類型表
     CREATE TABLE fund_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- equity、bond、balanced、money_market、index、etc
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- equity、bond、balanced、money_market、index、etc
         name                             VARCHAR(50)    NOT NULL,                        -- 股票型、債券型、平衡型、貨幣市場型、指數型、其他
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1222,7 +1224,7 @@
     -- 債券種類表
     CREATE TABLE bond_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- government、corporate、municipal
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- government、corporate、municipal
         name                             VARCHAR(50)    NOT NULL,                        -- 政府債、公司債、市政債
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1259,7 +1261,7 @@
     -- 選擇權類型表
     CREATE TABLE option_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- CALL、PUT
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- CALL、PUT
         name                             VARCHAR(50)    NOT NULL,                        -- 買權 Call Option、賣權 Put Option
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1295,7 +1297,7 @@
     CREATE TABLE risk_rating_systems (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NULL,                            -- 國家
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- S&P、晨星、Moody’s
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- S&P、晨星、Moody’s
         name                             VARCHAR(50)    NOT NULL,
         scale_min                        INT NOT NULL,                                  -- 1
         scale_max                        INT NOT NULL,                                  -- 5 / 10
@@ -1312,7 +1314,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         risk_rating_system_id            BIGINT         NOT NULL,
 
-        code                             VARCHAR(30)    NOT NULL,                         -- AAA、AA+、BBB、Aaa、⭐5
+        code                             VARCHAR(50)    NOT NULL,                         -- AAA、AA+、BBB、Aaa、⭐5
         name                             VARCHAR(50)    NOT NULL,                         -- 顯示名稱
 
         score                            DECIMAL(5,2)   NULL,                            -- 可選：轉換成數值 (方便排序)
@@ -1351,7 +1353,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         ledger_type_id                   BIGINT         NOT NULL,
         
-        code                             VARCHAR(30)    NOT NULL,
+        code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(50)    NOT NULL,                        -- 帳戶性質（如：
                                                                                          -- 收支帳下的現金 cash、銀行 bank、信用卡 credit_card ，
                                                                                          -- 投資帳下的股票 stock、基金 fund、債券 bond、外幣 forex、虛擬貨幣 crypto、
@@ -1404,7 +1406,7 @@
     -- 利率類型表
     CREATE TABLE interest_rate_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- FIXED、FLOATING
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- FIXED、FLOATING
         name                             VARCHAR(50)    NOT NULL,                        -- 固定、流動
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1463,7 +1465,7 @@
     -- (測試中)銀行帳戶類型表
     CREATE TABLE bank_account_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1492,7 +1494,7 @@
     -- (測試中)支付網路類型表
     CREATE TABLE payment_network_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1506,7 +1508,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NULL,                            -- 母公司所在國（Amex=US, JCB=JP）
         payment_network_type_id          BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VISA, MASTERCARD, JCB, AMEX, UNIONPAY
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- VISA, MASTERCARD, JCB, AMEX, UNIONPAY
         name                             VARCHAR(50)    NOT NULL,                        -- Visa, Mastercard...
         image_url                        VARCHAR(255)   NULL,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1521,7 +1523,7 @@
     -- (測試中)卡片等級表
     CREATE TABLE card_tiers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),
@@ -1550,7 +1552,7 @@
     -- (測試中)卡片能力表
     CREATE TABLE card_capabilities (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1625,7 +1627,7 @@
     -- (測試中)卡片發行類型表
     CREATE TABLE card_issuance_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1750,7 +1752,7 @@
     -- 固定資產分類表
     CREATE TABLE asset_categories (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (HOUSE、CAR、APPLIANCE、ELECTRONICS)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (HOUSE、CAR、APPLIANCE、ELECTRONICS)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (房屋、車輛、家電、電子產品)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1762,7 +1764,7 @@
     -- 折舊方法表
     CREATE TABLE depreciation_methods (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (STRAIGHT_LINE、DECLINING_BALANCE、DOUBLE_DECLINING、SUM_OF_YEARS)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (STRAIGHT_LINE、DECLINING_BALANCE、DOUBLE_DECLINING、SUM_OF_YEARS)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1792,7 +1794,7 @@
     -- 存貨分類表
     CREATE TABLE inventory_categories (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (FOOD、BEVERAGE、CONSUMABLE、SPARE_PART、OFFICE_SUPPLIES)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (FOOD、BEVERAGE、CONSUMABLE、SPARE_PART、OFFICE_SUPPLIES)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (食品、飲品、消耗品、備件、辦公用品)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1804,7 +1806,7 @@
     -- 存貨成本方法表
     CREATE TABLE cost_methods (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (FIFO、LIFO、AVERAGE)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (FIFO、LIFO、AVERAGE)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (先進先出法、後進先出法、加權平均法)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1831,7 +1833,7 @@
     -- 合約種類表
     CREATE TABLE contract_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                -- 代號
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                -- 代號
         name                             VARCHAR(50)    NOT NULL,                       -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1871,7 +1873,7 @@
     -- 還款種類表
     CREATE TABLE repayment_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                -- 代號 (EQUAL_PRINCIPAL_INTEREST、EQUAL_PRINCIPAL、INTEREST_ONLY)
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                -- 代號 (EQUAL_PRINCIPAL_INTEREST、EQUAL_PRINCIPAL、INTEREST_ONLY)
         name                             VARCHAR(50)    NOT NULL,                       -- 名稱 (等額本息或本息平均、等額本金或本金平均、只還利息)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1933,7 +1935,7 @@
     -- (測試中)交易來源種類表
     CREATE TABLE transaction_source_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- MANUAL、CONTRACT、IMPORT
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- MANUAL、CONTRACT、IMPORT
         name                             VARCHAR(50)    NOT NULL,                        -- 手動、合約、匯入
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1961,7 +1963,7 @@
     -- (測試中)分類類型表
     CREATE TABLE category_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- income、expense、transfer
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- income、expense、transfer
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1976,7 +1978,7 @@
         user_id                          BIGINT         NULL,                            -- 使用者名稱 (使用者可以自訂大分類與小分類)
         ledger_type_id                   BIGINT         NOT NULL,
         category_type_id                 BIGINT         NOT NULL,                        -- 分類類型
-        code                             VARCHAR(30)    NOT NULL,                        -- 大分類代號
+        code                             VARCHAR(50)    NOT NULL,                        -- 大分類代號
         name                             VARCHAR(50)    NOT NULL,                        -- 大分類名稱
         icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
@@ -1999,7 +2001,7 @@
     CREATE TABLE categories (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         category_group_id                BIGINT         NOT NULL,		                -- (對應大分類)
-        code                             VARCHAR(30)    NOT NULL,                        -- 小分類代號
+        code                             VARCHAR(50)    NOT NULL,                        -- 小分類代號
         name                             VARCHAR(50)    NOT NULL,                        -- 小分類名稱
         icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
@@ -2052,7 +2054,7 @@
     CREATE TABLE transaction_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         ledger_type_id                   BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL,	                     -- 代號
+        code                             VARCHAR(50)    NOT NULL,	                     -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 交易類型名稱 (如：
                                                                                          -- 收支活動 (income / expense / buy / sell)
                                                                                          -- 投資活動
@@ -2075,7 +2077,7 @@
     -- (測試中)交易狀態表
     CREATE TABLE transaction_statuses (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(30)    NOT NULL UNIQUE,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
