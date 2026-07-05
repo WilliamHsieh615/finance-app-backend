@@ -2446,17 +2446,17 @@
         scheduled_date                   DATETIME       NULL,                            -- 一次性通知使用(提醒日)
 
         is_repeat                        BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否週期性重複提醒
-        is_reminder                      BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否單次重複提醒
+        is_retry                         BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否單次重複提醒
         
-        max_notify_count                 INT            NULL,                            -- 最多重複提醒幾次
-        notify_count                     INT            DEFAULT 0,                       -- 目前已提醒幾次
-        next_notify_date                 DATETIME       NULL,                            -- 下一次提醒日
-        last_notify_date                 DATETIME       NULL,                            -- 上次提醒日
-        
-        max_reminder_count               INT            NULL,                            -- 最多單次重複提醒幾次
-        reminder_count                   INT            DEFAULT 0,                       -- 目前單次已提醒幾次
-        next_reminder_date               DATETIME       NULL,                            -- 下一次單次重複提醒日
-        
+        repeat_limit                     INT            NULL,                            -- 最多重複提醒幾次
+        repeat_count                     INT            DEFAULT 0,                       -- 目前已提醒幾次
+        next_repeat_date                 DATETIME       NULL,                            -- 下一次提醒日
+        last_repeat_date                 DATETIME       NULL,                            -- 上次提醒日
+
+        retry_limit                      INT            NULL,                            -- 最多單次重複提醒幾次
+        retry_count                      INT            DEFAULT 0,                       -- 目前單次已提醒幾次
+        next_retry_date                  DATETIME       NULL,                            -- 下一次單次重複提醒日
+
         notification_schedule_status_id  BIGINT         NOT NULL,
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -2517,7 +2517,7 @@
         is_enabled                       BOOLEAN        NOT NULL DEFAULT TRUE,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE(user_id, notification_channel_id),
+        UNIQUE(user_id, notification_type_id, notification_channel_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (notification_channel_id) REFERENCES notification_channels(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -2542,9 +2542,9 @@
         notification_schedule_id         BIGINT         NOT NULL,
         notification_channel_id          BIGINT         NOT NULL,
         notification_send_status_id      BIGINT         NOT NULL,
-        sent_date                        DATETIME       NOT NULL,
+        notification_send_status_date    DATETIME       NOT NULL,
         error_message                    VARCHAR(255)   NULL,
-        provider_response                VARCHAR(500)   NULL,
+        provider_response                JSON           NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         
         INDEX(user_notification_id),
