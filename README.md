@@ -7,7 +7,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (EMOJI、LUCIDE、MATERIAL、CUSTOM_UPLOAD)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
-        is_active                        BOOLEAN        DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         resource_url                     VARCHAR(255)   NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -20,7 +20,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        is_active                        BOOLEAN        DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         provider_url                     VARCHAR(255)   NULL,
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -33,6 +33,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 資料表代號
         name                             VARCHAR(50)    NOT NULL,                        -- 資料表名稱
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -44,6 +45,7 @@
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -59,6 +61,7 @@
         is_image                         BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否是影像
         is_previewable                   BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否可以預覽
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -127,10 +130,8 @@
         iso3                             CHAR(3)        NULL,                            -- ISO 3166-1國別碼 (三碼)
         iso_numeric                      CHAR(3)        NULL UNIQUE,                     -- ISO 3166-1國別碼 (數字)
         phone_code                       VARCHAR(10)    NULL,                            -- 國際電話區碼
-    
         name                             VARCHAR(50)    NOT NULL,                        -- 國家名稱 (英文)
         native_name                      VARCHAR(100)   NOT NULL,                        -- 國家名稱 (本地文字)
-
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -244,7 +245,7 @@
         
         value                            TEXT           NOT NULL,
         version                          INT            DEFAULT 1,                       -- 版本
-        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否啟用
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         is_default                       BOOLEAN        DEFAULT FALSE,                   -- 是否預設
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -262,6 +263,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (BANK, BROKER, INSURANCE, EXCHANGE, CRYPTO)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -274,6 +276,7 @@
         code                                VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
         name                                VARCHAR(50)    NOT NULL,                        -- 名稱
         note                                VARCHAR(255),
+        is_active                           BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                        DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -287,7 +290,7 @@
         code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構集團名稱 (例如：國泰金控、富邦金控)
         legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構集團正式名稱
-        is_active                        BOOLEAN        DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -305,7 +308,7 @@
         code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 金融機構名稱 (例如：國泰世華銀行、台本富邦銀行、國泰人壽、IB、Binance)
         legal_name                       VARCHAR(150)   NOT NULL,                        -- 金融機構正式名稱
-        is_active                        BOOLEAN        DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -322,6 +325,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (SWIFT、BANK_CODE、TAX_ID、STOCK_CODE、ROUTING_NUMBER、IBAN_PREFIX、LICENSE_NO)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -352,6 +356,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -428,6 +433,7 @@
         code                             CHAR(3)        NOT NULL UNIQUE,                 -- 代碼 (ECB、yahoo)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -473,7 +479,7 @@
 
         email_verified                   BOOLEAN        DEFAULT FALSE,                   -- 電子郵件驗證
         sms_verified                     BOOLEAN        DEFAULT FALSE,                   -- 簡訊驗證
-        
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -487,6 +493,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- ADMIN, STAFF, USER
         name                             VARCHAR(50)    NOT NULL,                        -- 管理者、員工、使用者
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -497,6 +504,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         role_id                          BIGINT         NOT NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -511,6 +519,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (USER、CAMPAIGN、INFLUENCER)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -522,7 +531,7 @@
         user_id                          BIGINT         NULL,                            -- 擁有者
         code                             VARCHAR(20)    NOT NULL UNIQUE,
         referral_code_type_id            BIGINT         NOT NULL,
-        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否啟用
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -536,6 +545,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、COMPLETED、INVALID)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -568,6 +578,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APPLE、GOOGLE)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -579,7 +590,7 @@
         distribution_platform_company_id BIGINT         NOT NULL,
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (APP_STORE、GOOGLE_PLAY)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
-        is_active                        BOOLEAN        DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -593,6 +604,7 @@
         code                             VARCHAR(30)    NOT NULL       ,                 -- FREE, PRO, PREMIUM
         name                             VARCHAR(50)    NOT NULL,
         duration_days                    INT            NOT NULL,                        -- 訂閱時效 (30天、365天)
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -609,7 +621,7 @@
         price                            DECIMAL(18,8)  NOT NULL,
         start_date                       DATE           NOT NULL,
         end_date                         DATE           NOT NULL,
-        
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -626,6 +638,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (ACTIVE、EXPIRED、CANCELLED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (啟動、過期、取消)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -643,7 +656,7 @@
 
         user_subscription_status_id      BIGINT         NOT NULL,   
         auto_renew                       BOOLEAN        DEFAULT TRUE,                    -- 是否自動續費
-
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -660,6 +673,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PENDING、SUCCESS、FAILED、REFUNDED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -704,6 +718,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (PERCENTAGE、FIXED)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (百分比、固定)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -725,6 +740,7 @@
         note                             VARCHAR(255),
         start_date                       DATE           NOT NULL,                        -- 開始日
         end_date                         DATE           NOT NULL,                        -- 到期日
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -735,7 +751,8 @@
     CREATE TABLE member_has_discounts ( 
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
-        discount_id                      BIGINT         NOT NULL, 
+        discount_id                      BIGINT         NOT NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -766,6 +783,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VAT、SALES_TAX
         name                             VARCHAR(50)    NOT NULL,                        -- 加值稅、營業稅
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -783,7 +801,7 @@
         amount                           DECIMAL(18,8)  NULL,                            -- 稅費 (與稅率二選一填寫)
         note                             VARCHAR(255),
 
-        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否生效
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         min_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 下限
         max_amount                       DECIMAL(18,8)  NULL,                            -- 上限
         effective_from                   DATE           NOT NULL,                        -- 有限時間(起)
@@ -818,6 +836,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -837,7 +856,7 @@
         amount                           DECIMAL(18,8)  NULL,                            -- 費用 (與費率二選一填寫)
         note                             VARCHAR(255),
         
-        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否生效
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         min_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 下限
         max_amount                       DECIMAL(18,8)  NULL,                            -- 上限
         effective_from                   DATE           NOT NULL,                        -- 有限時間(起)
@@ -873,6 +892,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -884,6 +904,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- PENDING、SUCCESS、FAILED
         name                             VARCHAR(50)    NOT NULL,                        -- 待退款、退款成功、退款失敗
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -915,6 +936,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (GEOGRAPHIC、ECONOMIC、FINANCIAL、POLITICS)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (地理、經濟、金融、政治)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -927,6 +949,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 市場名稱 (台灣、美國、日本、中國、歐洲、新興市場、開發中國家、亞洲四小龍)
         market_type_id                   BIGINT         NOT NULL,                        -- 市場種類
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -939,6 +962,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         market_id                        BIGINT         NOT NULL,
         country_id                       BIGINT         NOT NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -955,6 +979,7 @@
         email                            VARCHAR(100)   NULL,
         address                          VARCHAR(255)   NULL,
         notes                            VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -966,6 +991,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- REPAYMENT、PAYOUT、RECOVERY、PAYMENT 
         name                             VARCHAR(50)    NOT NULL,                        -- 你還錢給他(債務面)、他支付給你(投資面)、他把錢還給你(債務面)、你支付給他(投資面)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -977,6 +1003,7 @@
         code                             VARCHAR(30)    NOT NULL,                        -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -990,6 +1017,7 @@
         code                             VARCHAR(30)    NOT NULL,                        -- 代號
         name                             VARCHAR(50)    NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1004,6 +1032,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- inventory、financial、commodity
         name                             VARCHAR(50)    NOT NULL,                        -- 存貨、金融商品、商品期貨
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1016,6 +1045,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (例如 包、瓶、個、合約、股、盎司、桶)
         unit_type_id                     BIGINT         NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1029,6 +1059,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 收支帳、投資帳、負債帳、應收帳、固定資產帳、存貨帳
         icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1044,7 +1075,7 @@
         
         name                             VARCHAR(100)   NOT NULL,                        -- 帳本名稱
         note                             VARCHAR(255),                                   -- 備註
-
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         is_archived                      BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否封存    
         archived_date                    DATETIME       NULL,                            -- 封存時間
         
@@ -1064,6 +1095,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                -- OWNER、ADMIN、EDITOR、VIEWER
         name                             VARCHAR(50)    NOT NULL,                       -- 擁有者、管理員、可編輯、只能看、
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,          -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
@@ -1075,6 +1107,7 @@
         user_id                          BIGINT         NOT NULL,
         ledger_id                        BIGINT         NOT NULL,
         ledger_member_role_id            BIGINT         NOT NULL,                       -- 權限設定
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,          -- 是否啟用
         joined_date                      DATETIME       NOT NULL,                       -- 加入時間
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1092,6 +1125,7 @@
         name                             VARCHAR(50)    NOT NULL,                        -- 股票、ETF、基金、債券、虛擬貨幣、外匯、黃金、期貨、選擇權
         is_derivative                    BOOLEAN        DEFAULT FALSE,                   -- 是否為衍生性商品
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1105,7 +1139,7 @@
         country_id                       BIGINT         NULL,                            -- 所屬國家
         timezone_id                      BIGINT         NULL,                            -- 時區
         note                             VARCHAR(255),
-        
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1125,8 +1159,8 @@
 
         code                             VARCHAR(50)    NOT NULL,                        -- 商品代碼 (AAPL、TSLA、BTC、0050)
         name                             VARCHAR(100)   NOT NULL,                        -- 商品名稱 (Apple Inc.)
-        isin                             VARCHAR(20),                                   -- 國際證券識別碼 ISIN（可為 NULL）
-        is_active                        BOOLEAN        DEFAULT TRUE,                    -- 是否仍可交易
+        isin                             VARCHAR(20),                                    -- 國際證券識別碼 ISIN（可為 NULL）
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
 
         unit_id                          BIGINT         NULL,                            -- 商品單位 (口、股、張)
         note                             VARCHAR(255),
@@ -1149,6 +1183,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- equity、bond、balanced、money_market、index、etc
         name                             VARCHAR(50)    NOT NULL,                        -- 股票型、債券型、平衡型、貨幣市場型、指數型、其他
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1176,6 +1211,7 @@
         name                             VARCHAR(100)   NOT NULL,                        -- 發行機構名稱
         country_id                       BIGINT         NOT NULL,                        -- 所屬國家
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1188,6 +1224,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- government、corporate、municipal
         name                             VARCHAR(50)    NOT NULL,                        -- 政府債、公司債、市政債
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1224,6 +1261,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- CALL、PUT
         name                             VARCHAR(50)    NOT NULL,                        -- 買權 Call Option、賣權 Put Option
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1241,15 +1279,11 @@
     -- 投資產品歷史價格表
     CREATE TABLE investment_price_histories (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-
         investment_product_id            BIGINT         NOT NULL,
-
         price                            DECIMAL(18,8)  NOT NULL,
         price_date                       DATE           NOT NULL,
-
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
         INDEX(investment_product_id, price_date),
         INDEX(price_date),
         UNIQUE (investment_product_id, price_date),
@@ -1265,6 +1299,7 @@
         scale_min                        INT NOT NULL,                                  -- 1
         scale_max                        INT NOT NULL,                                  -- 5 / 10
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1281,7 +1316,7 @@
 
         score                            DECIMAL(5,2)   NULL,                            -- 可選：轉換成數值 (方便排序)
         rank_order                       INT            NOT NULL,                        -- 排序用 (1 = 最安全)
-
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1299,7 +1334,7 @@
 
         effective_from                   DATE           NOT NULL,
         effective_to                     DATE           NULL,
-
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1328,6 +1363,7 @@
         icon_id                          BIGINT         NULL,
         direction                        TINYINT        NOT NULL,                        -- 正向 / 負向
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1348,8 +1384,8 @@
         name                             VARCHAR(100)   NOT NULL,
         legal_name                       VARCHAR(150)   NULL,
         initial_balance                  DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 初始餘額
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
-        note                             VARCHAR(255),                                  -- 備註
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        note                             VARCHAR(255),                                   -- 備註
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1370,6 +1406,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- FIXED、FLOATING
         name                             VARCHAR(50)    NOT NULL,                        -- 固定、流動
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1383,6 +1420,7 @@
         interest_rate                    DECIMAL(18,8)  NOT NULL,                        -- 利率 %
         start_date                       DATE           NOT NULL,                        -- 開始日
         end_date                         DATE           NULL,                            -- 到期日
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1397,6 +1435,7 @@
         account_id                       BIGINT         NOT NULL,
         tax_id                           BIGINT         NOT NULL,
         tax_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計稅金
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1411,6 +1450,7 @@
         account_id                       BIGINT         NOT NULL,
         fee_id                           BIGINT         NOT NULL,
         fee_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 小計費用
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1425,6 +1465,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1453,6 +1494,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
@@ -1466,7 +1508,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- VISA, MASTERCARD, JCB, AMEX, UNIONPAY
         name                             VARCHAR(50)    NOT NULL,                        -- Visa, Mastercard...
         image_url                        VARCHAR(255)   NULL,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1480,7 +1522,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1494,7 +1536,7 @@
         card_tier_id                     BIGINT         NOT NULL,
         display_name                     VARCHAR(50)    NOT NULL, -- 實際顯示名稱
         level_rank                       INT            NOT NULL, -- 在該 network 內的排序
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1510,6 +1552,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
@@ -1517,15 +1560,14 @@
 
     -- 帳戶表子表 (收支帳 → 銀行卡) 
     CREATE TABLE bank_cards (
-        account_id                      BIGINT        NOT NULL,
-        payment_network_card_tier_id    BIGINT        NULL,
-        name                            VARCHAR(100)  NOT NULL,
-        card_number                     VARCHAR(20)   NULL,
-        card_holder_name                VARCHAR(100)  NULL,
-        expiry_date                     DATE          NULL,
-        is_virtual                      BOOLEAN       NOT NULL DEFAULT FALSE,          -- 是否為虛擬卡
-        is_active                       BOOLEAN       DEFAULT TRUE,
-        note                            VARCHAR(255),
+        account_id                       BIGINT         NOT NULL,
+        payment_network_card_tier_id     BIGINT         NULL,
+        name                             VARCHAR(100)   NOT NULL,
+        card_number                      VARCHAR(20)    NULL,
+        card_holder_name                 VARCHAR(100)   NULL,
+        expiry_date                      DATE           NULL,
+        is_virtual                       BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否為虛擬卡
+        note                             VARCHAR(255),
         FOREIGN KEY (account_id) REFERENCES bank_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -1534,7 +1576,7 @@
     CREATE TABLE bank_card_has_capabilities (
         account_id                       BIGINT         NOT NULL,
         card_capability_id               BIGINT         NOT NULL,
-        is_active                        BOOLEAN        DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1545,19 +1587,19 @@
 
     -- (測試中)帳戶表子表 (收支帳 → 信用卡)
     CREATE TABLE credit_card_accounts (
-        account_id                          BIGINT        PRIMARY KEY,
-        financial_institution_id            BIGINT        NULL,
-        payment_network_card_tier_id        BIGINT        NULL,
-        card_number                         VARCHAR(20)   NULL,
-        card_holder_name                    VARCHAR(100)  NULL,
-        credit_limit                        DECIMAL(18,8) NULL,                            -- 信用額度
-        expiry_date                         DATE          NULL,
-        is_virtual                          BOOLEAN       NOT NULL DEFAULT FALSE,          -- 是否為虛擬卡
-        cycle_day                           TINYINT       NOT NULL,		                   -- 結帳日 (1~31)
-        due_day                             TINYINT       NOT NULL,                        -- 繳款日 (1~31)
-        annual_fee                          DECIMAL(18,8) NULL,                            -- 年費
-        is_auto_pay                         BOOLEAN       DEFAULT FALSE,                   -- 是否自動扣款
-        auto_pay_account_id                 BIGINT        NULL,                            -- 自動扣款帳戶
+        account_id                       BIGINT         PRIMARY KEY,
+        financial_institution_id         BIGINT         NULL,
+        payment_network_card_tier_id     BIGINT         NULL,
+        card_number                      VARCHAR(20)    NULL,
+        card_holder_name                 VARCHAR(100)   NULL,
+        credit_limit                     DECIMAL(18,8)  NULL,                            -- 信用額度
+        expiry_date                      DATE           NULL,
+        is_virtual                       BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否為虛擬卡
+        cycle_day                        TINYINT        NOT NULL,		                 -- 結帳日 (1~31)
+        due_day                          TINYINT        NOT NULL,                        -- 繳款日 (1~31)
+        annual_fee                       DECIMAL(18,8)  NULL,                            -- 年費
+        is_auto_pay                      BOOLEAN        DEFAULT FALSE,                   -- 是否自動扣款
+        auto_pay_account_id              BIGINT         NULL,                            -- 自動扣款帳戶
 
         UNIQUE(account_id, auto_pay_account_id),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1570,7 +1612,7 @@
     CREATE TABLE credit_card_has_capabilities (
         account_id                       BIGINT         NOT NULL,
         card_capability_id               BIGINT         NOT NULL,
-        is_active                        BOOLEAN        DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1585,6 +1627,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
@@ -1709,6 +1752,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (HOUSE、CAR、APPLIANCE、ELECTRONICS)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (房屋、車輛、家電、電子產品)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1720,6 +1764,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (STRAIGHT_LINE、DECLINING_BALANCE、DOUBLE_DECLINING、SUM_OF_YEARS)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (直線法、餘額遞減法/定率法、雙倍餘額遞減法、年數總和法)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1749,6 +1794,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (FOOD、BEVERAGE、CONSUMABLE、SPARE_PART、OFFICE_SUPPLIES)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (食品、飲品、消耗品、備件、辦公用品)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1760,6 +1806,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- 代號 (FIFO、LIFO、AVERAGE)
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱 (先進先出法、後進先出法、加權平均法)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1786,6 +1833,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                -- 代號
         name                             VARCHAR(50)    NOT NULL,                       -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
@@ -1801,7 +1849,7 @@
         total_terms                      INT            NULL,                           -- 總期數
         start_date                       DATE           NOT NULL,                       -- 開始日
         end_date                         DATE           NULL,                           -- 到期日
-
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,          -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
@@ -1825,6 +1873,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                -- 代號 (EQUAL_PRINCIPAL_INTEREST、EQUAL_PRINCIPAL、INTEREST_ONLY)
         name                             VARCHAR(50)    NOT NULL,                       -- 名稱 (等額本息或本息平均、等額本金或本金平均、只還利息)
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                            -- 刪除時間 (由後端寫入)
@@ -1886,6 +1935,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- MANUAL、CONTRACT、IMPORT
         name                             VARCHAR(50)    NOT NULL,                        -- 手動、合約、匯入
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1897,7 +1947,8 @@
         transaction_source_type_id       BIGINT         NOT NULL,
         entity_type_id                   BIGINT         NULL,                            -- 對應合約表或其他匯入的表
         source_id                        BIGINT         NULL,                            -- transaction_source_type 為 MANUAL 時 = NULL
-                                                                                           transaction_source_type 為 CONTRACT 時 = contract_id
+                                                                                            transaction_source_type 為 CONTRACT 時 = contract_id
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
@@ -1912,6 +1963,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,                 -- income、expense、transfer
         name                             VARCHAR(50)    NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1929,7 +1981,7 @@
         note                             VARCHAR(255),
 
         is_system                        BOOLEAN        NOT NULL DEFAULT FALSE,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1951,7 +2003,7 @@
         icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
         is_system                        BOOLEAN        NOT NULL DEFAULT FALSE,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1967,6 +2019,7 @@
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- restaurant、supermarket、utility
         name                             VARCHAR(100)   NOT NULL,                        -- 餐廳、超市、公共事業
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -1983,7 +2036,7 @@
         icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
         is_system                        BOOLEAN        NOT NULL DEFAULT FALSE,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -1998,21 +2051,21 @@
     CREATE TABLE transaction_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         ledger_type_id                   BIGINT         NOT NULL,
-        code                             VARCHAR(30)    NOT NULL,	                    -- 代號
-        name                             VARCHAR(50)    NOT NULL,                       -- 交易類型名稱 (如：
-                                                                                        -- 收支活動 (income / expense / buy / sell)
-                                                                                        -- 投資活動
-                                                                                        -- 負債活動 (principal / interest / fee)
-                                                                                        -- 應收帳款活動 (lend / receive / interest)
-                                                                                        -- 固定資產活動 (depreciation / repair / revalue)
-                                                                                        -- 存貨 (in / out / adjust)
-        direction                        TINYINT        NOT NULL,                       -- 正向 / 負向 (income=1、expense=-1、buy=-1、sell=1、transfer=0)
+        code                             VARCHAR(30)    NOT NULL,	                     -- 代號
+        name                             VARCHAR(50)    NOT NULL,                        -- 交易類型名稱 (如：
+                                                                                         -- 收支活動 (income / expense / buy / sell)
+                                                                                         -- 投資活動
+                                                                                         -- 負債活動 (principal / interest / fee)
+                                                                                         -- 應收帳款活動 (lend / receive / interest)
+                                                                                         -- 固定資產活動 (depreciation / repair / revalue)
+                                                                                         -- 存貨 (in / out / adjust)
+        direction                        TINYINT        NOT NULL,                        -- 正向 / 負向 (income=1、expense=-1、buy=-1、sell=1、transfer=0)
         affects_balance                  BOOLEAN        DEFAULT TRUE,
         note                             VARCHAR(255),
-        
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
         UNIQUE (ledger_type_id, code),
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -2024,6 +2077,7 @@
         code                             VARCHAR(30)    NOT NULL UNIQUE,
         name                             VARCHAR(50)    NOT NULL,
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
@@ -2120,7 +2174,7 @@
         last_run_date                    DATE           NULL,                            -- 上次執行日期
         start_date                       DATE           NOT NULL,
         end_date                         DATE           NULL,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
 
         note                             VARCHAR(255),
         transaction_status_id            BIGINT         NOT NULL,
@@ -2175,6 +2229,8 @@
         ledger_id                        BIGINT         NOT NULL,
         name                             VARCHAR(50)    NOT NULL,
         color                            VARCHAR(20),
+        note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -2221,7 +2277,8 @@
 
         total_amount                     DECIMAL(18,8)  NOT NULL,                        -- 預算金額
         safety_amount                    DECIMAL(18,8)  NULL,                            -- 安全金額 (低於安全金額可設定提醒)
-
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -2239,7 +2296,8 @@
 
         amount                           DECIMAL(18,8)  NOT NULL,                        -- 預算金額
         spent_amount                     DECIMAL(18,8)  DEFAULT 0,                       -- 已花費金額（可快取）
-
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -2255,6 +2313,7 @@
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼
         name                             VARCHAR(100)   NOT NULL,                        -- 名稱
         note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
