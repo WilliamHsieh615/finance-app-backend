@@ -234,7 +234,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        UNIQUE (entity_type_id, entity_id, field_name),
+        UNIQUE (entity_type_id, entity_id, field_code),
         FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -2380,6 +2380,60 @@
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- 提醒類型表
+    CREATE TABLE notification_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- BILL_DUE、BUDGET_OVER、SUBSCRIPTION_EXPIRED、PRICE_ALERT
+        name                             VARCHAR(100)   NOT NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
+    -- 提醒表
+    CREATE TABLE notifications (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        notification_type_id             BIGINT         NOT NULL,
+        entity_type_id                   BIGINT         NULL,
+        entity_id                        BIGINT         NULL,
+        title                            VARCHAR(100)   NOT NULL,
+        message                          VARCHAR(500)   NOT NULL,
+        payload                          JSON           NULL,
+        frequency_id                     BIGINT         NULL,                            -- 週期性通知使用(提醒頻率)
+        scheduled_date                   DATETIME       NULL,                            -- 一次性通知使用(提醒日)
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
+
+        INDEX(notification_type_id),
+        INDEX(entity_type_id, entity_id),
+        FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 使用者提醒關聯表
+    CREATE TABLE user_has_notifications (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        notification_id                  BIGINT         NOT NULL,
+
+        is_read                          BOOLEAN NOT NULL DEFAULT FALSE,
+        read_date                        DATETIME NULL,
+        is_sent                          BOOLEAN NOT NULL DEFAULT FALSE,
+        sent_date                        DATETIME NULL,
+
+        created_date                     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date DATETIME NULL,
+
+        UNIQUE(user_id, notification_id),
+        INDEX(user_id, is_read),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
     -- 帳戶調整原因表
     CREATE TABLE account_adjustment_reasons (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -2471,6 +2525,8 @@
         browser_name                     VARCHAR(50)   NULL,
         country_id                       BIGINT        NULL,
         city                             VARCHAR(100)  NULL,
+        session_id                       VARCHAR(100)  NULL,
+        refresh_token_id                 VARCHAR(100)  NULL,
 
         INDEX(user_id, login_time),
         INDEX(email),
