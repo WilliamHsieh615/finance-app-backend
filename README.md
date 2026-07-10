@@ -185,6 +185,8 @@
                                                                                                  KWD 0.001
                                                                                                  BHD 0.001
                                                                                                  BTC 0.00000001）
+        is_fiat                          BOOLEAN        NOT NULL,                       -- 是否為法定貨幣
+        is_crypto                        BOOLEAN        NOT NULL,                       -- 是否為虛擬貨幣
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
@@ -762,7 +764,7 @@
     );
 
     -- 會員與折扣關聯表
-    CREATE TABLE member_has_discounts ( 
+    CREATE TABLE user_has_discounts ( 
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         discount_id                      BIGINT         NOT NULL,
@@ -1524,7 +1526,6 @@
         payment_network_type_id          BIGINT         NOT NULL,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- VISA, MASTERCARD, JCB, AMEX, UNIONPAY
         name                             VARCHAR(100)   NOT NULL,                        -- Visa, Mastercard...
-        image_url                        VARCHAR(255)   NULL,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1697,6 +1698,7 @@
 
         last_price                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 最後報價
         last_updated_price_date          DATETIME       NOT NULL,                        -- 報價更新時間
+        market_value                     DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 市價
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1707,7 +1709,7 @@
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- 投資持倉手數
+    -- 投資持倉手數表
     CREATE TABLE investment_position_lots (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         investment_position_id           BIGINT         NOT NULL,
