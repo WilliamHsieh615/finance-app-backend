@@ -992,6 +992,7 @@
     -- 債務人表
     CREATE TABLE debtors (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL
         name                             VARCHAR(100)   NOT NULL,
         phone                            VARCHAR(50)    NULL,
         email                            VARCHAR(100)   NULL,
@@ -1000,7 +1001,8 @@
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                             -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)流向類型表
@@ -1155,6 +1157,7 @@
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- NASDAQ、NYSE、TSE、BINANCE
         name                             VARCHAR(100)   NOT NULL,                        -- 美國納斯達克交易所、紐約證券交易所
         country_id                       BIGINT         NULL,                            -- 所屬國家
+        market_id                        BIGINT         NULL,                            -- 所屬市場
         timezone_id                      BIGINT         NULL,                            -- 時區
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1163,6 +1166,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
@@ -1170,7 +1174,8 @@
     CREATE TABLE investment_products (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         product_type_id                  BIGINT         NOT NULL,
-        market_id                        BIGINT         NULL,                            -- 所屬市場 (美股、台股、幣圈)                 
+        market_id                        BIGINT         NULL,                            -- 所屬市場 (美股、台股、幣圈)
+        financial_institution_id         BIGINT         NULL,                            -- 發行金融機構
         listing_currency_id              BIGINT         NOT NULL,                        -- 標的幣別 (USD、TWD)
         trading_currency_id              BIGINT         NOT NULL,                        -- 計價幣種 (虛擬貨幣、外匯與差價合約會與標的幣別不同)
         exchange_id                      BIGINT         NULL,                            -- 交易所
@@ -1190,6 +1195,7 @@
         UNIQUE(market_id, exchange_id, code),
         FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (listing_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (trading_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (exchange_id) REFERENCES exchanges(id) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1212,13 +1218,11 @@
     CREATE TABLE fund_products (
         investment_product_id            BIGINT        PRIMARY KEY,
         
-        financial_institution_id         BIGINT        NULL,                            -- 發行金融機構
         expense_ratio                    DECIMAL(18,8) NOT NULL,                        -- 總費用率
         dividend_frequency_id            BIGINT        NULL,                            -- 配息頻率
         fund_type_id                     BIGINT        NULL,                            -- 基金類型
         
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (dividend_frequency_id) REFERENCES flow_frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
@@ -1885,6 +1889,7 @@
         contract_type_id                 BIGINT         NOT NULL,
         parent_contract_id               BIGINT         NULL,                           -- (用於母子合約關聯)
 
+        contract_number                  VARCHAR(255)   NULL,
         total_amount                     DECIMAL(18,8)  NULL,                           -- 總金額
         total_terms                      INT            NULL,                           -- 總期數
         start_date                       DATE           NOT NULL,                       -- 開始日
@@ -1986,7 +1991,7 @@
     CREATE TABLE transaction_sources (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         transaction_source_type_id       BIGINT         NOT NULL,
-        entity_type_id                   BIGINT         NULL,                            -- 對應合約表或其他匯入的表
+        source_type_id                   BIGINT         NULL,                            -- 對應合約表或其他匯入的表
         source_id                        BIGINT         NULL,                            -- transaction_source_type 為 MANUAL 時 = NULL
                                                                                             transaction_source_type 為 CONTRACT 時 = contract_id
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1995,7 +2000,7 @@
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (transaction_source_type_id) REFERENCES transaction_source_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE SET NULL ON UPDATE CASCADE
+        FOREIGN KEY (source_type_id) REFERENCES entity_types(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)分類類型表
@@ -2278,7 +2283,7 @@
     );
 
     -- 交易與標籤關聯表
-    CREATE TABLE transaction_tags (
+    CREATE TABLE transaction_tag_mappings (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         transaction_id                   BIGINT         NOT NULL,
         tag_id                           BIGINT         NOT NULL,
@@ -2445,6 +2450,7 @@
     CREATE TABLE notifications (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         notification_type_id             BIGINT         NOT NULL,
+        user_id                          BIGINT         NOT NULL,
         
         entity_type_id                   BIGINT         NULL,
         entity_id                        BIGINT         NULL,
@@ -2452,6 +2458,7 @@
         title                            VARCHAR(100)   NOT NULL,
         message                          VARCHAR(500)   NOT NULL,
         payload                          JSON           NULL,
+        notification_priority_id         BIGINT         NOT NULL                         -- 通知先順序
         expires_date                     DATETIME       NULL,                            -- 通知時效 (通知的生命週期)
         
         created_by                       BIGINT         NOT NULL,
@@ -2462,8 +2469,10 @@
         INDEX(notification_type_id),
         INDEX(entity_type_id, entity_id),
         FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
+        FOREIGN KEY (notification_priority_id) REFERENCES notification_priorities(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE  
     );
 
     -- 提醒排程狀態表
