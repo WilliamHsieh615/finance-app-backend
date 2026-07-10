@@ -96,12 +96,12 @@
         INDEX (user_id),
         INDEX (file_role_id),
         UNIQUE(entity_type_id, entity_id, file_role_id, sort_order),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (storage_provider_id) REFERENCES storage_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (file_role_id) REFERENCES file_roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (file_type_id) REFERENCES file_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (storage_provider_id) REFERENCES storage_providers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (file_role_id) REFERENCES file_roles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (file_type_id) REFERENCES file_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)圖示表
@@ -119,7 +119,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (resource_provider_id) REFERENCES resource_providers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
     
@@ -247,7 +247,7 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (entity_type_id, entity_id, field_code),
-        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 翻譯表
@@ -266,8 +266,8 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (translation_key_id, language_id, version),
-        FOREIGN KEY (translation_key_id) REFERENCES translation_keys(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (translation_key_id) REFERENCES translation_keys(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)金融機構大類表
@@ -293,7 +293,7 @@
         created_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                        DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (financial_institution_type_group_id) REFERENCES financial_institution_type_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_type_group_id) REFERENCES financial_institution_type_groups(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)金融機構集團表
@@ -309,7 +309,7 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(country_id, code),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)金融機構表
@@ -327,9 +327,9 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(country_id, code),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_type_id) REFERENCES financial_institution_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_type_id) REFERENCES financial_institution_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)金融機構識別碼類型表
@@ -357,9 +357,9 @@
         updated_date                             DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                             DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(financial_institution_identifier_type_id, identifier_value),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_identifier_type_id) REFERENCES financial_institution_identifier_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
@@ -376,7 +376,7 @@
     );
 
     -- 金融機構在某個國家的能力關聯表 (金融機構在某國家的業務範圍)
-    CREATE TABLE financial_institution_in_country_has_capabilities (
+    CREATE TABLE financial_institution_country_capabilities (
         id                                  BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                          BIGINT         NOT NULL,
         financial_institution_id            BIGINT         NOT NULL,
@@ -418,9 +418,9 @@
         created_date                          DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                          DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                          DATETIME       NULL,                         -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (source_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (target_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (source_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (target_financial_institution_group_id) REFERENCES financial_institution_groups(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
     
     -- 金融機構變更表
@@ -434,9 +434,9 @@
         created_date                         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                         DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (source_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (target_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_change_type_id) REFERENCES financial_institution_change_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (source_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (target_financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 匯率來源表
@@ -453,7 +453,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
     
     -- 匯率表
@@ -474,9 +474,9 @@
         UNIQUE (exchange_rate_source_id, base_currency_id, quote_currency_id, rate_datetime),
         INDEX (base_currency_id, quote_currency_id),
         CHECK (base_currency_id <> quote_currency_id),
-        FOREIGN KEY (exchange_rate_source_id) REFERENCES exchange_rate_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (exchange_rate_source_id) REFERENCES exchange_rate_sources(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
     
     -- (測試中)使用者表
@@ -499,8 +499,8 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)角色表
@@ -516,7 +516,7 @@
     );
 
     -- (測試中)使用者與角色關聯表
-    CREATE TABLE user_has_roles (
+    CREATE TABLE user_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         role_id                          BIGINT         NOT NULL,
@@ -551,8 +551,8 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (referral_code_type_id) REFERENCES referral_code_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (referral_code_type_id) REFERENCES referral_code_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 使用者推薦狀態表
@@ -583,10 +583,10 @@
         completed_date                   DATETIME       NULL,
 
         UNIQUE (referee_id, referral_code_id),
-        FOREIGN KEY (referrer_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (referee_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (referral_code_id) REFERENCES referral_codes(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (user_referral_status_id) REFERENCES user_referral_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (referrer_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (referee_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (referral_code_id) REFERENCES referral_codes(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (user_referral_status_id) REFERENCES user_referral_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 發行平台公司表
@@ -610,14 +610,14 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (distribution_platform_company_id) REFERENCES distribution_platform_companies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (distribution_platform_company_id) REFERENCES distribution_platform_companies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 訂閱方案表
     CREATE TABLE subscription_plans (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         distribution_platform_id         BIGINT         NOT NULL,
-        code                             VARCHAR(50)    NOT NULL       ,                 -- FREE, PRO, PREMIUM
+        code                             VARCHAR(50)    NOT NULL,                        -- FREE, PRO, PREMIUM
         name                             VARCHAR(100)   NOT NULL,
         duration_days                    INT            NOT NULL,                        -- 訂閱時效 (30天、365天)
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -625,7 +625,7 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (distribution_platform_id, code),
-        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 訂閱方案價格表
@@ -643,9 +643,9 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (subscription_plan_id, country_id, currency_id, start_date, end_date),
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 使用者訂閱狀態表
@@ -677,10 +677,10 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (user_subscription_status_id) REFERENCES user_subscription_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (user_subscription_status_id) REFERENCES user_subscription_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 訂單狀態表
@@ -721,11 +721,11 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (distribution_platform_id, provider_transaction_number),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (user_subscription_id) REFERENCES user_subscriptions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (order_status_id) REFERENCES order_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (user_subscription_id) REFERENCES user_subscriptions(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (order_status_id) REFERENCES order_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 折扣類型表
@@ -764,7 +764,7 @@
     );
 
     -- 會員與折扣關聯表
-    CREATE TABLE user_has_discounts ( 
+    CREATE TABLE user_discounts ( 
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NOT NULL,
         discount_id                      BIGINT         NOT NULL,
@@ -828,8 +828,8 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
 
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (tax_type_id) REFERENCES tax_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (tax_type_id) REFERENCES tax_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 訂單與稅費關聯表
@@ -882,10 +882,10 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (fee_type_id) REFERENCES fee_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (distribution_platform_id) REFERENCES distribution_platforms(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (fee_type_id) REFERENCES fee_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 訂單與費用關聯表
@@ -941,9 +941,9 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (refund_transaction_reason_id) REFERENCES refund_transaction_reasons(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (refund_transaction_status_id) REFERENCES refund_transaction_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (refund_transaction_reason_id) REFERENCES refund_transaction_reasons(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (refund_transaction_status_id) REFERENCES refund_transaction_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 投資市場類型表
@@ -970,7 +970,7 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(name),
-        FOREIGN KEY (market_type_id) REFERENCES market_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (market_type_id) REFERENCES market_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 市場與國別關聯表
@@ -1038,8 +1038,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(code, flow_type_id, frequency_id),
-        FOREIGN KEY (flow_type_id) REFERENCES flow_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (frequency_id) REFERENCES frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (flow_type_id) REFERENCES flow_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (frequency_id) REFERENCES frequencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 單位類型表
@@ -1065,7 +1065,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (unit_type_id) REFERENCES unit_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (unit_type_id) REFERENCES unit_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)帳本種類表
@@ -1100,9 +1100,9 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(user_id, name),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 帳本成員角色表
@@ -1160,8 +1160,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 投資產品表
@@ -1186,12 +1186,12 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(market_id, exchange_id, code),
-        FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (listing_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (trading_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (exchange_id) REFERENCES exchanges(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (listing_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (trading_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (exchange_id) REFERENCES exchanges(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 基金類型表
@@ -1215,10 +1215,10 @@
         dividend_frequency_id            BIGINT        NULL,                            -- 配息頻率
         fund_type_id                     BIGINT        NULL,                            -- 基金類型
         
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (dividend_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (dividend_frequency_id) REFERENCES flow_frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (fund_type_id) REFERENCES fund_types(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 債券發行單位表
@@ -1232,7 +1232,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 債券種類表
@@ -1258,10 +1258,10 @@
         face_value                       DECIMAL(18,8) NOT NULL,                        -- 面額
         bond_type_id                     BIGINT        NULL,                            -- 債券種類
 
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (coupon_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (bond_type_id) REFERENCES bond_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (bond_issuer_id) REFERENCES bond_issuers(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (coupon_frequency_id) REFERENCES flow_frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (bond_type_id) REFERENCES bond_types(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 投資產品表子表 (期貨)
@@ -1269,7 +1269,7 @@
         investment_product_id            BIGINT        PRIMARY KEY,
         contract_size                    DECIMAL(18,8) NOT NULL,                        -- 每張合約的標的數量
         expiration_date                  DATE          NOT NULL,                        -- 到期日
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 選擇權類型表
@@ -1289,8 +1289,8 @@
         investment_product_id            BIGINT        PRIMARY KEY,
         strike_price                     DECIMAL(18,8) NOT NULL,                        -- 履約價
         option_type_id                   BIGINT        NOT NULL,
-        FOREIGN KEY (investment_product_id) REFERENCES derivative_products(investment_product_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (option_type_id) REFERENCES option_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (investment_product_id) REFERENCES derivative_products(investment_product_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (option_type_id) REFERENCES option_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 投資產品歷史價格表
@@ -1304,7 +1304,7 @@
         INDEX(investment_product_id, price_date),
         INDEX(price_date),
         UNIQUE (investment_product_id, price_date),
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 風險評分系統
@@ -1320,7 +1320,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 風險等級規模表
@@ -1339,7 +1339,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
         UNIQUE(risk_rating_system_id, code),
-        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 投資商品風險表
@@ -1357,9 +1357,9 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE(investment_product_id, risk_rating_system_id, effective_from),
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (risk_rating_scale_id) REFERENCES risk_rating_scales(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (risk_rating_system_id) REFERENCES risk_rating_systems(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (risk_rating_scale_id) REFERENCES risk_rating_scales(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)帳戶種類表
@@ -1387,7 +1387,7 @@
 
         CHECK (direction IN (1, -1)),
         UNIQUE (ledger_type_id, code),
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
@@ -1412,9 +1412,9 @@
         INDEX(ledger_id),
         INDEX(account_type_id),
         INDEX(currency_id),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (account_type_id) REFERENCES account_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (account_type_id) REFERENCES account_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 利率類型表
@@ -1444,8 +1444,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         INDEX(account_id, start_date, end_date),
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (interest_rate_type_id) REFERENCES interest_rate_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (interest_rate_type_id) REFERENCES interest_rate_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 帳戶與稅費關聯表
@@ -1459,8 +1459,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (account_id, tax_id),
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (tax_id) REFERENCES taxes(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (tax_id) REFERENCES taxes(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 帳戶與費用關聯表
@@ -1474,8 +1474,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE (account_id, fee_id),
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (fee_id) REFERENCES fees(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (fee_id) REFERENCES fees(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)銀行帳戶類型表
@@ -1502,9 +1502,9 @@
         settlement_days                  INT           NULL,
         payout_frequency_id              BIGINT        NULL,                            -- 配息頻率
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (bank_account_type_id) REFERENCES bank_account_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (bank_account_type_id) REFERENCES bank_account_types(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)支付網路類型表
@@ -1531,8 +1531,8 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payment_network_type_id) REFERENCES payment_network_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (payment_network_type_id) REFERENCES payment_network_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)卡片等級表
@@ -1560,8 +1560,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,
         UNIQUE(payment_network_id, card_tier_id),
-        FOREIGN KEY (payment_network_id) REFERENCES payment_networks(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (card_tier_id) REFERENCES card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (payment_network_id) REFERENCES payment_networks(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (card_tier_id) REFERENCES card_tiers(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)卡片能力表
@@ -1587,11 +1587,11 @@
         is_virtual                       BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否為虛擬卡
         note                             VARCHAR(255),
         FOREIGN KEY (account_id) REFERENCES bank_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 銀行卡能力關聯表
-    CREATE TABLE bank_card_has_capabilities (
+    CREATE TABLE bank_card_capabilities (
         account_id                       BIGINT         NOT NULL,
         card_capability_id               BIGINT         NOT NULL,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1599,8 +1599,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (account_id, card_capability_id),
-        FOREIGN KEY (account_id) REFERENCES bank_cards(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (card_capability_id) REFERENCES card_capabilities(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES bank_cards(account_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (card_capability_id) REFERENCES card_capabilities(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)帳戶表子表 (收支帳 → 信用卡)
@@ -1621,13 +1621,13 @@
 
         UNIQUE(account_id, auto_pay_account_id),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (auto_pay_account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (payment_network_card_tier_id) REFERENCES payment_network_card_tiers(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (auto_pay_account_id) REFERENCES accounts(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 信用卡能力關聯表
-    CREATE TABLE credit_card_has_capabilities (
+    CREATE TABLE credit_card_capabilities (
         account_id                       BIGINT         NOT NULL,
         card_capability_id               BIGINT         NOT NULL,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1635,8 +1635,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         PRIMARY KEY (account_id, card_capability_id),
-        FOREIGN KEY (account_id) REFERENCES credit_card_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (card_capability_id) REFERENCES card_capabilities(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES credit_card_accounts(account_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (card_capability_id) REFERENCES card_capabilities(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)卡片發行類型表
@@ -1654,8 +1654,8 @@
     -- 卡片發行表
     CREATE TABLE card_issuances (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        previous_card_issuance_id        BIGINT         NULL,
         account_id                       BIGINT         NOT NULL,
+        previous_card_issuance_id        BIGINT         NULL,
         card_issuance_type_id            BIGINT         NOT NULL,
         card_number                      VARCHAR(20)    NULL,
     
@@ -1668,9 +1668,9 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (card_issuance_type_id) REFERENCES card_issuance_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (previous_card_issuance_id) REFERENCES card_issuances(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (previous_card_issuance_id) REFERENCES card_issuances(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (card_issuance_type_id) REFERENCES card_issuance_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
     
     -- 帳戶表子表 (投資帳 → 股票、ETF、基金、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
@@ -1680,8 +1680,8 @@
         financial_institution_id         BIGINT        NULL,
         realized_pnl                     DECIMAL(18,8) DEFAULT 0,                        -- 已實現損益
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 投資持倉表
@@ -1705,8 +1705,8 @@
 
         UNIQUE(account_id, investment_product_id),
 
-        FOREIGN KEY (account_id) REFERENCES investment_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES investment_accounts(account_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 投資持倉手數表
@@ -1740,9 +1740,9 @@
         payout_frequency_id              BIGINT        NULL,                            -- 配息類型
         penalty_rate                     DECIMAL(18,8) NULL,                            -- 違約利率
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (payout_frequency_id) REFERENCES flow_frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (負債帳 → 房貸、車貸、信貸）
@@ -1761,8 +1761,8 @@
         CHECK (cycle_day BETWEEN 1 AND 31),
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (repayment_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (repayment_frequency_id) REFERENCES flow_frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (應收帳款)
@@ -1780,7 +1780,7 @@
         CHECK (cycle_day BETWEEN 1 AND 31),
         CHECK (due_day BETWEEN 1 AND 31),
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (recovery_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (recovery_frequency_id) REFERENCES flow_frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 固定資產分類表
@@ -1821,8 +1821,8 @@
         location                         VARCHAR(100),                                  -- 位置
         
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (asset_category_id) REFERENCES asset_categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (depreciation_method_id) REFERENCES depreciation_methods(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (asset_category_id) REFERENCES asset_categories(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (depreciation_method_id) REFERENCES depreciation_methods(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 存貨分類表
@@ -1859,9 +1859,9 @@
         cost_method_id                   BIGINT        NULL,
         expiry_date                      DATE,                                          -- 有效期限
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (inventory_category_id) REFERENCES inventory_categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (cost_method_id) REFERENCES cost_methods(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (inventory_category_id) REFERENCES inventory_categories(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (cost_method_id) REFERENCES cost_methods(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 合約種類表
@@ -1892,8 +1892,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (contract_type_id) REFERENCES contract_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (contract_type_id) REFERENCES contract_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (parent_contract_id) REFERENCES contracts(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
@@ -1937,7 +1937,7 @@
         prepayment_penalty_type          VARCHAR(20)    NULL,                           -- 'PERCENT'(餘額百分比), 'FIXED'(固定)
         prepayment_penalty               DECIMAL(18,8)  NULL,                           -- 提前清償違約金 (數值)
         FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (repayment_type_id) REFERENCES repayment_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (repayment_type_id) REFERENCES repayment_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 合約子表 (應收帳款)
@@ -1945,7 +1945,7 @@
         contract_id                      BIGINT        PRIMARY KEY,
         debtor_id                        BIGINT        NOT NULL,
         FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (debtor_id) REFERENCES debtors(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 合約子表 (租賃合約)
@@ -1955,7 +1955,7 @@
         rent_amount                      DECIMAL(18,8),
         deposit_amount                   DECIMAL(18,8),
         payment_day                      TINYINT, -- 每月幾號
-        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 合約子表 (薪資合約)
@@ -1992,8 +1992,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
 
-        FOREIGN KEY (transaction_source_type_id) REFERENCES transaction_source_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (transaction_source_type_id) REFERENCES transaction_source_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)分類類型表
@@ -2028,8 +2028,8 @@
 
         UNIQUE(user_id, ledger_type_id, code),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (category_type_id) REFERENCES category_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (category_type_id) REFERENCES category_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
@@ -2048,7 +2048,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         UNIQUE(category_group_id, code),
         INDEX(category_group_id),
-        FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category_group_id) REFERENCES category_groups(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
@@ -2082,7 +2082,7 @@
         UNIQUE(user_id, country_id, code),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
@@ -2107,7 +2107,7 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         
         UNIQUE (ledger_type_id, code),
-        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)交易狀態表
@@ -2151,12 +2151,12 @@
         INDEX (transaction_type_id),
         INDEX (transaction_date),
         
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)交易關聯表 (不同交易之間的關聯)
@@ -2181,7 +2181,7 @@
         merchant_id                      BIGINT        NULL,
         INDEX(category_id),
         FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
     );
     
@@ -2228,13 +2228,13 @@
         INDEX(recurrence_frequency_id),
         INDEX(next_run_date, is_active),
         
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (recurrence_frequency_id) REFERENCES flow_frequencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (recurrence_frequency_id) REFERENCES flow_frequencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)重複交易關聯表 (不同交易之間的關聯)
@@ -2257,9 +2257,9 @@
         recurring_transaction_id         BIGINT        PRIMARY KEY,
         category_id                      BIGINT        NOT NULL,
         merchant_id                      BIGINT        NULL,
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 交易標籤表
@@ -2278,7 +2278,7 @@
     );
 
     -- 交易與標籤關聯表
-    CREATE TABLE transaction_has_tags (
+    CREATE TABLE transaction_tags (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         transaction_id                   BIGINT         NOT NULL,
         tag_id                           BIGINT         NOT NULL,
@@ -2291,7 +2291,7 @@
     );
 
     -- 重複交易與標籤關聯表
-    CREATE TABLE recurring_transaction_has_tags (
+    CREATE TABLE recurring_transaction_tags (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         recurring_transaction_id         BIGINT         NOT NULL,
         tag_id                           BIGINT         NOT NULL,
@@ -2323,8 +2323,8 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (ledger_id, name),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 個別預算表
@@ -2342,8 +2342,8 @@
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
         UNIQUE (general_budget_id, category_id),
-        FOREIGN KEY (general_budget_id) REFERENCES general_budgets(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (general_budget_id) REFERENCES general_budgets(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 使用者餘額快照表 (可作總資產、總負債或淨資產 圓餅圖或曲線圖)
@@ -2359,7 +2359,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
         UNIQUE (user_id, snapshot_date),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 帳本餘額快照表 (單一帳本)
@@ -2370,7 +2370,7 @@
         snapshot_date                    DATE           NOT NULL,                      -- 快照日期
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (ledger_id, snapshot_date),
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 帳戶餘額快照表 (單一帳戶)
@@ -2388,9 +2388,9 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
         UNIQUE (account_id, snapshot_date),
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 投資持倉快照表 (單一投資商品)
@@ -2412,8 +2412,8 @@
         UNIQUE (account_id, investment_product_id, snapshot_date),
         INDEX(account_id),
 
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 提醒類型表
@@ -2461,9 +2461,9 @@
 
         INDEX(notification_type_id),
         INDEX(entity_type_id, entity_id),
-        FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 提醒排程狀態表
@@ -2502,9 +2502,9 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (frequency_id) REFERENCES frequencies(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (notification_schedule_status_id) REFERENCES notification_schedule_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (notification_schedule_status_id) REFERENCES notification_schedule_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 提醒狀態表
@@ -2531,9 +2531,9 @@
         deleted_date                     DATETIME       NULL,
         UNIQUE(user_id, notification_id),
         INDEX(notification_status_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_status_id) REFERENCES notification_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (notification_status_id) REFERENCES notification_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 提醒通路表
@@ -2558,9 +2558,9 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE(user_id, notification_type_id, notification_channel_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_channel_id) REFERENCES notification_channels(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (notification_type_id) REFERENCES notification_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (notification_channel_id) REFERENCES notification_channels(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 提醒寄送狀態表
@@ -2590,10 +2590,10 @@
         
         INDEX(user_notification_id),
         INDEX(notification_schedule_id),
-        FOREIGN KEY (user_notification_id) REFERENCES user_notifications(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_schedule_id) REFERENCES notification_schedules(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_channel_id) REFERENCES notification_channels(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (notification_send_status_id) REFERENCES notification_send_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_notification_id) REFERENCES user_notifications(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (notification_schedule_id) REFERENCES notification_schedules(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (notification_channel_id) REFERENCES notification_channels(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (notification_send_status_id) REFERENCES notification_send_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 帳戶調整原因表
@@ -2617,9 +2617,9 @@
         note                             VARCHAR(255),
         created_by                       BIGINT         NOT NULL,                        -- 誰做的調整
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 稽核活動類型表
@@ -2654,8 +2654,8 @@
         INDEX(audit_action_type_id, created_date),
 
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (audit_action_type_id) REFERENCES audit_action_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (audit_action_type_id) REFERENCES audit_action_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (entity_type_id) REFERENCES entity_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- 使用者登入狀態表
@@ -2697,7 +2697,7 @@
 
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (user_login_status_id) REFERENCES user_login_statuses(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (user_login_status_id) REFERENCES user_login_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
 
