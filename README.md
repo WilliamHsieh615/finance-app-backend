@@ -132,9 +132,11 @@
         phone_code                       VARCHAR(10)    NULL,                            -- 國際電話區碼
         name                             VARCHAR(100)   NOT NULL,                        -- 國家名稱 (英文)
         native_name                      VARCHAR(100)   NOT NULL,                        -- 國家名稱 (本地文字)
+        icon_id                          BIGINT         NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- (測試中)時區表
@@ -2072,7 +2074,6 @@
         merchant_type_id                 BIGINT         NOT NULL,                        -- 商店 / 公司類型
         code                             VARCHAR(50)    NOT NULL,                        -- 商店 / 公司代號
         name                             VARCHAR(100)   NOT NULL,                        -- 商店 / 公司名稱
-        icon_id                          BIGINT         NULL,
         note                             VARCHAR(255),
         is_system                        BOOLEAN        NOT NULL DEFAULT FALSE,
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -2082,8 +2083,7 @@
         UNIQUE(user_id, country_id, code),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
+        FOREIGN KEY (merchant_type_id) REFERENCES merchant_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (測試中)交易類型表
