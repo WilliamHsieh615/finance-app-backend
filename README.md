@@ -443,8 +443,11 @@
         financial_institution_id         BIGINT         NULL,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代碼 (ECB、yahoo)
         name                             VARCHAR(100)   NOT NULL,                        -- 名稱
+        api_url                          VARCHAR(255)   NULL,
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
+        last_success_sync_date           DATETIME       NULL,                            -- 最後同步成功時間 (此值每天會一修改，不會新增)
+        last_attempt_sync_date           DATETIME       NULL,                            -- 最後企圖同步時間 (此值每天會一修改，不會新增，同步失敗時會與last_success_sync_date值不同)
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
@@ -545,7 +548,7 @@
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (referral_code_type_id) REFERENCES referral_code_types(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -1163,9 +1166,9 @@
     CREATE TABLE investment_products (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         product_type_id                  BIGINT         NOT NULL,
-        
-        market_id                        BIGINT         NULL,                            -- 所屬市場 (美股、台股、幣圈)
-        currency_id                      BIGINT         NOT NULL,                        -- 報價幣別 (USD、TWD)
+        market_id                        BIGINT         NULL,                            -- 所屬市場 (美股、台股、幣圈)                 
+        listing_currency_id              BIGINT         NOT NULL,                        -- 標的幣別 (USD、TWD)
+        trading_currency_id              BIGINT         NOT NULL,                        -- 計價幣種 (虛擬貨幣、外匯與差價合約會與標的幣別不同)
         exchange_id                      BIGINT         NULL,                            -- 交易所
 
         code                             VARCHAR(50)    NOT NULL,                        -- 商品代碼 (AAPL、TSLA、BTC、0050)
@@ -1183,7 +1186,8 @@
         UNIQUE(market_id, exchange_id, code),
         FOREIGN KEY (product_type_id) REFERENCES investment_product_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (listing_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (trading_currency_id) REFERENCES currencies(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (exchange_id) REFERENCES exchanges(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -1699,8 +1703,26 @@
 
         UNIQUE(account_id, investment_product_id),
 
-        FOREIGN KEY (account_id) REFERENCES investment_accounts(account_id),
-        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id)
+        FOREIGN KEY (account_id) REFERENCES investment_accounts(account_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+    -- 投資持倉手數
+    CREATE TABLE investment_position_lots (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        investment_position_id           BIGINT         NOT NULL,
+        purchase_transaction_id          BIGINT         NOT NULL,
+        purchase_date                    DATETIME       NOT NULL,
+        original_quantity                DECIMAL(18,8)  NOT NULL,
+        remaining_quantity               DECIMAL(18,8)  NOT NULL,
+        purchase_unit_price              DECIMAL(18,8)  NOT NULL,
+        fee_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        tax_amount                       DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        subtotal_cost                    DECIMAL(18,8)  NOT NULL,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (investment_position_id) REFERENCES investment_positions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (purchase_transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- 帳戶表子表 (投資帳 → 定存、保險、基金、債券）
@@ -1857,6 +1879,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         account_id                       BIGINT         NOT NULL,
         contract_type_id                 BIGINT         NOT NULL,
+        parent_contract_id               BIGINT         NULL,                           -- (用於母子合約關聯)
 
         total_amount                     DECIMAL(18,8)  NULL,                           -- 總金額
         total_terms                      INT            NULL,                           -- 總期數
@@ -1868,7 +1891,8 @@
         deleted_date                     DATETIME       NULL,                           -- 刪除時間 (由後端寫入)
 
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (contract_type_id) REFERENCES contract_types(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (contract_type_id) REFERENCES contract_types(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (parent_contract_id) REFERENCES contracts(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
     -- 合約子表 (保險)
@@ -2402,6 +2426,19 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
+    -- 提醒優先順序表
+    CREATE TABLE notification_priorities (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- LOW、NORMAL、HIGH、URGENT
+        name                             VARCHAR(100)   NOT NULL,
+        sort_order                       INT            NOT NULL DEFAULT 0,
+        note                             VARCHAR(255),
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
+    );
+
     -- 提醒表
     CREATE TABLE notifications (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
@@ -2413,6 +2450,7 @@
         title                            VARCHAR(100)   NOT NULL,
         message                          VARCHAR(500)   NOT NULL,
         payload                          JSON           NULL,
+        expires_date                     DATETIME       NULL,                            -- 通知時效 (通知的生命週期)
         
         created_by                       BIGINT         NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -2543,7 +2581,7 @@
         notification_channel_id          BIGINT         NOT NULL,
         notification_send_status_id      BIGINT         NOT NULL,
         notification_send_status_date    DATETIME       NOT NULL,
-        retry_no                         INT            NOT NULL DEFAULT 0               -- 單次重寄的寄次(第幾次)
+        retry_no                         INT            NOT NULL DEFAULT 0,               -- 單次重寄的寄次(第幾次)
         error_message                    VARCHAR(255)   NULL,
         provider_response                JSON           NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -2578,7 +2616,7 @@
         created_by                       BIGINT         NOT NULL,                        -- 誰做的調整
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_adjustment_reason_id) REFERENCES account_adjustment_reasons(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
