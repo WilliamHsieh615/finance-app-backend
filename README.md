@@ -992,7 +992,7 @@
     -- 債務人表
     CREATE TABLE debtors (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        user_id                          BIGINT         NOT NULL
+        user_id                          BIGINT         NOT NULL,
         name                             VARCHAR(100)   NOT NULL,
         phone                            VARCHAR(50)    NULL,
         email                            VARCHAR(100)   NULL,
@@ -1034,7 +1034,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         flow_type_id                     BIGINT         NOT NULL,
         frequency_id                     BIGINT         NOT NULL,
-        code                             VARCHAR(50)    NOT NULL,                        -- 代號
+        code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
         name                             VARCHAR(100)   NOT NULL,                        -- 年繳、月繳、週繳、日繳、月配、季配、半年配、年配、不配息
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
@@ -1103,7 +1103,7 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        UNIQUE(user_id, name),
+        UNIQUE(user_id, ledger_type_id, name),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -1307,8 +1307,8 @@
         price_date                       DATE           NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX(investment_product_id, price_date),
-        INDEX(price_date),
+        INDEX (investment_product_id, price_date),
+        INDEX (price_date, investment_product_id),
         UNIQUE (investment_product_id, price_date),
         FOREIGN KEY (investment_product_id) REFERENCES investment_products(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
@@ -1673,7 +1673,7 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,
-
+        
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (previous_card_issuance_id) REFERENCES card_issuances(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (card_issuance_type_id) REFERENCES card_issuance_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -1729,6 +1729,7 @@
         subtotal_cost                    DECIMAL(18,8)  NOT NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX(remaining_quantity),
         FOREIGN KEY (investment_position_id) REFERENCES investment_positions(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (purchase_transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
@@ -1889,7 +1890,7 @@
         contract_type_id                 BIGINT         NOT NULL,
         parent_contract_id               BIGINT         NULL,                           -- (用於母子合約關聯)
 
-        contract_number                  VARCHAR(255)   NULL,
+        contract_number                  VARCHAR(255)   NULL UNIQUE,
         total_amount                     DECIMAL(18,8)  NULL,                           -- 總金額
         total_terms                      INT            NULL,                           -- 總期數
         start_date                       DATE           NOT NULL,                       -- 開始日
@@ -2458,7 +2459,7 @@
         title                            VARCHAR(100)   NOT NULL,
         message                          VARCHAR(500)   NOT NULL,
         payload                          JSON           NULL,
-        notification_priority_id         BIGINT         NOT NULL                         -- 通知先順序
+        notification_priority_id         BIGINT         NOT NULL,                        -- 通知先順序
         expires_date                     DATETIME       NULL,                            -- 通知時效 (通知的生命週期)
         
         created_by                       BIGINT         NOT NULL,
