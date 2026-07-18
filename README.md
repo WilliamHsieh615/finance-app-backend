@@ -486,6 +486,7 @@
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         country_id                       BIGINT         NULL,
         timezone_id                      BIGINT         NULL,
+        language_id                      BIGINT         NOT NULL,
 
         user_number                      VARCHAR(10)    NOT NULL UNIQUE,                 -- 使用者編號，10碼隨機碼
         name                             VARCHAR(255)   NOT NULL,                        -- 姓名
@@ -502,7 +503,8 @@
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE SET NULL ON UPDATE CASCADE
+        FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
     -- (測試中)角色表
@@ -1705,6 +1707,7 @@
         last_price                       DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 最後報價
         last_updated_price_date          DATETIME       NOT NULL,                        -- 報價更新時間
         market_value                     DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 市價
+        unrealized_pnl                   DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 未實現損益
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
