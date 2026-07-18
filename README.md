@@ -1408,7 +1408,8 @@
 
         name                             VARCHAR(100)   NOT NULL,
         legal_name                       VARCHAR(150)   NULL,
-        initial_balance                  DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 初始餘額
+        initial_balance                  DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 初始餘額 (不會變更)
+        current_balance                  DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 現在餘額 (會一直 update)
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         note                             VARCHAR(255),                                   -- 備註
         
@@ -1683,10 +1684,11 @@
     
     -- 帳戶表子表 (投資帳 → 股票、ETF、基金、外幣、虛擬貨幣、貴金屬、期貨 futures、選擇權 option，）
     CREATE TABLE investment_accounts (
-        account_id                       BIGINT        PRIMARY KEY,
-        market_id                        BIGINT        NULL,
-        financial_institution_id         BIGINT        NULL,
-        realized_pnl                     DECIMAL(18,8) DEFAULT 0,                        -- 已實現損益
+        account_id                       BIGINT         PRIMARY KEY,
+        market_id                        BIGINT         NULL,
+        financial_institution_id         BIGINT         NULL,
+        realized_pnl                     DECIMAL(18,8)  NOT NULL DEFAULT 0,               -- 已實現損益
+        realized_pnl_rate                DECIMAL(18,8)  NOT NULL DEFAULT 0,               -- 已實現損益率
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (market_id) REFERENCES markets(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (financial_institution_id) REFERENCES financial_institutions(id) ON DELETE SET NULL ON UPDATE CASCADE
@@ -1708,6 +1710,7 @@
         last_updated_price_date          DATETIME       NOT NULL,                        -- 報價更新時間
         market_value                     DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 市價
         unrealized_pnl                   DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 未實現損益
+        unrealized_pnl_rate              DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 未實現損益率
 
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
