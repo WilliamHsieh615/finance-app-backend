@@ -2,7 +2,7 @@
 
     USE finance_app;
 
-    -- (測試中)資源提供者
+    -- (V1)資源提供者
     CREATE TABLE resource_providers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (EMOJI、LUCIDE、MATERIAL、CUSTOM_UPLOAD)
@@ -15,7 +15,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- (測試中)儲存提供者
+    -- (V1)儲存提供者
     CREATE TABLE storage_providers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
@@ -28,7 +28,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- (測試中)實體類型表(用於資料表對應資料表)
+    -- (V1)實體類型表(用於資料表對應資料表)
     CREATE TABLE entity_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 資料表代號
@@ -39,7 +39,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- (測試中)檔案角色
+    -- (V1)檔案角色
     CREATE TABLE file_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
@@ -51,7 +51,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
     
-    -- (測試中)檔案類型表
+    -- (V1)檔案類型表
     CREATE TABLE file_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF、SVG、WEBP)
@@ -67,7 +67,7 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
-    -- (測試中)檔案表
+    -- (V1)檔案表
     CREATE TABLE files (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         user_id                          BIGINT         NULL,                            -- 誰上傳的檔案
@@ -104,7 +104,7 @@
         FOREIGN KEY (file_type_id) REFERENCES file_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
-    -- (測試中)圖示表
+    -- (V1)圖示表
     CREATE TABLE icons (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         resource_provider_id             BIGINT         NOT NULL,
@@ -123,7 +123,7 @@
         FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
     
-    -- (測試中)國別表
+    -- (V1)國別表
     CREATE TABLE countries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         iso2                             CHAR(2)        NOT NULL UNIQUE,                 -- ISO 3166-1國別碼 (兩碼)
@@ -132,11 +132,9 @@
         phone_code                       VARCHAR(10)    NULL,                            -- 國際電話區碼
         name                             VARCHAR(100)   NOT NULL,                        -- 國家名稱 (英文)
         native_name                      VARCHAR(100)   NOT NULL,                        -- 國家名稱 (本地文字)
-        icon_id                          BIGINT         NULL,
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
+        deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
     -- (測試中)時區表
