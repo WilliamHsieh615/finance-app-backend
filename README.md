@@ -6,7 +6,7 @@
     CREATE TABLE resource_providers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (EMOJI、LUCIDE、MATERIAL、CUSTOM_UPLOAD)
-        name                             VARCHAR(100)    NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
+        name                             VARCHAR(100)   NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         resource_url                     VARCHAR(255)   NULL,
         note                             VARCHAR(255),
@@ -19,7 +19,7 @@
     CREATE TABLE storage_providers (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
-        name                             VARCHAR(100)    NOT NULL,                        -- 名稱
+        name                             VARCHAR(100)   NOT NULL,                        -- 名稱
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         provider_url                     VARCHAR(255)   NULL,
         note                             VARCHAR(255),
@@ -32,7 +32,7 @@
     CREATE TABLE entity_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 資料表代號
-        name                             VARCHAR(100)    NOT NULL,                        -- 資料表名稱
+        name                             VARCHAR(100)   NOT NULL,                        -- 資料表名稱
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -43,7 +43,7 @@
     CREATE TABLE file_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號
-        name                             VARCHAR(100)    NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
+        name                             VARCHAR(100)   NOT NULL,                        -- 名稱 (avatar、logo、banner、receipt、attachment、thumbnail、icon、statement)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -55,7 +55,7 @@
     CREATE TABLE file_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         code                             VARCHAR(50)    NOT NULL UNIQUE,                 -- 代號 (JPG、PNG、PDF、SVG、WEBP)
-        name                             VARCHAR(100)    NOT NULL,                        -- 名稱 (JPEG Image、PNG Image、PDF File)
+        name                             VARCHAR(100)   NOT NULL,                        -- 名稱 (JPEG Image、PNG Image、PDF File)
         mime_type                        VARCHAR(100)   NOT NULL,                        -- 格式類型 (text/plain、image/jpeg、image/png、application/pdf)
         extension                        VARCHAR(20)    NOT NULL,                        -- 副檔名 (.jpg、.png、.pdf)
         is_image                         BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否是影像
