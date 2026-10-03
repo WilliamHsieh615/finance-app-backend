@@ -531,6 +531,49 @@
         FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
+    -- (V1 DB AP)權限類型表
+    CREATE TABLE permission_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)權限表
+    CREATE TABLE permissions (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        permission_type_id               BIGINT         NOT NULL,
+        code                             VARCHAR(100)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
+        INDEX (permission_type_id),
+        FOREIGN KEY (permission_type_id) REFERENCES permission_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
+    -- (V1 DB AP)角色與權限關聯表
+    CREATE TABLE role_permissions (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        role_id                          BIGINT         NOT NULL,
+        permission_id                    BIGINT         NOT NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
+        UNIQUE (role_id, permission_id),
+        INDEX (role_id),
+        INDEX (permission_id),
+        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
     -- 推薦碼類型表
     CREATE TABLE referral_code_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
