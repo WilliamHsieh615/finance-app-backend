@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "user_refresh_tokens")
@@ -41,6 +42,7 @@ public class UserRefreshToken {
     @Column(name = "last_used_date")
     private LocalDateTime lastUsedDate;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "created_date",
         nullable = false,

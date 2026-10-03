@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "user_auth_event_logs")
@@ -56,6 +57,7 @@ public class UserAuthEventLog {
     @Column(name = "user_agent", length = 500)
     private String userAgent;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "event_time",
         nullable = false,

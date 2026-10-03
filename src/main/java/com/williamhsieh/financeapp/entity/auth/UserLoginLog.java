@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "user_login_logs")
@@ -46,6 +47,7 @@ public class UserLoginLog {
     )
     private String email;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "login_time",
         nullable = false,
