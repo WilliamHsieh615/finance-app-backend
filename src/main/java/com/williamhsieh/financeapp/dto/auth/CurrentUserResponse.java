@@ -2,6 +2,7 @@ package com.williamhsieh.financeapp.dto.auth;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record CurrentUserResponse(
     Long id,
@@ -14,6 +15,8 @@ public record CurrentUserResponse(
     boolean emailVerified,
     boolean smsVerified,
     boolean active,
+    List<String> roles,
+    List<String> permissions,
     CountryInfo country,
     TimezoneInfo timezone,
     LanguageInfo language,

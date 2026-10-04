@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.williamhsieh.financeapp.dto.common.ApiErrorResponse;
 import com.williamhsieh.financeapp.dto.common.FieldErrorResponse;
@@ -148,6 +149,28 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
+            .body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse>
+        handleAccessDeniedException(
+            AccessDeniedException exception,
+            HttpServletRequest request
+        ) {
+
+        ApiErrorResponse response =
+            ApiErrorResponse.of(
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN
+                    .getReasonPhrase(),
+                "ACCESS_DENIED",
+                "你沒有執行此操作的權限",
+                request.getRequestURI()
+            );
+
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
             .body(response);
     }
 

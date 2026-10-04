@@ -20,6 +20,11 @@ import com.williamhsieh.financeapp.repository.region.CountryTimezoneRepository;
 import com.williamhsieh.financeapp.repository.region.LanguageRepository;
 import com.williamhsieh.financeapp.repository.region.TimezoneRepository;
 import com.williamhsieh.financeapp.repository.user.UserRepository;
+import com.williamhsieh.financeapp.constant.auth.RoleCodes;
+import com.williamhsieh.financeapp.entity.auth.Role;
+import com.williamhsieh.financeapp.entity.auth.UserRole;
+import com.williamhsieh.financeapp.repository.auth.RoleRepository;
+import com.williamhsieh.financeapp.repository.auth.UserRoleRepository;
 
 @Service
 public class RegistrationService {
@@ -36,6 +41,8 @@ public class RegistrationService {
     private final LanguageRepository languageRepository;
     private final CountryTimezoneRepository countryTimezoneRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
 
     public RegistrationService(
         UserRepository userRepository,
@@ -43,13 +50,18 @@ public class RegistrationService {
         TimezoneRepository timezoneRepository,
         LanguageRepository languageRepository,
         CountryTimezoneRepository countryTimezoneRepository,
+        RoleRepository roleRepository,
+        UserRoleRepository userRoleRepository,
         PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.countryRepository = countryRepository;
         this.timezoneRepository = timezoneRepository;
         this.languageRepository = languageRepository;
-        this.countryTimezoneRepository = countryTimezoneRepository;
+        this.countryTimezoneRepository =
+            countryTimezoneRepository;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -91,6 +103,8 @@ public class RegistrationService {
         user.setActive(false);
 
         User savedUser = userRepository.save(user);
+        
+        assignDefaultUserRole(savedUser);
 
         return new RegisterUserResponse(
             savedUser.getId(),
@@ -101,6 +115,26 @@ public class RegistrationService {
             savedUser.isActive(),
             "註冊資料建立成功，請完成電子郵件與手機驗證"
         );
+    }
+
+    private void assignDefaultUserRole(User user) {
+        Role role = roleRepository
+            .findByCodeIgnoreCaseAndActiveTrueAndDeletedDateIsNull(
+                RoleCodes.USER
+            )
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "系統預設 USER 角色不存在或已停用"
+                )
+            );
+
+        UserRole userRole = new UserRole(
+            user,
+            role
+        );
+
+        userRoleRepository.save(userRole);
     }
 
     private void validateUniqueUserData(

@@ -1,5 +1,7 @@
 package com.williamhsieh.financeapp.service.auth;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +30,9 @@ public class CurrentUserService {
 
     @Transactional(readOnly = true)
     public CurrentUserResponse getCurrentUser(
-        String subject
+        String subject,
+        List<String> roles,
+        List<String> permissions
     ) {
         Long userId = parseUserId(subject);
 
@@ -48,7 +52,11 @@ public class CurrentUserService {
             );
         }
 
-        return toResponse(user);
+        return toResponse(
+            user,
+            roles,
+            permissions
+        );
     }
 
     private Long parseUserId(String subject) {
@@ -70,7 +78,11 @@ public class CurrentUserService {
         );
     }
 
-    private CurrentUserResponse toResponse(User user) {
+    private CurrentUserResponse toResponse(
+        User user,
+        List<String> roles,
+        List<String> permissions
+    ) {
         return new CurrentUserResponse(
             user.getId(),
             user.getUserNumber(),
@@ -82,6 +94,8 @@ public class CurrentUserService {
             user.isEmailVerified(),
             user.isSmsVerified(),
             user.isActive(),
+            List.copyOf(roles),
+            List.copyOf(permissions),
             toCountryInfo(user.getCountry()),
             toTimezoneInfo(user.getTimezone()),
             toLanguageInfo(user.getLanguage()),

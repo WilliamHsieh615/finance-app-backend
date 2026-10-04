@@ -17,6 +17,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -77,6 +79,7 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean active = false;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "created_date",
         nullable = false,
@@ -85,6 +88,7 @@ public class User {
     )
     private LocalDateTime createdDate;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "updated_date",
         nullable = false,

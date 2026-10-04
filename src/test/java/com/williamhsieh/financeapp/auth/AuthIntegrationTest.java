@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
+import java.util.List;
 
 import com.jayway.jsonpath.JsonPath;
 
@@ -30,6 +31,8 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 import com.williamhsieh.financeapp.service.notification.EmailSender;
 import com.williamhsieh.financeapp.service.notification.SmsSender;
@@ -52,6 +55,9 @@ class AuthIntegrationTest {
     @Autowired
     private JwtEncoder jwtEncoder;
 
+    @Autowired
+    private JwtDecoder jwtDecoder;
+
     @MockitoBean
     private EmailSender emailSender;
 
@@ -64,7 +70,9 @@ class AuthIntegrationTest {
         insertLoginStatuses();
         insertAuthEventTypes();
         insertLanguage();
+        insertAuthorizationData();
         insertUser();
+        insertUserRole();
     }
 
     private void clearTestData() {
@@ -90,6 +98,22 @@ class AuthIntegrationTest {
 
         jdbcTemplate.update(
             "DELETE FROM user_roles"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM role_permissions"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM permissions"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM permission_types"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM roles"
         );
 
         jdbcTemplate.update(
@@ -564,6 +588,203 @@ class AuthIntegrationTest {
             .getTokenValue();
     }
 
+    private void insertAuthorizationData() {
+        jdbcTemplate.update(
+            """
+            INSERT INTO permission_types (
+                id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                1,
+                'USER',
+                '個人資料',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                1,
+                1,
+                'PROFILE_READ_SELF',
+                '查看自己的會員資料',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO roles (
+                id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                1,
+                'USER',
+                '一般使用者',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                1,
+                1,
+                1,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permission_types (
+                id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                'USER_MANAGEMENT',
+                '會員管理',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+        
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                2,
+                'USER_READ',
+                '查詢會員資料',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO roles (
+                id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                'SUPPORT',
+                '客服人員',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+                )
+            VALUES (
+                2,
+                2,
+                2,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+    }
+
+    private void insertUserRole() {
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_roles (
+                id,
+                user_id,
+                role_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                1,
+                100,
+                1,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+    }
+
     @Test
     void meWithoutAccessTokenReturnsUnauthorized()
         throws Exception {
@@ -729,11 +950,32 @@ class AuthIntegrationTest {
 
         String responseBody =
             result.getResponse().getContentAsString();
-
+        
+        String rawAccessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+        
         String rawRefreshToken =
             JsonPath.read(
                 responseBody,
                 "$.refreshToken"
+            );
+
+        Jwt decodedAccessToken =
+            jwtDecoder.decode(
+                rawAccessToken
+            );
+
+        List<String> roles =
+            decodedAccessToken.getClaimAsStringList(
+                "roles"
+            );
+
+        List<String> permissions =
+            decodedAccessToken.getClaimAsStringList(
+                "permissions"
             );
 
         Long refreshTokenCount =
@@ -800,6 +1042,48 @@ class AuthIntegrationTest {
         assertThat(loginSessionId)
             .isNotBlank()
             .hasSize(36);
+
+        assertThat(rawAccessToken)
+            .isNotBlank();
+
+        assertThat(roles)
+            .containsExactly("USER");
+
+        assertThat(permissions)
+            .containsExactly(
+                "PROFILE_READ_SELF"
+            );
+        
+        assertThat(decodedAccessToken.getSubject())
+            .isEqualTo("100");
+
+        assertThat(
+            decodedAccessToken.getClaimAsString(
+                "userNumber"
+            )
+        )
+            .isEqualTo("TESTUSER01");
+
+        assertThat(
+            decodedAccessToken.getClaimAsString(
+                "email"
+            )
+        )
+            .isEqualTo("test@example.com");
+
+        assertThat(
+            decodedAccessToken.getClaimAsString(
+                "tokenType"
+            )
+        )
+            .isEqualTo("access");
+
+        assertThat(
+            decodedAccessToken.getClaimAsString(
+                "sid"
+            )
+        )
+            .isEqualTo(loginSessionId);
     }
 
     // 密碼錯誤測試
@@ -1117,6 +1401,22 @@ class AuthIntegrationTest {
         .andExpect(
             jsonPath("$.active")
                 .value(true)
+        )
+        .andExpect(
+            jsonPath("$.roles.length()")
+                .value(1)
+        )
+        .andExpect(
+            jsonPath("$.roles[0]")
+                .value("USER")
+        )
+        .andExpect(
+            jsonPath("$.permissions.length()")
+                .value(1)
+        )
+        .andExpect(
+            jsonPath("$.permissions[0]")
+                .value("PROFILE_READ_SELF")
         )
         .andExpect(
             jsonPath("$.language.id")
@@ -2312,5 +2612,1742 @@ class AuthIntegrationTest {
          * 使用撤銷的 Token 不可以建立新的 Refresh Token。
          */
         assertThat(refreshTokenCount).isEqualTo(1);
+    }
+
+    @Test
+    void refreshReloadsLatestRolesAndPermissions()
+        throws Exception {
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String loginResponseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String originalAccessToken =
+            JsonPath.read(
+                loginResponseBody,
+                "$.accessToken"
+            );
+
+        String refreshToken =
+            JsonPath.read(
+                loginResponseBody,
+                "$.refreshToken"
+            );
+
+        Jwt originalJwt =
+            jwtDecoder.decode(
+                originalAccessToken
+            );
+
+        assertThat(
+            originalJwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .containsExactly("USER");
+
+        assertThat(
+            originalJwt.getClaimAsStringList(
+                "permissions"
+            )
+        )
+            .containsExactly(
+                "PROFILE_READ_SELF"
+            );
+
+        /*
+         * 登入完成後才指派 SUPPORT。
+         * 舊 Access Token 不會自動改變。
+         */
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_roles (
+                id,
+                user_id,
+                role_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                100,
+                2,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        assertThat(
+            originalJwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .containsExactly("USER");
+
+        String refreshRequestBody = """
+            {
+              "refreshToken": "%s"
+            }
+            """.formatted(refreshToken);
+
+        MvcResult refreshResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/refresh")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(refreshRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andExpect(
+                    jsonPath("$.accessToken")
+                        .isNotEmpty()
+                )
+                .andExpect(
+                    jsonPath("$.refreshToken")
+                        .isNotEmpty()
+                )
+                .andReturn();
+
+        String refreshResponseBody =
+            refreshResult
+                .getResponse()
+                .getContentAsString();
+
+        String newAccessToken =
+            JsonPath.read(
+                refreshResponseBody,
+                "$.accessToken"
+            );
+
+        Jwt newJwt =
+            jwtDecoder.decode(
+                newAccessToken
+            );
+
+        assertThat(
+            newJwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .containsExactly(
+                "SUPPORT",
+                "USER"
+            );
+
+        assertThat(
+            newJwt.getClaimAsStringList(
+                "permissions"
+            )
+        )
+            .containsExactly(
+                "PROFILE_READ_SELF",
+                "USER_READ"
+            );
+
+        /*
+         * 舊 Token 仍然保持簽發當下的 USER。
+         */
+        Jwt decodedOriginalJwtAgain =
+            jwtDecoder.decode(
+                originalAccessToken
+            );
+
+        assertThat(
+            decodedOriginalJwtAgain
+                .getClaimAsStringList(
+                    "roles"
+                )
+        )
+            .containsExactly("USER");
+    }
+
+    @Test
+    void userWithoutUserReadPermissionReturnsForbidden()
+        throws Exception {
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/user-read"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(
+                        "/api/v1/test/authorization/user-read"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void supportWithUserReadPermissionCanAccessProtectedApi()
+        throws Exception {
+
+        /*
+         * 在登入以前增加 SUPPORT，
+         * 讓 Access Token 包含 USER_READ。
+         */
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_roles (
+                id,
+                user_id,
+                role_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                100,
+                2,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(
+                accessToken
+            );
+
+        assertThat(
+            jwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .containsExactly(
+                "SUPPORT",
+                "USER"
+            );
+
+        assertThat(
+            jwt.getClaimAsStringList(
+                "permissions"
+            )
+        )
+            .containsExactly(
+                "PROFILE_READ_SELF",
+                "USER_READ"
+            );
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/user-read"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.result")
+                    .value("allowed")
+            );
+    }
+
+    @Test
+    void userWithoutSupportRoleReturnsForbidden()
+        throws Exception {
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/support"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(
+                        "/api/v1/test/authorization/support"
+                    )
+            );
+    }
+
+    @Test
+    void supportRoleCanAccessSupportApi()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_roles (
+                id,
+                user_id,
+                role_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                100,
+                2,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(
+                accessToken
+            );
+
+        assertThat(
+            jwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .containsExactly(
+                "SUPPORT",
+                "USER"
+            );
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/support"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.result")
+                    .value("support-allowed")
+            );
+    }
+
+    @Test
+    void registrationAssignsOnlyDefaultUserRole()
+        throws Exception {
+
+        String requestBody = """
+            {
+              "countryId": null,
+              "timezoneId": null,
+              "languageId": 1,
+              "name": "New User",
+              "nickname": "Newbie",
+              "email": "new-user@example.com",
+              "password": "Password123!",
+              "birthday": "1995-05-20",
+              "phone": "+886923456789"
+            }
+            """;
+
+        MvcResult result =
+            mockMvc.perform(
+                    post("/api/v1/registration")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(requestBody)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(
+                    content().contentTypeCompatibleWith(
+                        MediaType.APPLICATION_JSON
+                    )
+                )
+                .andExpect(
+                    jsonPath("$.id").isNumber()
+                )
+                .andExpect(
+                    jsonPath("$.userNumber")
+                        .isNotEmpty()
+                )
+                .andExpect(
+                    jsonPath("$.email")
+                        .value(
+                            "new-user@example.com"
+                        )
+                )
+                .andExpect(
+                    jsonPath("$.emailVerified")
+                        .value(false)
+                )
+                .andExpect(
+                    jsonPath("$.smsVerified")
+                        .value(false)
+                )
+                .andExpect(
+                    jsonPath("$.active")
+                        .value(false)
+                )
+                .andExpect(
+                    jsonPath("$.message")
+                        .value(
+                            "註冊資料建立成功，請完成電子郵件與手機驗證"
+                        )
+                )
+                .andReturn();
+
+        String responseBody =
+            result
+                .getResponse()
+                .getContentAsString();
+
+        Number responseUserId =
+            JsonPath.read(
+                responseBody,
+                "$.id"
+            );
+
+        String userNumber =
+            JsonPath.read(
+                responseBody,
+                "$.userNumber"
+            );
+
+        long registeredUserId =
+            responseUserId.longValue();
+
+        assertThat(userNumber)
+            .hasSize(10)
+            .matches("[A-Z0-9]{10}");
+
+        Long userCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM users
+                WHERE id = ?
+                  AND email =
+                      'new-user@example.com'
+                  AND email_verified = FALSE
+                  AND sms_verified = FALSE
+                  AND is_active = FALSE
+                  AND deleted_date IS NULL
+                """,
+                Long.class,
+                registeredUserId
+            );
+
+        Long totalRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_roles
+                WHERE user_id = ?
+                  AND is_active = TRUE
+                  AND deleted_date IS NULL
+                """,
+                Long.class,
+                registeredUserId
+            );
+
+        Long userRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_roles user_role
+                JOIN roles role
+                  ON role.id =
+                     user_role.role_id
+                WHERE user_role.user_id = ?
+                  AND role.code = 'USER'
+                  AND user_role.is_active = TRUE
+                  AND user_role.deleted_date IS NULL
+                  AND role.is_active = TRUE
+                  AND role.deleted_date IS NULL
+                """,
+                Long.class,
+                registeredUserId
+            );
+
+        Long supportRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_roles user_role
+                JOIN roles role
+                  ON role.id =
+                     user_role.role_id
+                WHERE user_role.user_id = ?
+                  AND role.code = 'SUPPORT'
+                """,
+                Long.class,
+                registeredUserId
+            );
+
+        assertThat(userCount)
+            .isEqualTo(1);
+
+        /*
+         * 新註冊者只應有一個預設角色。
+         */
+        assertThat(totalRoleCount)
+            .isEqualTo(1);
+
+        assertThat(userRoleCount)
+            .isEqualTo(1);
+
+        /*
+         * 公開註冊流程不能自行取得內部角色。
+         */
+        assertThat(supportRoleCount)
+            .isZero();
+
+        String storedPassword =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT password
+                FROM users
+                WHERE id = ?
+                """,
+                String.class,
+                registeredUserId
+            );
+
+        assertThat(storedPassword)
+            .isNotBlank()
+            .isNotEqualTo("Password123!");
+
+        assertThat(
+            passwordEncoder.matches(
+                "Password123!",
+                storedPassword
+            )
+        )
+            .isTrue();
+    }
+
+    @Test
+    void registrationRollsBackWhenDefaultUserRoleIsUnavailable()
+        throws Exception {
+
+        /*
+         * 模擬系統預設 USER 角色被停用。
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE roles
+            SET is_active = FALSE
+            WHERE code = 'USER'
+            """
+        );
+
+        String requestBody = """
+            {
+              "countryId": null,
+              "timezoneId": null,
+              "languageId": 1,
+              "name": "Rollback User",
+              "nickname": "Rollback",
+              "email": "rollback-user@example.com",
+              "password": "Password123!",
+              "birthday": "1992-08-10",
+              "phone": "+886934567890"
+            }
+            """;
+
+        mockMvc.perform(
+                post("/api/v1/registration")
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(requestBody)
+            )
+            .andExpect(
+                status().isInternalServerError()
+            )
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(500)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value(
+                        "Internal Server Error"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("REQUEST_FAILED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "系統預設 USER 角色不存在或已停用"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(
+                        "/api/v1/registration"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        Long createdUserCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM users
+                WHERE email =
+                      'rollback-user@example.com'
+                """,
+                Long.class
+            );
+
+        Long createdUserRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_roles user_role
+                JOIN users registered_user
+                  ON registered_user.id =
+                     user_role.user_id
+                WHERE registered_user.email =
+                      'rollback-user@example.com'
+                """,
+                Long.class
+            );
+
+        assertThat(createdUserCount)
+            .isZero();
+
+        assertThat(createdUserRoleCount)
+            .isZero();
+    }
+
+    @Test
+    void inactiveUserRoleIsExcludedFromAccessToken()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            UPDATE user_roles
+            SET is_active = FALSE
+            WHERE user_id = 100
+              AND role_id = 1
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(
+                accessToken
+            );
+
+        assertThat(
+            jwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .isEmpty();
+
+        assertThat(
+            jwt.getClaimAsStringList(
+                "permissions"
+            )
+        )
+            .isEmpty();
+
+        /*
+         * JWT 本身有效，所以 /me 仍可用於
+         * 前端取得目前登入者與授權狀態。
+         */
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.roles")
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath("$.permissions")
+                    .isEmpty()
+            );
+
+        /*
+         * 但需要 Permission 的 API 必須拒絕。
+         */
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/user-read"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            );
+    }
+
+    @Test
+    void inactiveRolePermissionIsExcludedFromAccessToken()
+        throws Exception {
+
+        /*
+         * USER 角色仍有效，但停用它與
+         * PROFILE_READ_SELF 的權限關聯。
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 1
+              AND permission_id = 1
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(
+                accessToken
+            );
+
+        /*
+         * UserRole 沒有被停用，所以 USER 仍存在。
+         */
+        assertThat(
+            jwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .containsExactly("USER");
+
+        /*
+         * RolePermission 已停用及軟刪除，
+         * 所以 PROFILE_READ_SELF 不得進入 JWT。
+         */
+        assertThat(
+            jwt.getClaimAsStringList(
+                "permissions"
+            )
+        )
+            .isEmpty();
+
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.roles.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.roles[0]")
+                    .value("USER")
+            )
+            .andExpect(
+                jsonPath("$.permissions")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void inactivePermissionIsExcludedFromAccessToken()
+        throws Exception {
+
+        /*
+         * RolePermission 關聯仍有效，
+         * 但 Permission 本身已停用並軟刪除。
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE permissions
+            SET is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE id = 1
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(
+                accessToken
+            );
+
+        /*
+         * USER 角色仍有效。
+         */
+        assertThat(
+            jwt.getClaimAsStringList("roles")
+        )
+            .containsExactly("USER");
+
+        /*
+         * Permission 本身已停用並軟刪除，
+         * 因此不得出現在 JWT。
+         */
+        assertThat(
+            jwt.getClaimAsStringList("permissions")
+        )
+            .isEmpty();
+
+        /*
+         * /me 仍可取得目前使用者，
+         * 但不會回傳已停用的權限。
+         */
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.roles[0]")
+                    .value("USER")
+            )
+            .andExpect(
+                jsonPath("$.permissions")
+                    .isEmpty()
+            );
+
+        /*
+         * 需要該權限的 API 應回傳 403。
+         */
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/user-read"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            );
+    }
+
+    @Test
+    void inactivePermissionTypeExcludesItsPermissionsFromAccessToken()
+        throws Exception {
+
+        /*
+         * Permission 與 RolePermission 都維持有效，
+         * 只停用 PermissionType。
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE permission_types
+            SET is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE id = 1
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(accessToken);
+
+        /*
+         * UserRole 與 Role 都有效，因此 USER 角色仍保留。
+         */
+        assertThat(
+            jwt.getClaimAsStringList("roles")
+        )
+            .containsExactly("USER");
+
+        /*
+         * PROFILE_READ_SELF 所屬的 PermissionType
+         * 已停用及軟刪除，因此權限不得進入 JWT。
+         */
+        assertThat(
+            jwt.getClaimAsStringList("permissions")
+        )
+            .isEmpty();
+
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.roles.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.roles[0]")
+                    .value("USER")
+            )
+            .andExpect(
+                jsonPath("$.permissions")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void inactiveRoleExcludesRoleAndPermissionsFromAccessToken()
+        throws Exception {
+
+        /*
+         * UserRole、RolePermission、Permission 都維持有效，
+         * 只停用 USER Role。
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE roles
+            SET is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE id = 1
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(accessToken);
+
+        /*
+         * Role 本身已失效，因此不能進入 JWT。
+         */
+        assertThat(
+            jwt.getClaimAsStringList("roles")
+        )
+            .isEmpty();
+
+        /*
+         * 失效 Role 底下的權限也不能生效。
+         */
+        assertThat(
+            jwt.getClaimAsStringList("permissions")
+        )
+            .isEmpty();
+
+        /*
+         * JWT 本身仍是有效的登入憑證，
+         * 所以 /me 可以呼叫，但沒有任何角色及權限。
+         */
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.roles")
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath("$.permissions")
+                    .isEmpty()
+            );
+
+        /*
+         * 需要 USER_READ 權限的 API 必須拒絕。
+         */
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/user-read"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            );
+    }
+
+    @Test
+    void multipleRolesMergePermissionsWithoutDuplicates()
+        throws Exception {
+
+        /*
+         * 指派 SUPPORT 給測試使用者。
+         */
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_roles (
+                id,
+                user_id,
+                role_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                100,
+                2,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        /*
+         * SUPPORT 原本已擁有 USER_READ。
+         * 再讓 SUPPORT 也擁有 USER 已有的
+         * PROFILE_READ_SELF，製造重複權限來源。
+         */
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                3,
+                2,
+                1,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+                }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken =
+            JsonPath.read(
+                responseBody,
+                "$.accessToken"
+            );
+
+        Jwt jwt =
+            jwtDecoder.decode(accessToken);
+
+        List<String> roles =
+            jwt.getClaimAsStringList("roles");
+
+        List<String> permissions =
+            jwt.getClaimAsStringList("permissions");
+
+        /*
+         * Repository 依照角色代碼排序。
+         */
+        assertThat(roles)
+            .containsExactly(
+                "SUPPORT",
+                "USER"
+            );
+
+        /*
+         * PROFILE_READ_SELF 雖然由兩個角色提供，
+         * JWT 中仍只能出現一次。
+         */
+        assertThat(permissions)
+            .containsExactly(
+                "PROFILE_READ_SELF",
+                "USER_READ"
+            );
+
+        long profileReadSelfCount =
+            permissions.stream()
+                .filter(
+                    "PROFILE_READ_SELF"::equals
+                )
+                .count();
+
+        assertThat(profileReadSelfCount)
+            .isEqualTo(1);
+
+        /*
+         * /me 回傳的授權資料也必須完成合併與去重。
+         */
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.roles.length()")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.roles[0]")
+                    .value("SUPPORT")
+            )
+            .andExpect(
+                jsonPath("$.roles[1]")
+                    .value("USER")
+            )
+            .andExpect(
+                jsonPath("$.permissions.length()")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.permissions[0]")
+                    .value("PROFILE_READ_SELF")
+            )
+            .andExpect(
+                jsonPath("$.permissions[1]")
+                    .value("USER_READ")
+            );
+    }
+
+    @Test
+    void refreshTokenReloadsAuthoritiesAfterRoleIsRevoked()
+        throws Exception {
+
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        /*
+         * 先正常登入。
+         */
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String loginResponseBody =
+            loginResult
+                .getResponse()
+                .getContentAsString();
+
+        String originalAccessToken =
+            JsonPath.read(
+                loginResponseBody,
+                "$.accessToken"
+            );
+
+        String refreshToken =
+            JsonPath.read(
+                loginResponseBody,
+                "$.refreshToken"
+            );
+
+        Jwt originalJwt =
+            jwtDecoder.decode(originalAccessToken);
+
+        assertThat(
+            originalJwt.getClaimAsStringList("roles")
+        )
+            .containsExactly("USER");
+
+        assertThat(
+            originalJwt.getClaimAsStringList(
+                "permissions"
+            )
+        )
+            .containsExactly(
+                "PROFILE_READ_SELF"
+            );
+
+        /*
+         * 登入後撤銷 USER 角色。
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE user_roles
+            SET is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE user_id = 100
+              AND role_id = 1
+            """
+        );
+
+        /*
+         * 舊 Access Token 是簽發時的快照，
+         * 其中的 USER 與權限仍然存在。
+         */
+        Jwt unchangedOriginalJwt =
+            jwtDecoder.decode(originalAccessToken);
+
+        assertThat(
+            unchangedOriginalJwt.getClaimAsStringList(
+                "roles"
+            )
+        )
+            .containsExactly("USER");
+
+        /*
+         * 使用 Refresh Token 取得新的 Token。
+         */
+        String refreshRequestBody = """
+            {
+              "refreshToken": "%s"
+            }
+            """.formatted(refreshToken);
+
+        MvcResult refreshResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/refresh")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(refreshRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String refreshResponseBody =
+            refreshResult
+                .getResponse()
+                .getContentAsString();
+
+        String newAccessToken =
+            JsonPath.read(
+                refreshResponseBody,
+                "$.accessToken"
+            );
+
+        Jwt newJwt =
+            jwtDecoder.decode(newAccessToken);
+
+        /*
+         * Refresh 時會重新查詢資料庫，
+         * 新 JWT 不得再包含已撤銷的角色及權限。
+         */
+        assertThat(
+            newJwt.getClaimAsStringList("roles")
+        )
+            .isEmpty();
+
+        assertThat(
+            newJwt.getClaimAsStringList("permissions")
+        )
+            .isEmpty();
+
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + newAccessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.roles")
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath("$.permissions")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void anonymousUserAccessingPermissionProtectedApiReturnsUnauthorized()
+        throws Exception {
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/test/authorization/user-read"
+                )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isUnauthorized())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(401)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Unauthorized")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("UNAUTHORIZED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "需要有效的 Access Token"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(
+                        "/api/v1/test/authorization/user-read"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
     }
 }

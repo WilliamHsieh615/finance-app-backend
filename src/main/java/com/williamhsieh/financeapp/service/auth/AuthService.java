@@ -29,6 +29,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final LoginAuditService loginAuditService;
     private final AuthEventAuditService authEventAuditService;
+    private final UserAuthorityService userAuthorityService;
 
     public AuthService(
         UserRepository userRepository,
@@ -36,7 +37,8 @@ public class AuthService {
         JwtService jwtService,
         RefreshTokenService refreshTokenService,
         LoginAuditService loginAuditService,
-        AuthEventAuditService authEventAuditService
+        AuthEventAuditService authEventAuditService,
+        UserAuthorityService userAuthorityService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -44,6 +46,7 @@ public class AuthService {
         this.refreshTokenService = refreshTokenService;
         this.loginAuditService = loginAuditService;
         this.authEventAuditService = authEventAuditService;
+        this.userAuthorityService = userAuthorityService;
     }
 
     @Transactional
@@ -135,11 +138,17 @@ public class AuthService {
         RefreshTokenResult refreshToken =
             refreshTokenService.create(user);
 
+        UserAuthorities authorities =
+            userAuthorityService.getUserAuthorities(
+            user.getId()
+        );
+
         AccessTokenResult accessToken =
             jwtService.generateAccessToken(
                 user,
-                sessionId
-            );
+                sessionId,
+                authorities
+        );
 
         loginAuditService.recordSuccess(
             user,
@@ -201,11 +210,17 @@ public class AuthService {
             rotationResult.newRefreshTokenId()
         );
 
+        UserAuthorities authorities =
+            userAuthorityService.getUserAuthorities(
+                rotationResult.user().getId()
+        );
+
         AccessTokenResult accessTokenResult =
             jwtService.generateAccessToken(
                 rotationResult.user(),
-                sessionId
-            );
+                sessionId,
+                authorities
+        );
 
         authEventAuditService.recordSuccess(
             AuthEventCodes.TOKEN_REFRESH_SUCCESS,

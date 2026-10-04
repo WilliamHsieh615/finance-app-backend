@@ -2,52 +2,75 @@ package com.williamhsieh.financeapp.entity.auth;
 
 import java.time.LocalDateTime;
 
-import com.williamhsieh.financeapp.entity.user.User;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.ColumnDefault;
-
 @Entity
 @Table(
-    name = "user_roles",
+    name = "role_permissions",
     uniqueConstraints = {
         @UniqueConstraint(
-            name = "uk_user_roles_user_role",
+            name = "uk_role_permissions_role_permission",
             columnNames = {
-                "user_id",
-                "role_id"
+                "role_id",
+                "permission_id"
             }
+        )
+    },
+    indexes = {
+        @Index(
+            name = "idx_role_permissions_role",
+            columnList = "role_id"
+        ),
+        @Index(
+            name = "idx_role_permissions_permission",
+            columnList = "permission_id"
         )
     }
 )
-public class UserRole {
-    
+public class RolePermission {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+        strategy = GenerationType.IDENTITY
+    )
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "role_id", nullable = false)
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
+    @JoinColumn(
+        name = "role_id",
+        nullable = false
+    )
     private Role role;
 
-    @Column(name = "is_active", nullable = false)
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
+    @JoinColumn(
+        name = "permission_id",
+        nullable = false
+    )
+    private Permission permission;
+
+    @Column(
+        name = "is_active",
+        nullable = false
+    )
     private boolean active = true;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "created_date",
         nullable = false,
@@ -56,7 +79,6 @@ public class UserRole {
     )
     private LocalDateTime createdDate;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "updated_date",
         nullable = false,
@@ -68,27 +90,11 @@ public class UserRole {
     @Column(name = "deleted_date")
     private LocalDateTime deletedDate;
 
-    protected UserRole() {
-    }
-
-    public UserRole(
-        User user,
-        Role role
-    ) {
-        this.user = user;
-        this.role = role;
+    protected RolePermission() {
     }
 
     public Long getId() {
         return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Role getRole() {
@@ -97,6 +103,16 @@ public class UserRole {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Permission getPermission() {
+        return permission;
+    }
+
+    public void setPermission(
+        Permission permission
+    ) {
+        this.permission = permission;
     }
 
     public boolean isActive() {
@@ -119,7 +135,9 @@ public class UserRole {
         return deletedDate;
     }
 
-    public void setDeletedDate(LocalDateTime deletedDate) {
+    public void setDeletedDate(
+        LocalDateTime deletedDate
+    ) {
         this.deletedDate = deletedDate;
     }
 }

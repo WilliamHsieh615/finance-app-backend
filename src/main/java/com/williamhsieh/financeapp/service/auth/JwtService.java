@@ -1,6 +1,7 @@
 package com.williamhsieh.financeapp.service.auth;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -28,7 +29,8 @@ public class JwtService {
 
     public AccessTokenResult generateAccessToken(
         User user,
-        String sessionId
+        String sessionId,
+        UserAuthorities authorities
     ) {
         Instant issuedAt = Instant.now();
 
@@ -53,6 +55,8 @@ public class JwtService {
             .claim("email", user.getEmail())
             .claim("sid", sessionId)
             .claim("tokenType", "access")
+            .claim("roles", List.copyOf(authorities.roles()))
+            .claim("permissions", List.copyOf(authorities.permissions()))
             .build();
 
         String token = jwtEncoder

@@ -4,20 +4,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.williamhsieh.financeapp.security.RestAuthenticationEntryPoint;
 import com.williamhsieh.financeapp.security.RestAccessDeniedHandler;
+import com.williamhsieh.financeapp.security.JwtAuthorityConverter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(
         HttpSecurity http,
         RestAuthenticationEntryPoint authenticationEntryPoint,
-        RestAccessDeniedHandler accessDeniedHandler
+        RestAccessDeniedHandler accessDeniedHandler,
+        JwtAuthorityConverter jwtAuthorityConverter
     ) throws Exception {
         return http
             .csrf(csrf -> csrf.disable())
@@ -60,7 +64,11 @@ public class SecurityConfig {
                     .authenticationEntryPoint(
                         authenticationEntryPoint
                     )
-                    .jwt(Customizer.withDefaults())
+                    .jwt(jwt ->
+                        jwt.jwtAuthenticationConverter(
+                            jwtAuthorityConverter
+                        )
+                    )
             )
 
             .build();
