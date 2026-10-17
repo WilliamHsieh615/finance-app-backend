@@ -520,6 +520,26 @@
         FOREIGN KEY (user_account_status_id) REFERENCES user_account_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
+    -- (V1 DB AP)使用者狀態異動歷程表
+    CREATE TABLE user_account_status_logs (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        previous_status_id               BIGINT         NULL,
+        new_status_id                    BIGINT         NOT NULL,
+        changed_by_user_id               BIGINT         NULL,
+        note                             VARCHAR(255)   NULL,
+        changed_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        INDEX (user_id, changed_date),
+        INDEX (new_status_id),
+        INDEX (changed_by_user_id),
+
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (previous_status_id) REFERENCES user_account_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (new_status_id) REFERENCES user_account_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+    );
+
     -- (V1 DB AP)角色表
     CREATE TABLE roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
