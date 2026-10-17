@@ -478,6 +478,18 @@
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
+
+    -- (V1 DB AP)使用者帳戶狀態表
+    CREATE TABLE user_account_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
     
     -- (V1 DB AP)使用者表
     CREATE TABLE users (
@@ -485,6 +497,7 @@
         country_id                       BIGINT         NULL,
         timezone_id                      BIGINT         NULL,
         language_id                      BIGINT         NOT NULL,
+        user_account_status_id           BIGINT         NOT NULL,
 
         user_number                      VARCHAR(10)    NOT NULL UNIQUE,                 -- 使用者編號，10碼隨機碼
         name                             VARCHAR(255)   NOT NULL,                        -- 姓名
@@ -500,21 +513,11 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
+        INDEX (user_account_status_id),
         FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE RESTRICT ON UPDATE CASCADE
-    );
-
-    -- (V1 DB AP)使用者帳戶狀態表
-    CREATE TABLE user_account_statuses (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)    NOT NULL UNIQUE,
-        name                             VARCHAR(100)   NOT NULL,
-        note                             VARCHAR(255)   NULL,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
-        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL
+        FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (user_account_status_id) REFERENCES user_account_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (V1 DB AP)角色表
