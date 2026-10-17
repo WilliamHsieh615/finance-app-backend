@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.williamhsieh.financeapp.dto.common.ApiErrorResponse;
 import com.williamhsieh.financeapp.dto.common.FieldErrorResponse;
@@ -26,6 +27,35 @@ public class GlobalExceptionHandler {
         LoggerFactory.getLogger(
             GlobalExceptionHandler.class
         );
+
+    @ExceptionHandler(
+        MethodArgumentTypeMismatchException.class
+    )
+    public ResponseEntity<ApiErrorResponse>
+        handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request
+        ) {
+
+        String parameterName =
+            exception.getName();
+
+        ApiErrorResponse response =
+            ApiErrorResponse.of(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST
+                    .getReasonPhrase(),
+                "BAD_REQUEST",
+                "請求參數 " +
+                    parameterName +
+                    " 格式不正確",
+                request.getRequestURI()
+            );
+
+        return ResponseEntity
+            .badRequest()
+            .body(response);
+    }
 
     @ExceptionHandler(
         MethodArgumentNotValidException.class
