@@ -505,6 +505,18 @@
         FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
+    -- (V1 DB AP)使用者帳戶狀態表
+    CREATE TABLE user_account_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
     -- (V1 DB AP)角色表
     CREATE TABLE roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
