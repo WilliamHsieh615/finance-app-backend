@@ -15,6 +15,7 @@ public record UserDetailResponse(
     boolean emailVerified,
     boolean smsVerified,
     boolean active,
+    UserAccountStatusResponse accountStatus,
     List<String> roles,
     CountryInfo country,
     TimezoneInfo timezone,

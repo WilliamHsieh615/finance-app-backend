@@ -49,6 +49,7 @@ public abstract class IntegrationTestSupport {
         insertAuthEventTypes();
         insertLanguage();
         insertAuthorizationData();
+        insertUserAccountStatuses();
         insertUser();
         insertUserRole();
     }
@@ -95,7 +96,15 @@ public abstract class IntegrationTestSupport {
         );
 
         jdbcTemplate.update(
+            "DELETE FROM user_account_status_logs"
+        );
+
+        jdbcTemplate.update(
             "DELETE FROM users"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM user_account_statuses"
         );
 
         jdbcTemplate.update(
@@ -606,6 +615,62 @@ public abstract class IntegrationTestSupport {
         );
     }
 
+    protected void insertUserAccountStatuses() {
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_account_statuses (
+                id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES
+                (
+                    1,
+                    'PENDING_EMAIL_VERIFICATION',
+                    '等待電子郵件驗證',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    2,
+                    'ACTIVE',
+                    '正常使用',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    3,
+                    'SUSPENDED',
+                    '已停權',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    4,
+                    'LOCKED',
+                    '已鎖定',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    5,
+                    'DELETED',
+                    '已刪除',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
+            """
+        );
+    }
+
     protected void insertUser() {
         String encodedPassword =
             passwordEncoder.encode("Password123!");
@@ -617,6 +682,7 @@ public abstract class IntegrationTestSupport {
                 country_id,
                 timezone_id,
                 language_id,
+                user_account_status_id,
                 user_number,
                 name,
                 nickname,
@@ -635,6 +701,7 @@ public abstract class IntegrationTestSupport {
                 NULL,
                 NULL,
                 1,
+                2,
                 'TESTUSER01',
                 'Test User',
                 'Tester',

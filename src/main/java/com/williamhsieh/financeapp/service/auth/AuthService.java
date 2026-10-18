@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.williamhsieh.financeapp.constant.auth.AuthEventCodes;
 import com.williamhsieh.financeapp.constant.auth.LoginStatusCodes;
+import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
 import com.williamhsieh.financeapp.dto.auth.LoginRequest;
 import com.williamhsieh.financeapp.dto.auth.LoginResponse;
 import com.williamhsieh.financeapp.dto.auth.LoginUserResponse;
@@ -105,21 +106,16 @@ public class AuthService {
             );
         }
 
-        if (!user.isSmsVerified()) {
-            loginAuditService.recordFailure(
-                user,
-                normalizedEmail,
-                LoginStatusCodes.SMS_NOT_VERIFIED,
-                metadata
+        String accountStatusCode =
+            user.getAccountStatus().getCode();
+
+        boolean accountAvailable =
+            user.isActive() &&
+            UserAccountStatusCodes.ACTIVE.equals(
+                accountStatusCode
             );
 
-            throw new ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "請先完成手機驗證"
-            );
-        }
-
-        if (!user.isActive()) {
+        if (!accountAvailable) {
             loginAuditService.recordFailure(
                 user,
                 normalizedEmail,
@@ -129,7 +125,9 @@ public class AuthService {
 
             throw new ResponseStatusException(
                 HttpStatus.FORBIDDEN,
-                "此帳號目前無法使用"
+                accountUnavailableMessage(
+                    accountStatusCode
+                )   
             );
         }
 
@@ -293,5 +291,43 @@ public class AuthService {
             HttpStatus.UNAUTHORIZED,
             "Email 或密碼錯誤"
         );
+    }
+
+    private String accountUnavailableMessage(
+        String accountStatusCode
+    ) {
+        if (
+            UserAccountStatusCodes
+                .PENDING_EMAIL_VERIFICATION
+                .equals(accountStatusCode)
+        ) {
+            return "請先完成 Email 驗證";
+        }
+
+        if (
+            UserAccountStatusCodes.SUSPENDED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被停權";
+        }
+
+        if (
+            UserAccountStatusCodes.LOCKED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被鎖定";
+        }
+
+        if (
+            UserAccountStatusCodes.DELETED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被刪除";
+        }
+
+        return "此帳號目前無法使用";
     }
 }

@@ -17,6 +17,7 @@ import com.williamhsieh.financeapp.entity.user.User;
 import com.williamhsieh.financeapp.entity.user.UserRefreshToken;
 import com.williamhsieh.financeapp.repository.user.UserRefreshTokenRepository;
 import com.williamhsieh.financeapp.constant.auth.AuthEventCodes;
+import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
 
 @Service
 public class RefreshTokenService {
@@ -140,13 +141,25 @@ public class RefreshTokenService {
             );
         }
 
-        if (!user.isActive() || user.getDeletedDate() != null) {
+        String accountStatusCode =
+            user.getAccountStatus().getCode();
+
+        boolean accountAvailable =
+            user.isActive() &&
+            user.getDeletedDate() == null &&
+            UserAccountStatusCodes.ACTIVE.equals(
+                accountStatusCode
+            );
+
+        if (!accountAvailable) {
             revokeAllUserTokens(user.getId());
 
             throw new RefreshTokenException(
                 HttpStatus.FORBIDDEN,
                 AuthEventCodes.REFRESH_TOKEN_REVOKED,
-                "使用者帳號已停用，所有 Refresh Token 已撤銷",
+                accountUnavailableMessage(
+                    accountStatusCode
+                ),
                 user.getId(),
                 currentToken.getId(),
                 user.getEmail(),
@@ -250,6 +263,44 @@ public class RefreshTokenService {
         for (UserRefreshToken token : activeTokens) {
             token.revoke();
         }
+    }
+
+    private String accountUnavailableMessage(
+        String accountStatusCode
+    ) {
+        if (
+            UserAccountStatusCodes
+                .PENDING_EMAIL_VERIFICATION
+                .equals(accountStatusCode)
+        ) {
+            return "使用者尚未完成 Email 驗證，所有 Refresh Token 已撤銷";
+        }
+
+        if (
+            UserAccountStatusCodes.SUSPENDED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "使用者帳號已被停權，所有 Refresh Token 已撤銷";
+        }
+
+        if (
+            UserAccountStatusCodes.LOCKED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "使用者帳號已被鎖定，所有 Refresh Token 已撤銷";
+        }
+
+        if (
+            UserAccountStatusCodes.DELETED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "使用者帳號已被刪除，所有 Refresh Token 已撤銷";
+        }
+
+        return "使用者帳號目前無法使用，所有 Refresh Token 已撤銷";
     }
 
     private String generateToken() {

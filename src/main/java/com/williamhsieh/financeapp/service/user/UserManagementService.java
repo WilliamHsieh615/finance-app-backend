@@ -22,6 +22,8 @@ import com.williamhsieh.financeapp.service.auth.UserAuthorities;
 import com.williamhsieh.financeapp.service.auth.UserAuthorityService;
 import com.williamhsieh.financeapp.dto.common.PageResponse;
 import com.williamhsieh.financeapp.dto.user.UserSummaryResponse;
+import com.williamhsieh.financeapp.dto.user.UserAccountStatusResponse;
+import com.williamhsieh.financeapp.entity.user.UserAccountStatus;
 
 @Service
 public class UserManagementService {
@@ -68,7 +70,23 @@ public class UserManagementService {
         int page,
         int size
     ) {
+        return getUsers(
+            page,
+            size,
+            null
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<UserSummaryResponse> getUsers(
+        int page,
+        int size,
+        String keyword
+    ) {
         validatePagination(page, size);
+
+        String normalizedKeyword =
+            normalizeKeyword(keyword);
 
         PageRequest pageRequest =
             PageRequest.of(
@@ -76,12 +94,27 @@ public class UserManagementService {
                 size
             );
 
-        Page<UserSummaryResponse> result =
-            userRepository
+        Page<User> users;
+
+        if (normalizedKeyword == null) {
+            users = userRepository
                 .findAllByDeletedDateIsNull(
                     pageRequest
-                )
-                .map(this::toSummaryResponse);
+                );
+        } else {
+            String escapedKeyword =
+                escapeLikePattern(
+                    normalizedKeyword
+                );
+            users = userRepository
+                .searchByKeyword(
+                    escapedKeyword,
+                    pageRequest
+                );
+        }
+
+        Page<UserSummaryResponse> result =
+            users.map(this::toSummaryResponse);
 
         return PageResponse.from(result);
     }
@@ -101,6 +134,9 @@ public class UserManagementService {
             user.isEmailVerified(),
             user.isSmsVerified(),
             user.isActive(),
+            toAccountStatusResponse(
+                user.getAccountStatus()
+            ),
             List.copyOf(authorities.roles()),
             toCountryInfo(user.getCountry()),
             toTimezoneInfo(user.getTimezone()),
@@ -109,6 +145,17 @@ public class UserManagementService {
             user.getUpdatedDate()
         );
     }
+
+    private UserAccountStatusResponse
+        toAccountStatusResponse(
+            UserAccountStatus accountStatus
+        ) {
+            return new UserAccountStatusResponse(
+                accountStatus.getId(),
+                accountStatus.getCode(),
+                accountStatus.getName()
+            );
+        }
 
     private CountryInfo toCountryInfo(
         Country country
@@ -189,8 +236,47 @@ public class UserManagementService {
             user.isEmailVerified(),
             user.isSmsVerified(),
             user.isActive(),
+            toAccountStatusResponse(
+                user.getAccountStatus()
+            ),
             user.getCreatedDate(),
             user.getUpdatedDate()
         );
+    }
+
+    private String normalizeKeyword(
+        String keyword
+    ) {
+        if (keyword == null) {
+            return null;
+        }
+
+        String normalizedKeyword =
+            keyword.trim();
+
+        if (normalizedKeyword.isEmpty()) {
+            return null;
+        }
+
+        if (normalizedKeyword.length() > 100) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "keyword 長度不得超過 100"
+            );
+        }
+
+        return normalizedKeyword;
+    }
+
+    private String escapeLikePattern(
+        String keyword
+    ) {
+        return keyword
+            /*
+             * 必須先處理跳脫字元本身。
+             */
+            .replace("!", "!!")
+            .replace("%", "!%")
+            .replace("_", "!_");
     }
 }

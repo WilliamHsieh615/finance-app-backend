@@ -51,11 +51,15 @@ public class UserManagementController {
         int page,
 
         @RequestParam(defaultValue = "20")
-        int size
+        int size,
+
+        @RequestParam(required = false)
+        String keyword
     ) {
         return userManagementService.getUsers(
             page,
-            size
+            size,
+            keyword
         );
     }
 }

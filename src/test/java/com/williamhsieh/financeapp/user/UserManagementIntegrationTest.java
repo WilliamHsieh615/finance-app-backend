@@ -183,6 +183,18 @@ class UserManagementIntegrationTest
                     .value(true)
             )
             .andExpect(
+                jsonPath("$.accountStatus.id")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.accountStatus.code")
+                    .value("ACTIVE")
+            )
+            .andExpect(
+                jsonPath("$.accountStatus.name")
+                    .value("正常使用")
+            )
+            .andExpect(
                 jsonPath("$.roles.length()")
                     .value(2)
             )
@@ -377,6 +389,7 @@ class UserManagementIntegrationTest
                 country_id,
                 timezone_id,
                 language_id,
+                user_account_status_id,
                 user_number,
                 name,
                 nickname,
@@ -395,6 +408,7 @@ class UserManagementIntegrationTest
                 NULL,
                 NULL,
                 1,
+                2,
                 'SECOND0001',
                 'Second User',
                 'Second',
@@ -448,6 +462,22 @@ class UserManagementIntegrationTest
             .andExpect(
                 jsonPath("$.content[0].email")
                     .value("test@example.com")
+            )
+            .andExpect(
+                jsonPath("$.content[0].active")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.content[0].accountStatus.id")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.content[0].accountStatus.code")
+                    .value("ACTIVE")
+            )
+            .andExpect(
+                jsonPath("$.content[0].accountStatus.name")
+                    .value("正常使用")
             )
             .andExpect(
                 jsonPath("$.content[0].password")
@@ -515,6 +545,10 @@ class UserManagementIntegrationTest
                     .value("SECOND0001")
             )
             .andExpect(
+                jsonPath("$.content[0].accountStatus.code")
+                    .value("ACTIVE")
+            )
+            .andExpect(
                 jsonPath("$.page")
                     .value(1)
             )
@@ -541,6 +575,7 @@ class UserManagementIntegrationTest
                 country_id,
                 timezone_id,
                 language_id,
+                user_account_status_id,
                 user_number,
                 name,
                 nickname,
@@ -560,6 +595,7 @@ class UserManagementIntegrationTest
                 NULL,
                 NULL,
                 1,
+                5,
                 'DELETED001',
                 'Deleted User',
                 'Deleted',
@@ -818,6 +854,442 @@ class UserManagementIntegrationTest
             );
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "search0001",
+        "Alice",
+        "queen",
+        "ALICE.CHEN@EXAMPLE.COM"
+    })
+    void userReadPermissionCanSearchUsersByKeyword(
+        String keyword
+    ) throws Exception {
+
+        insertSearchTargetUser();
+
+        String accessToken =
+            loginAsSupport();
+
+        mockMvc.perform(
+                get("/api/v1/admin/users")
+                    .param("page", "0")
+                    .param("size", "20")
+                    .param("keyword", keyword)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(101)
+            )
+            .andExpect(
+                jsonPath("$.content[0].userNumber")
+                    .value("SEARCH0001")
+            )
+            .andExpect(
+                jsonPath("$.content[0].name")
+                    .value("Alice Chen")
+            )
+            .andExpect(
+                jsonPath("$.content[0].nickname")
+                    .value("FinanceQueen")
+            )
+            .andExpect(
+                jsonPath("$.content[0].email")
+                    .value(
+                        "alice.chen@example.com"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(1)
+            );
+    }
+
+    @Test
+    void userSearchReturnsEmptyPageWhenNoUsersMatch()
+        throws Exception {
+
+        String accessToken =
+            loginAsSupport();
+
+        mockMvc.perform(
+                get("/api/v1/admin/users")
+                    .param("page", "0")
+                    .param("size", "20")
+                    .param(
+                        "keyword",
+                        "no-such-user"
+                    )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content")
+                    .isArray()
+            )
+            .andExpect(
+                jsonPath("$.content")
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath("$.page")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.size")
+                    .value(20)
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @Test
+    void blankKeywordReturnsAllActiveUsers()
+        throws Exception {
+
+        String accessToken =
+            loginAsSupport();
+
+        mockMvc.perform(
+                get("/api/v1/admin/users")
+                    .param("page", "0")
+                    .param("size", "20")
+                    .param("keyword", "   ")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(100)
+            )
+            .andExpect(
+                jsonPath("$.content[0].userNumber")
+                    .value("TESTUSER01")
+            )
+            .andExpect(
+                jsonPath("$.content[0].email")
+                    .value("test@example.com")
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @Test
+    void keywordIsTrimmedBeforeSearching()
+        throws Exception {
+
+        insertSearchTargetUser();
+
+        String accessToken =
+            loginAsSupport();
+
+        mockMvc.perform(
+                get("/api/v1/admin/users")
+                    .param("page", "0")
+                    .param("size", "20")
+                    .param(
+                        "keyword",
+                        "   Alice   "
+                    )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(101)
+            )
+            .andExpect(
+                jsonPath("$.content[0].userNumber")
+                    .value("SEARCH0001")
+            )
+            .andExpect(
+                jsonPath("$.content[0].name")
+                    .value("Alice Chen")
+            )
+            .andExpect(
+                jsonPath("$.content[0].email")
+                    .value(
+                        "alice.chen@example.com"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(1)
+            );
+    }
+
+    @Test
+    void keywordLongerThanMaximumLengthReturnsBadRequest()
+        throws Exception {
+
+        String accessToken =
+            loginAsSupport();
+
+        String oversizedKeyword =
+            "a".repeat(101);
+
+        mockMvc.perform(
+                get("/api/v1/admin/users")
+                    .param("page", "0")
+                    .param("size", "20")
+                    .param(
+                        "keyword",
+                        oversizedKeyword
+                    )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(400)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Bad Request")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("BAD_REQUEST")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "keyword 長度不得超過 100"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(
+                        "/api/v1/admin/users"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "%",
+        "_"
+    })
+    void likeWildcardCharactersDoNotMatchAllUsers(
+        String keyword
+    ) throws Exception {
+
+        String accessToken =
+            loginAsSupport();
+
+        mockMvc.perform(
+                get("/api/v1/admin/users")
+                    .param("page", "0")
+                    .param("size", "20")
+                    .param("keyword", keyword)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content")
+                    .isArray()
+            )
+            .andExpect(
+                jsonPath("$.content")
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "%",
+        "_",
+        "!"
+    })
+    void escapedLikeCharactersCanBeSearchedLiterally(
+        String keyword
+    ) throws Exception {
+
+        insertSpecialCharacterUser();
+
+        String accessToken =
+            loginAsSupport();
+
+        mockMvc.perform(
+                get("/api/v1/admin/users")
+                    .param("page", "0")
+                    .param("size", "20")
+                    .param("keyword", keyword)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(101)
+            )
+            .andExpect(
+                jsonPath("$.content[0].userNumber")
+                    .value("SPECIAL001")
+            )
+            .andExpect(
+                jsonPath("$.content[0].name")
+                    .value(
+                        "Budget_100%! User"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.content[0].email")
+                    .value(
+                        "special@example.com"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(1)
+            );
+    }
+
     private String loginAsDefaultUser()
         throws Exception {
 
@@ -882,5 +1354,95 @@ class UserManagementIntegrationTest
         assignSupportRole();
 
         return loginAsDefaultUser();
+    }
+
+    private void insertSearchTargetUser() {
+        jdbcTemplate.update(
+            """
+            INSERT INTO users (
+                id,
+                country_id,
+                timezone_id,
+                language_id,
+                user_account_status_id,
+                user_number,
+                name,
+                nickname,
+                email,
+                password,
+                birthday,
+                phone,
+                email_verified,
+                sms_verified,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                101,
+                NULL,
+                NULL,
+                1,
+                2,
+                'SEARCH0001',
+                'Alice Chen',
+                'FinanceQueen',
+                'alice.chen@example.com',
+                'not-used-in-this-test',
+                DATE '1991-02-02',
+                '0933333333',
+                TRUE,
+                TRUE,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+    }
+
+    private void insertSpecialCharacterUser() {
+        jdbcTemplate.update(
+            """
+            INSERT INTO users (
+                id,
+                country_id,
+                timezone_id,
+                language_id,
+                user_account_status_id,
+                user_number,
+                name,
+                nickname,
+                email,
+                password,
+                birthday,
+                phone,
+                email_verified,
+                sms_verified,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                101,
+                NULL,
+                NULL,
+                1,
+                2,
+                'SPECIAL001',
+                'Budget_100%! User',
+                'Special',
+                'special@example.com',
+                'not-used-in-this-test',
+                DATE '1991-02-02',
+                '0944444444',
+                TRUE,
+                TRUE,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
     }
 }

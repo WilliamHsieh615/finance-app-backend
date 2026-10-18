@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -39,4 +40,100 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """
     )
     Page<User> findAllByDeletedDateIsNull(Pageable pageable);
+
+    @Query(
+        value = """
+            SELECT appUser
+            FROM User appUser
+            WHERE appUser.deletedDate IS NULL
+              AND (
+                    LOWER(appUser.userNumber)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+                 OR LOWER(appUser.name)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+                 OR LOWER(appUser.nickname)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+                 OR LOWER(appUser.email)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+              )
+            ORDER BY
+                appUser.createdDate DESC,
+                appUser.id DESC
+            """,
+        countQuery = """
+            SELECT COUNT(appUser)
+            FROM User appUser
+            WHERE appUser.deletedDate IS NULL
+              AND (
+                    LOWER(appUser.userNumber)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+                 OR LOWER(appUser.name)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+                 OR LOWER(appUser.nickname)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+                 OR LOWER(appUser.email)
+                        LIKE LOWER(
+                            CONCAT(
+                                '%',
+                                :keyword,
+                                '%'
+                            )
+                        )
+                        ESCAPE '!'
+              )
+            """
+    )
+    Page<User> searchByKeyword(
+        @Param("keyword") String keyword,
+        Pageable pageable
+    );
 }

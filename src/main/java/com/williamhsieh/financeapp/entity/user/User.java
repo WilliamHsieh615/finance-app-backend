@@ -3,6 +3,7 @@ package com.williamhsieh.financeapp.entity.user;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
 import com.williamhsieh.financeapp.entity.region.Country;
 import com.williamhsieh.financeapp.entity.region.Language;
 import com.williamhsieh.financeapp.entity.region.Timezone;
@@ -38,6 +39,13 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "language_id", nullable = false)
     private Language language;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "user_account_status_id",
+        nullable = false
+    )
+    private UserAccountStatus accountStatus;
 
     @Column(
         name = "user_number",
@@ -129,6 +137,10 @@ public class User {
 
     public void setLanguage(Language language) {
         this.language = language;
+    }
+
+    public UserAccountStatus getAccountStatus() {
+        return accountStatus;
     }
 
     public String getUserNumber() {
@@ -223,11 +235,30 @@ public class User {
         return deletedDate;
     }
 
+    public void changeAccountStatus(
+        UserAccountStatus accountStatus
+    ) {
+        if (accountStatus == null) {
+            throw new IllegalArgumentException(
+                "使用者帳號狀態不可為 null"
+            );
+        }
+
+        this.accountStatus = accountStatus;
+        this.active = UserAccountStatusCodes.ACTIVE.equals(
+            accountStatus.getCode()
+        );
+    }
+
     public void setDeletedDate(LocalDateTime deletedDate) {
         this.deletedDate = deletedDate;
     }
 
-    public void refreshActiveStatus() {
-        this.active = this.emailVerified && this.smsVerified;
+    public void completeEmailVerification() {
+        this.emailVerified = true;
+    }
+
+    public void completeSmsVerification() {
+        this.smsVerified = true;
     }
 }

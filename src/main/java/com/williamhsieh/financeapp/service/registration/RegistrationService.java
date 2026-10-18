@@ -19,12 +19,17 @@ import com.williamhsieh.financeapp.repository.region.CountryRepository;
 import com.williamhsieh.financeapp.repository.region.CountryTimezoneRepository;
 import com.williamhsieh.financeapp.repository.region.LanguageRepository;
 import com.williamhsieh.financeapp.repository.region.TimezoneRepository;
+import com.williamhsieh.financeapp.repository.user.UserAccountStatusLogRepository;
+import com.williamhsieh.financeapp.repository.user.UserAccountStatusRepository;
 import com.williamhsieh.financeapp.repository.user.UserRepository;
 import com.williamhsieh.financeapp.constant.auth.RoleCodes;
 import com.williamhsieh.financeapp.entity.auth.Role;
 import com.williamhsieh.financeapp.entity.auth.UserRole;
 import com.williamhsieh.financeapp.repository.auth.RoleRepository;
 import com.williamhsieh.financeapp.repository.auth.UserRoleRepository;
+import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
+import com.williamhsieh.financeapp.entity.user.UserAccountStatus;
+import com.williamhsieh.financeapp.entity.user.UserAccountStatusLog;
 
 @Service
 public class RegistrationService {
@@ -43,6 +48,10 @@ public class RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final UserAccountStatusRepository
+        userAccountStatusRepository;
+    private final UserAccountStatusLogRepository
+        userAccountStatusLogRepository;
 
     public RegistrationService(
         UserRepository userRepository,
@@ -52,7 +61,9 @@ public class RegistrationService {
         CountryTimezoneRepository countryTimezoneRepository,
         RoleRepository roleRepository,
         UserRoleRepository userRoleRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        UserAccountStatusRepository userAccountStatusRepository,
+        UserAccountStatusLogRepository userAccountStatusLogRepository
     ) {
         this.userRepository = userRepository;
         this.countryRepository = countryRepository;
@@ -63,6 +74,10 @@ public class RegistrationService {
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userAccountStatusRepository =
+            userAccountStatusRepository;
+        this.userAccountStatusLogRepository =
+            userAccountStatusLogRepository;
     }
 
     @Transactional
@@ -84,6 +99,18 @@ public class RegistrationService {
             request.timezoneId()
         );
 
+        UserAccountStatus pendingStatus =
+            userAccountStatusRepository
+                .findByCodeAndActiveTrueAndDeletedDateIsNull(
+                    UserAccountStatusCodes
+                        .PENDING_EMAIL_VERIFICATION
+                )
+                .orElseThrow(() ->
+                    new IllegalStateException(
+                        "找不到使用者初始帳號狀態"
+                    )
+                );
+
         User user = new User();
 
         user.setCountry(country);
@@ -100,9 +127,20 @@ public class RegistrationService {
         // 新註冊使用者尚未完成驗證
         user.setEmailVerified(false);
         user.setSmsVerified(false);
-        user.setActive(false);
+        user.changeAccountStatus(pendingStatus);
 
         User savedUser = userRepository.save(user);
+
+        UserAccountStatusLog statusLog =
+            new UserAccountStatusLog(
+                savedUser,
+                null,
+                pendingStatus,
+                null,
+                "使用者完成註冊，等待 Email 驗證"
+            );
+
+        userAccountStatusLogRepository.save(statusLog);
         
         assignDefaultUserRole(savedUser);
 
@@ -113,7 +151,7 @@ public class RegistrationService {
             savedUser.isEmailVerified(),
             savedUser.isSmsVerified(),
             savedUser.isActive(),
-            "註冊資料建立成功，請完成電子郵件與手機驗證"
+            "註冊資料建立成功，請完成電子郵件驗證"
         );
     }
 

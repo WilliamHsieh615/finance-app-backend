@@ -16,6 +16,9 @@ import com.williamhsieh.financeapp.entity.region.Language;
 import com.williamhsieh.financeapp.entity.region.Timezone;
 import com.williamhsieh.financeapp.entity.user.User;
 import com.williamhsieh.financeapp.repository.user.UserRepository;
+import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
+import com.williamhsieh.financeapp.dto.user.UserAccountStatusResponse;
+import com.williamhsieh.financeapp.entity.user.UserAccountStatus;
 
 @Service
 public class CurrentUserService {
@@ -45,10 +48,22 @@ public class CurrentUserService {
                 )
             );
 
-        if (!user.isActive()) {
+        String accountStatusCode =
+            user.getAccountStatus().getCode();
+
+        boolean accountAvailable =
+            user.isActive() &&
+            user.getDeletedDate() == null &&
+            UserAccountStatusCodes.ACTIVE.equals(
+                accountStatusCode
+            );
+
+        if (!accountAvailable) {
             throw new ResponseStatusException(
                 HttpStatus.FORBIDDEN,
-                "此帳號目前無法使用"
+                accountUnavailableMessage(
+                    accountStatusCode
+                )
             );
         }
 
@@ -57,6 +72,44 @@ public class CurrentUserService {
             roles,
             permissions
         );
+    }
+
+    private String accountUnavailableMessage(
+        String accountStatusCode
+    ) {
+        if (
+            UserAccountStatusCodes
+                .PENDING_EMAIL_VERIFICATION
+                .equals(accountStatusCode)
+        ) {
+            return "請先完成 Email 驗證";
+        }
+
+        if (
+            UserAccountStatusCodes.SUSPENDED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被停權";
+        }
+
+        if (
+            UserAccountStatusCodes.LOCKED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被鎖定";
+        }
+
+        if (
+            UserAccountStatusCodes.DELETED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被刪除";
+        }
+
+        return "此帳號目前無法使用";
     }
 
     private Long parseUserId(String subject) {
@@ -94,6 +147,9 @@ public class CurrentUserService {
             user.isEmailVerified(),
             user.isSmsVerified(),
             user.isActive(),
+            toAccountStatusResponse(
+                user.getAccountStatus()
+            ),
             List.copyOf(roles),
             List.copyOf(permissions),
             toCountryInfo(user.getCountry()),
@@ -103,6 +159,17 @@ public class CurrentUserService {
             user.getUpdatedDate()
         );
     }
+
+    private UserAccountStatusResponse
+        toAccountStatusResponse(
+            UserAccountStatus accountStatus
+        ) {
+            return new UserAccountStatusResponse(
+                accountStatus.getId(),
+                accountStatus.getCode(),
+                accountStatus.getName()
+            );
+        }
 
     private CountryInfo toCountryInfo(Country country) {
         if (country == null) {

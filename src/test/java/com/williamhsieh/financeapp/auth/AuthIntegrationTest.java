@@ -494,7 +494,10 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         jdbcTemplate.update(
             """
             UPDATE users
-            SET email_verified = FALSE
+            SET email_verified = FALSE,
+                sms_verified = FALSE,
+                is_active = FALSE,
+                user_account_status_id = 1
             WHERE id = 100
             """
         );
@@ -536,50 +539,46 @@ class AuthIntegrationTest extends IntegrationTestSupport {
 
     // SMS 未驗證測試
     @Test
-    void loginWithUnverifiedSmsReturnsForbidden()
+    void loginWithVerifiedEmailAndUnverifiedSmsSucceeds()
         throws Exception {
 
         jdbcTemplate.update(
             """
             UPDATE users
-            SET sms_verified = FALSE
+            SET email_verified = TRUE,
+                sms_verified = FALSE,
+                is_active = TRUE,
+                user_account_status_id = 2
             WHERE id = 100
             """
         );
 
         String requestBody = """
             {
-                "email": "test@example.com",
-                "password": "Password123!"
+              "email": "test@example.com",
+              "password": "Password123!"
             }
             """;
 
         mockMvc.perform(
-            post("/api/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-        )
-        .andExpect(status().isForbidden())
-        .andExpect(
-            jsonPath("$.status").value(403)
-        )
-        .andExpect(
-            jsonPath("$.code")
-                .value("ACCESS_DENIED")
-        )
-        .andExpect(
-            jsonPath("$.message")
-                .value("請先完成手機驗證")
-        )
-        .andExpect(
-            jsonPath("$.path")
-                .value("/api/v1/auth/login")
-        );
-
-        assertFailedLoginRecorded(
-            "SMS_NOT_VERIFIED"
-        );
+                post("/api/v1/auth/login")
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(requestBody)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.accessToken")
+                    .isNotEmpty()
+            )
+            .andExpect(
+                jsonPath("$.refreshToken")
+                    .isNotEmpty()
+            );
     }
 
     // 帳號停用測試
@@ -590,7 +589,8 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         jdbcTemplate.update(
             """
             UPDATE users
-            SET is_active = FALSE
+            SET is_active = FALSE,
+                user_account_status_id = 3
             WHERE id = 100
             """
         );
@@ -618,7 +618,7 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         )
         .andExpect(
             jsonPath("$.message")
-                .value("此帳號目前無法使用")
+                .value("此帳號已被停權")
         )
         .andExpect(
             jsonPath("$.path")
@@ -628,6 +628,185 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         assertFailedLoginRecorded(
             "ACCOUNT_DISABLED"
         );
+    }
+
+    @Test
+    void emailVerificationActivatesPendingUserAndRecordsStatusLog()
+        throws Exception {
+
+        /*
+         * 將預設測試會員調整成剛完成註冊、
+         * 尚未驗證 Email 的狀態。
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE users
+            SET email_verified = FALSE,
+                sms_verified = FALSE,
+                is_active = FALSE,
+                user_account_status_id = 1
+            WHERE id = 100
+            """
+        );
+
+        /*
+         * 模擬註冊時產生的第一筆狀態紀錄。
+         */
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_account_status_logs (
+                user_id,
+                previous_status_id,
+                new_status_id,
+                changed_by_user_id,
+                note,
+                changed_date
+            )
+            VALUES (
+                100,
+                NULL,
+                1,
+                NULL,
+                '使用者完成註冊，等待 Email 驗證',
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        /*
+         * raw token：
+         * email-verification-test-token
+         *
+         * 下方是它的 SHA-256。
+         */
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_email_verifications (
+                user_id,
+                email,
+                token_hash,
+                expires_date,
+                verified_date,
+                created_date
+            )
+            VALUES (
+                100,
+                'test@example.com',
+                '7e52931323efa6c07515a04a061f98e2e1ff2928a3db48c58afdafed61062c15',
+                TIMESTAMP '2099-01-01 00:00:00',
+                NULL,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        String requestBody = """
+            {
+              "token": "email-verification-test-token"
+            }
+            """;
+
+        mockMvc.perform(
+                post(
+                    "/api/v1/verifications/email/confirm"
+                )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.verified")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.active")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "Email 驗證成功，帳號已啟用"
+                    )
+            );
+
+        Long activeUserCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM users registered_user
+                JOIN user_account_statuses account_status
+                  ON account_status.id =
+                     registered_user.user_account_status_id
+                WHERE registered_user.id = 100
+                  AND registered_user.email_verified = TRUE
+                  AND registered_user.sms_verified = FALSE
+                  AND registered_user.is_active = TRUE
+                  AND account_status.code = 'ACTIVE'
+                """,
+                Long.class
+            );
+
+        Long completedVerificationCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_email_verifications
+                WHERE user_id = 100
+                  AND email = 'test@example.com'
+                  AND verified_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        Long activationLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_account_status_logs status_log
+                JOIN user_account_statuses previous_status
+                  ON previous_status.id =
+                     status_log.previous_status_id
+                JOIN user_account_statuses new_status
+                  ON new_status.id =
+                     status_log.new_status_id
+                WHERE status_log.user_id = 100
+                  AND previous_status.code =
+                      'PENDING_EMAIL_VERIFICATION'
+                  AND new_status.code = 'ACTIVE'
+                  AND status_log.changed_by_user_id IS NULL
+                  AND status_log.note =
+                      'Email 驗證成功，啟用帳號'
+                  AND status_log.changed_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        Long totalStatusLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_account_status_logs
+                WHERE user_id = 100
+                """,
+                Long.class
+            );
+
+        assertThat(activeUserCount)
+            .isEqualTo(1);
+
+        assertThat(completedVerificationCount)
+            .isEqualTo(1);
+
+        assertThat(activationLogCount)
+            .isEqualTo(1);
+
+        /*
+         * 第一筆：NULL → PENDING_EMAIL_VERIFICATION
+         * 第二筆：PENDING_EMAIL_VERIFICATION → ACTIVE
+         */
+        assertThat(totalStatusLogCount)
+            .isEqualTo(2);
     }
 
     @Test
@@ -730,6 +909,18 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         .andExpect(
             jsonPath("$.active")
                 .value(true)
+        )
+        .andExpect(
+            jsonPath("$.accountStatus.id")
+                .value(2)
+        )
+        .andExpect(
+            jsonPath("$.accountStatus.code")
+                .value("ACTIVE")
+        )
+        .andExpect(
+            jsonPath("$.accountStatus.name")
+                .value("正常使用")
         )
         .andExpect(
             jsonPath("$.roles.length()")
@@ -1128,6 +1319,158 @@ class AuthIntegrationTest extends IntegrationTestSupport {
             .isEqualTo(originalSessionId);
 
         assertThat(refreshSuccessEventCount)
+            .isEqualTo(1);
+    }
+
+    @Test
+    void suspendedUserCannotRefreshAndAllTokensAreRevoked()
+        throws Exception {
+
+        /*
+         * 先以正常 ACTIVE 會員登入，
+         * 取得有效的 Refresh Token。
+         */
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String refreshToken =
+            JsonPath.read(
+                loginResult
+                    .getResponse()
+                    .getContentAsString(),
+                "$.refreshToken"
+            );
+
+        Long refreshTokenId =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT id
+                FROM user_refresh_tokens
+                WHERE user_id = 100
+                  AND revoked_date IS NULL
+                """,
+                Long.class
+            );
+
+        /*
+         * 模擬後台將會員停權。
+         *
+         * 3 = SUSPENDED
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE users
+            SET user_account_status_id = 3,
+                is_active = FALSE
+            WHERE id = 100
+            """
+        );
+
+        String refreshRequestBody = """
+            {
+              "refreshToken": "%s"
+            }
+            """.formatted(refreshToken);
+
+        mockMvc.perform(
+                post("/api/v1/auth/refresh")
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(refreshRequestBody)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "Refresh Token 無效或已過期"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value("/api/v1/auth/refresh")
+            );
+
+        Long revokedTokenCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_refresh_tokens
+                WHERE user_id = 100
+                  AND revoked_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        Long activeTokenCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_refresh_tokens
+                WHERE user_id = 100
+                  AND revoked_date IS NULL
+                """,
+                Long.class
+            );
+
+        Long revokedEventCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_auth_event_logs event_log
+                JOIN user_auth_event_types event_type
+                  ON event_type.id =
+                     event_log.user_auth_event_type_id
+                WHERE event_type.code =
+                      'REFRESH_TOKEN_REVOKED'
+                  AND event_log.user_id = 100
+                  AND event_log.refresh_token_id = ?
+                  AND event_log.is_success = FALSE
+                  AND event_log.failure_detail =
+                      '使用者帳號已被停權，所有 Refresh Token 已撤銷'
+                  AND event_log.email =
+                      'test@example.com'
+                """,
+                Long.class,
+                refreshTokenId
+            );
+
+        assertThat(revokedTokenCount)
+            .isEqualTo(1);
+
+        assertThat(activeTokenCount)
+            .isZero();
+
+        assertThat(revokedEventCount)
             .isEqualTo(1);
     }
 
@@ -2526,7 +2869,7 @@ class AuthIntegrationTest extends IntegrationTestSupport {
                 .andExpect(
                     jsonPath("$.message")
                         .value(
-                            "註冊資料建立成功，請完成電子郵件與手機驗證"
+                            "註冊資料建立成功，請完成電子郵件驗證"
                         )
                 )
                 .andReturn();
@@ -2559,14 +2902,42 @@ class AuthIntegrationTest extends IntegrationTestSupport {
             jdbcTemplate.queryForObject(
                 """
                 SELECT COUNT(*)
-                FROM users
-                WHERE id = ?
-                  AND email =
+                FROM users registered_user
+                JOIN user_account_statuses account_status
+                  ON account_status.id =
+                     registered_user.user_account_status_id
+                WHERE registered_user.id = ?
+                  AND registered_user.email =
                       'new-user@example.com'
-                  AND email_verified = FALSE
-                  AND sms_verified = FALSE
-                  AND is_active = FALSE
-                  AND deleted_date IS NULL
+                  AND registered_user.email_verified = FALSE
+                  AND registered_user.sms_verified = FALSE
+                  AND registered_user.is_active = FALSE
+                  AND registered_user.deleted_date IS NULL
+                  AND account_status.code =
+                      'PENDING_EMAIL_VERIFICATION'
+                  AND account_status.is_active = TRUE
+                  AND account_status.deleted_date IS NULL
+                """,
+                Long.class,
+                registeredUserId
+            );
+
+        Long initialStatusLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_account_status_logs status_log
+                JOIN user_account_statuses new_status
+                  ON new_status.id =
+                     status_log.new_status_id
+                WHERE status_log.user_id = ?
+                  AND status_log.previous_status_id IS NULL
+                  AND new_status.code =
+                      'PENDING_EMAIL_VERIFICATION'
+                  AND status_log.changed_by_user_id IS NULL
+                  AND status_log.note =
+                      '使用者完成註冊，等待 Email 驗證'
+                  AND status_log.changed_date IS NOT NULL
                 """,
                 Long.class,
                 registeredUserId
@@ -2620,6 +2991,9 @@ class AuthIntegrationTest extends IntegrationTestSupport {
             );
 
         assertThat(userCount)
+            .isEqualTo(1);
+        
+        assertThat(initialStatusLogCount)
             .isEqualTo(1);
 
         /*
@@ -3673,6 +4047,100 @@ class AuthIntegrationTest extends IntegrationTestSupport {
                     .value(
                         "/api/v1/test/authorization/user-read"
                     )
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void suspendedUserCannotAccessMeWithExistingAccessToken()
+        throws Exception {
+
+        /*
+         * 先以正常 ACTIVE 會員登入，
+         * 取得有效的 Access Token。
+         */
+        String loginRequestBody = """
+            {
+              "email": "test@example.com",
+              "password": "Password123!"
+            }
+            """;
+
+        MvcResult loginResult =
+            mockMvc.perform(
+                    post("/api/v1/auth/login")
+                        .contentType(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .accept(
+                            MediaType.APPLICATION_JSON
+                        )
+                        .content(loginRequestBody)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String accessToken =
+            JsonPath.read(
+                loginResult
+                    .getResponse()
+                    .getContentAsString(),
+                "$.accessToken"
+            );
+
+        /*
+         * Access Token 簽發後，
+         * 模擬後台將會員停權。
+         *
+         * 3 = SUSPENDED
+         */
+        jdbcTemplate.update(
+            """
+            UPDATE users
+            SET user_account_status_id = 3,
+                is_active = FALSE
+            WHERE id = 100
+            """
+        );
+
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("此帳號已被停權")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value("/api/v1/auth/me")
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isArray()
             )
             .andExpect(
                 jsonPath("$.fieldErrors")

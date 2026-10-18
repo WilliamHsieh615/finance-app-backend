@@ -137,14 +137,13 @@ public class SmsVerificationService {
         LocalDateTime now = LocalDateTime.now();
 
         verification.setVerifiedDate(now);
-        user.setSmsVerified(true);
-        user.refreshActiveStatus();
+        user.completeSmsVerification();
 
         return new VerificationResponse(
             true,
             user.isActive(),
-            user.isActive()
-                ? "手機驗證成功，帳號已啟用"
+            user.isEmailVerified()
+                ? "手機驗證成功"
                 : "手機驗證成功，請繼續完成 Email 驗證"
         );
     }

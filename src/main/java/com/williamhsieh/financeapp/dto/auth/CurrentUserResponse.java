@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.williamhsieh.financeapp.dto.user.UserAccountStatusResponse;
+
 public record CurrentUserResponse(
     Long id,
     String userNumber,
@@ -15,6 +17,7 @@ public record CurrentUserResponse(
     boolean emailVerified,
     boolean smsVerified,
     boolean active,
+    UserAccountStatusResponse accountStatus,
     List<String> roles,
     List<String> permissions,
     CountryInfo country,

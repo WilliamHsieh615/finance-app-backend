@@ -11,6 +11,7 @@ public record UserSummaryResponse(
     boolean emailVerified,
     boolean smsVerified,
     boolean active,
+    UserAccountStatusResponse accountStatus,
     LocalDateTime createdDate,
     LocalDateTime updatedDate
 ) {

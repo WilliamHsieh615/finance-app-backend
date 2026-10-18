@@ -21,6 +21,8 @@ import com.williamhsieh.financeapp.entity.user.UserEmailVerification;
 import com.williamhsieh.financeapp.repository.user.UserEmailVerificationRepository;
 import com.williamhsieh.financeapp.repository.user.UserRepository;
 import com.williamhsieh.financeapp.service.notification.EmailSender;
+import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
+import com.williamhsieh.financeapp.service.user.UserAccountStatusService;
 
 @Service
 public class EmailVerificationService {
@@ -35,15 +37,18 @@ public class EmailVerificationService {
     private final UserRepository userRepository;
     private final UserEmailVerificationRepository verificationRepository;
     private final EmailSender emailSender;
+    private final UserAccountStatusService accountStatusService;
 
     public EmailVerificationService(
         UserRepository userRepository,
         UserEmailVerificationRepository verificationRepository,
-        EmailSender emailSender
+        EmailSender emailSender,
+        UserAccountStatusService accountStatusService
     ) {
         this.userRepository = userRepository;
         this.verificationRepository = verificationRepository;
         this.emailSender = emailSender;
+        this.accountStatusService = accountStatusService;
     }
 
     @Transactional
@@ -114,15 +119,29 @@ public class EmailVerificationService {
         LocalDateTime now = LocalDateTime.now();
 
         verification.setVerifiedDate(now);
-        user.setEmailVerified(true);
-        user.refreshActiveStatus();
+        user.completeEmailVerification();
+
+        if (
+            UserAccountStatusCodes
+                .PENDING_EMAIL_VERIFICATION
+                .equals(user.getAccountStatus().getCode())
+        ) {
+            accountStatusService.changeStatus(
+                user,
+                UserAccountStatusCodes.ACTIVE,
+                null,
+                "Email 驗證成功，啟用帳號"
+            );
+        }
+
+        String message = user.isActive()
+            ? "Email 驗證成功，帳號已啟用"
+            : "Email 驗證成功";
 
         return new VerificationResponse(
             true,
             user.isActive(),
-            user.isActive()
-                ? "Email 驗證成功，帳號已啟用"
-                : "Email 驗證成功，請繼續完成手機驗證"
+            message
         );
     }
 
