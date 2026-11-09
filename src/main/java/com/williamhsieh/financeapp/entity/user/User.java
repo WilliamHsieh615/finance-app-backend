@@ -75,7 +75,12 @@ public class User {
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
 
-    @Column(name = "phone", nullable = false, length = 20)
+    @Column(
+        name = "phone", 
+        nullable = false, 
+        unique = true, 
+        length = 20
+    )
     private String phone;
 
     @Column(name = "email_verified", nullable = false)

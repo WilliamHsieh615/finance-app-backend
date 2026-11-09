@@ -23,4 +23,10 @@ public interface UserLoginLogRepository
         findAllByUser_IdOrderByLoginTimeDesc(
             Long userId
         );
+
+    boolean
+        existsBySessionIdAndUser_IdAndLogoutTimeIsNullAndRefreshToken_RevokedDateIsNull(
+            String sessionId,
+            Long userId
+        );
 }

@@ -1682,6 +1682,14 @@ class AuthIntegrationTest extends IntegrationTestSupport {
                 "$.refreshToken"
             );
 
+        String accessToken =
+            JsonPath.read(
+                loginResult
+                    .getResponse()
+                    .getContentAsString(),
+                "$.accessToken"
+            );
+
         Long refreshTokenId =
             jdbcTemplate.queryForObject(
                 """
@@ -1718,6 +1726,53 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         )
         .andExpect(status().isNoContent())
         .andExpect(content().string(""));
+
+        /*
+         * 登出會撤銷 Refresh Token 並結束 Session，
+         * 因此相同 Session 的 Access Token 必須立即失效。
+         */
+        mockMvc.perform(
+                get("/api/v1/auth/me")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value("/api/v1/auth/me")
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
 
         Long revokedTokenCount =
             jdbcTemplate.queryForObject(
@@ -3725,7 +3780,7 @@ class AuthIntegrationTest extends IntegrationTestSupport {
                 updated_date
             )
             VALUES (
-                3,
+                4,
                 2,
                 1,
                 TRUE,
@@ -4132,7 +4187,7 @@ class AuthIntegrationTest extends IntegrationTestSupport {
             )
             .andExpect(
                 jsonPath("$.message")
-                    .value("此帳號已被停權")
+                    .value("你沒有執行此操作的權限")
             )
             .andExpect(
                 jsonPath("$.path")
@@ -4146,5 +4201,128 @@ class AuthIntegrationTest extends IntegrationTestSupport {
                 jsonPath("$.fieldErrors")
                     .isEmpty()
             );
+    }
+
+    @Test
+    void registrationWithDeletedAccountEmailReturnsDeletedAccountExists()
+        throws Exception {
+
+        /*
+        * 將測試基底的 id=100 改成已刪除會員。
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE users
+            SET email = 'deleted-user@example.com',
+                user_account_status_id = 5,
+                is_active = FALSE,
+                deleted_date =
+                    TIMESTAMP '2026-11-01 10:00:00'
+            WHERE id = 100
+            """
+        );
+
+        String requestBody = """
+            {
+            "countryId": null,
+            "timezoneId": null,
+            "languageId": 1,
+            "name": "Second Account",
+            "nickname": "SecondAccount",
+            "email": "deleted-user@example.com",
+            "password": "Password123!",
+            "birthday": "1995-05-20",
+            "phone": "+886923456789"
+            }
+            """;
+
+        mockMvc.perform(
+                post("/api/v1/registration")
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(requestBody)
+            )
+            .andExpect(status().isConflict())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(409)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Conflict")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value(
+                        "DELETED_ACCOUNT_EXISTS"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "此 Email 所屬帳號已被刪除，請聯絡客服申請恢復"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(
+                        "/api/v1/registration"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        /*
+        * 確認沒有建立第二個相同 Email 的會員。
+        */
+        Long sameEmailUserCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM users
+                WHERE LOWER(email) =
+                    LOWER(
+                        'deleted-user@example.com'
+                    )
+                """,
+                Long.class
+            );
+
+        /*
+        * 原帳號仍保持 DELETED，
+        * 註冊 API 不會自動恢復帳號。
+        */
+        Long deletedUserCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM users app_user
+                JOIN user_account_statuses account_status
+                ON account_status.id =
+                    app_user.user_account_status_id
+                WHERE app_user.id = 100
+                AND app_user.is_active = FALSE
+                AND app_user.deleted_date IS NOT NULL
+                AND account_status.code = 'DELETED'
+                """,
+                Long.class
+            );
+
+        assertThat(sameEmailUserCount)
+            .isEqualTo(1);
+
+        assertThat(deletedUserCount)
+            .isEqualTo(1);
     }
 }

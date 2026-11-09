@@ -19,16 +19,22 @@ import com.williamhsieh.financeapp.repository.user.UserRepository;
 import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
 import com.williamhsieh.financeapp.dto.user.UserAccountStatusResponse;
 import com.williamhsieh.financeapp.entity.user.UserAccountStatus;
+import com.williamhsieh.financeapp.service.user.UserAccountAccessPolicy;
 
 @Service
 public class CurrentUserService {
 
     private final UserRepository userRepository;
+    private final UserAccountAccessPolicy
+        userAccountAccessPolicy;
 
     public CurrentUserService(
-        UserRepository userRepository
+        UserRepository userRepository,
+        UserAccountAccessPolicy userAccountAccessPolicy
     ) {
         this.userRepository = userRepository;
+        this.userAccountAccessPolicy =
+            userAccountAccessPolicy;
     }
 
     @Transactional(readOnly = true)
@@ -52,11 +58,8 @@ public class CurrentUserService {
             user.getAccountStatus().getCode();
 
         boolean accountAvailable =
-            user.isActive() &&
-            user.getDeletedDate() == null &&
-            UserAccountStatusCodes.ACTIVE.equals(
-                accountStatusCode
-            );
+            userAccountAccessPolicy
+                .isAvailable(user);
 
         if (!accountAvailable) {
             throw new ResponseStatusException(

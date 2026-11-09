@@ -13,6 +13,7 @@ public record UserSummaryResponse(
     boolean active,
     UserAccountStatusResponse accountStatus,
     LocalDateTime createdDate,
-    LocalDateTime updatedDate
+    LocalDateTime updatedDate,
+    LocalDateTime deletedDate
 ) {
 }

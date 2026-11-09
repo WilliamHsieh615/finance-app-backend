@@ -122,6 +122,30 @@ public class GlobalExceptionHandler {
             .body(response);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiErrorResponse>
+        handleBusinessException(
+            BusinessException exception,
+            HttpServletRequest request
+        ) {
+
+        HttpStatus status =
+            exception.getStatus();
+
+        ApiErrorResponse response =
+            ApiErrorResponse.of(
+                status.value(),
+                status.getReasonPhrase(),
+                exception.getCode(),
+                exception.getMessage(),
+                request.getRequestURI()
+            );
+
+        return ResponseEntity
+            .status(status)
+            .body(response);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse>
         handleResponseStatusException(

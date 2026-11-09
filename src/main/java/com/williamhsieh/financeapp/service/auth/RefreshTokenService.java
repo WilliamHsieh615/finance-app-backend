@@ -18,6 +18,7 @@ import com.williamhsieh.financeapp.entity.user.UserRefreshToken;
 import com.williamhsieh.financeapp.repository.user.UserRefreshTokenRepository;
 import com.williamhsieh.financeapp.constant.auth.AuthEventCodes;
 import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
+import com.williamhsieh.financeapp.service.user.UserAccountAccessPolicy;
 
 @Service
 public class RefreshTokenService {
@@ -29,13 +30,18 @@ public class RefreshTokenService {
 
     private final UserRefreshTokenRepository refreshTokenRepository;
     private final JwtProperties jwtProperties;
+    private final UserAccountAccessPolicy
+        userAccountAccessPolicy;
 
     public RefreshTokenService(
         UserRefreshTokenRepository refreshTokenRepository,
-        JwtProperties jwtProperties
+        JwtProperties jwtProperties,
+        UserAccountAccessPolicy userAccountAccessPolicy
     ) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtProperties = jwtProperties;
+        this.userAccountAccessPolicy =
+            userAccountAccessPolicy;
     }
 
     @Transactional
@@ -145,11 +151,8 @@ public class RefreshTokenService {
             user.getAccountStatus().getCode();
 
         boolean accountAvailable =
-            user.isActive() &&
-            user.getDeletedDate() == null &&
-            UserAccountStatusCodes.ACTIVE.equals(
-                accountStatusCode
-            );
+            userAccountAccessPolicy
+                .isAvailable(user);
 
         if (!accountAvailable) {
             revokeAllUserTokens(user.getId());
@@ -225,6 +228,13 @@ public class RefreshTokenService {
             true,
             true
         );
+    }
+
+    @Transactional
+    public void revokeAllActiveTokensForUser(
+        Long userId
+    ) {
+        revokeAllUserTokens(userId);
     }
 
     private RefreshTokenResult createTokenWithoutNewTransaction(

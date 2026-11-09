@@ -613,6 +613,203 @@ public abstract class IntegrationTestSupport {
             )
             """
         );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                3,
+                2,
+                'USER_STATUS_UPDATE',
+                '變更會員帳號狀態',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO roles (
+                id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                3,
+                'ADMIN',
+                '系統管理員',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                3,
+                3,
+                3,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                4,
+                2,
+                'USER_DELETE',
+                '刪除會員',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                10,
+                3,
+                4,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                5,
+                2,
+                'USER_READ_DELETED',
+                '查看已刪除會員',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                11,
+                3,
+                5,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                6,
+                2,
+                'USER_RESTORE',
+                '恢復已刪除會員',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                12,
+                3,
+                6,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
     }
 
     protected void insertUserAccountStatuses() {

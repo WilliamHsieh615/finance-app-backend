@@ -7,10 +7,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 
 import com.williamhsieh.financeapp.security.RestAuthenticationEntryPoint;
 import com.williamhsieh.financeapp.security.RestAccessDeniedHandler;
 import com.williamhsieh.financeapp.security.JwtAuthorityConverter;
+import com.williamhsieh.financeapp.security.ActiveAccountFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -21,7 +23,8 @@ public class SecurityConfig {
         HttpSecurity http,
         RestAuthenticationEntryPoint authenticationEntryPoint,
         RestAccessDeniedHandler accessDeniedHandler,
-        JwtAuthorityConverter jwtAuthorityConverter
+        JwtAuthorityConverter jwtAuthorityConverter,
+        ActiveAccountFilter activeAccountFilter
     ) throws Exception {
         return http
             .csrf(csrf -> csrf.disable())
@@ -69,6 +72,11 @@ public class SecurityConfig {
                             jwtAuthorityConverter
                         )
                     )
+            )
+
+            .addFilterAfter(
+                activeAccountFilter,
+                ExceptionTranslationFilter.class
             )
 
             .build();

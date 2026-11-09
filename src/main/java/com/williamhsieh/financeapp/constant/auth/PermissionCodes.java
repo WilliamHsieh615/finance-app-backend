@@ -19,4 +19,16 @@ public final class PermissionCodes {
      */
     public static final String USER_READ =
         "USER_READ";
+
+    public static final String USER_STATUS_UPDATE =
+        "USER_STATUS_UPDATE";
+
+    public static final String USER_DELETE =
+        "USER_DELETE";
+
+    public static final String USER_READ_DELETED =
+        "USER_READ_DELETED";
+
+    public static final String USER_RESTORE =
+        "USER_RESTORE";
 }

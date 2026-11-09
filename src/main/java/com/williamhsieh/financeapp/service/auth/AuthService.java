@@ -20,6 +20,7 @@ import com.williamhsieh.financeapp.dto.auth.RefreshTokenRequest;
 import com.williamhsieh.financeapp.dto.auth.TokenRefreshResponse;
 import com.williamhsieh.financeapp.entity.user.User;
 import com.williamhsieh.financeapp.repository.user.UserRepository;
+import com.williamhsieh.financeapp.service.user.UserAccountAccessPolicy;
 
 @Service
 public class AuthService {
@@ -31,6 +32,8 @@ public class AuthService {
     private final LoginAuditService loginAuditService;
     private final AuthEventAuditService authEventAuditService;
     private final UserAuthorityService userAuthorityService;
+    private final UserAccountAccessPolicy
+        userAccountAccessPolicy;
 
     public AuthService(
         UserRepository userRepository,
@@ -39,7 +42,8 @@ public class AuthService {
         RefreshTokenService refreshTokenService,
         LoginAuditService loginAuditService,
         AuthEventAuditService authEventAuditService,
-        UserAuthorityService userAuthorityService
+        UserAuthorityService userAuthorityService,
+        UserAccountAccessPolicy userAccountAccessPolicy
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -48,6 +52,8 @@ public class AuthService {
         this.loginAuditService = loginAuditService;
         this.authEventAuditService = authEventAuditService;
         this.userAuthorityService = userAuthorityService;
+        this.userAccountAccessPolicy =
+            userAccountAccessPolicy;
     }
 
     @Transactional
@@ -110,10 +116,8 @@ public class AuthService {
             user.getAccountStatus().getCode();
 
         boolean accountAvailable =
-            user.isActive() &&
-            UserAccountStatusCodes.ACTIVE.equals(
-                accountStatusCode
-            );
+            userAccountAccessPolicy
+                .isAvailable(user);
 
         if (!accountAvailable) {
             loginAuditService.recordFailure(

@@ -21,7 +21,8 @@ public record UserDetailResponse(
     TimezoneInfo timezone,
     LanguageInfo language,
     LocalDateTime createdDate,
-    LocalDateTime updatedDate
+    LocalDateTime updatedDate,
+    LocalDateTime deletedDate
 ) {
 
     public UserDetailResponse {

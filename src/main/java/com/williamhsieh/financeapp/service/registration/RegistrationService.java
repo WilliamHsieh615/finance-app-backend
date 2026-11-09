@@ -2,12 +2,14 @@ package com.williamhsieh.financeapp.service.registration;
 
 import java.security.SecureRandom;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.williamhsieh.financeapp.dto.registration.RegisterUserRequest;
 import com.williamhsieh.financeapp.dto.registration.RegisterUserResponse;
@@ -30,6 +32,7 @@ import com.williamhsieh.financeapp.repository.auth.UserRoleRepository;
 import com.williamhsieh.financeapp.constant.user.UserAccountStatusCodes;
 import com.williamhsieh.financeapp.entity.user.UserAccountStatus;
 import com.williamhsieh.financeapp.entity.user.UserAccountStatusLog;
+import com.williamhsieh.financeapp.exception.BusinessException;
 
 @Service
 public class RegistrationService {
@@ -129,7 +132,24 @@ public class RegistrationService {
         user.setSmsVerified(false);
         user.changeAccountStatus(pendingStatus);
 
-        User savedUser = userRepository.save(user);
+        User savedUser;
+
+        try {
+            /*
+            * 使用 saveAndFlush() 立即執行 INSERT，
+            * 讓 UNIQUE 衝突在這個 try 區塊內發生。
+            */
+            savedUser =
+                userRepository.saveAndFlush(user);
+        } catch (
+            DataIntegrityViolationException exception
+        ) {
+            throw new BusinessException(
+                HttpStatus.CONFLICT,
+                "REGISTRATION_DATA_CONFLICT",
+                "Email、手機號碼或使用者編號已被使用，請重新確認"
+            );
+        }
 
         UserAccountStatusLog statusLog =
             new UserAccountStatusLog(
@@ -179,7 +199,20 @@ public class RegistrationService {
         String email,
         String phone
     ) {
-        if (userRepository.existsByEmailIgnoreCase(email)) {
+        Optional<User> existingEmailUser =
+            userRepository.findByEmailIgnoreCase(email);
+
+        if (existingEmailUser.isPresent()) {
+            User user = existingEmailUser.get();
+
+            if (isDeletedAccount(user)) {
+                throw new BusinessException(
+                    HttpStatus.CONFLICT,
+                    "DELETED_ACCOUNT_EXISTS",
+                    "此 Email 所屬帳號已被刪除，請聯絡客服申請恢復"
+                );
+            }
+
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT,
                 "此 Email 已被註冊"
@@ -284,5 +317,14 @@ public class RegistrationService {
         }
 
         return result.toString();
+    }
+
+    private boolean isDeletedAccount(
+        User user
+    ) {
+        return user.getDeletedDate() != null ||
+            UserAccountStatusCodes.DELETED.equals(
+                user.getAccountStatus().getCode()
+            );
     }
 }
