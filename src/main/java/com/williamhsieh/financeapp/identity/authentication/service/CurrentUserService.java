@@ -39,12 +39,10 @@ public class CurrentUserService {
 
     @Transactional(readOnly = true)
     public CurrentUserResponse getCurrentUser(
-        String subject,
+        Long userId,
         List<String> roles,
         List<String> permissions
     ) {
-        Long userId = parseUserId(subject);
-
         User user = userRepository
             .findByIdAndDeletedDateIsNull(userId)
             .orElseThrow(() ->
@@ -113,25 +111,6 @@ public class CurrentUserService {
         }
 
         return "此帳號目前無法使用";
-    }
-
-    private Long parseUserId(String subject) {
-        if (subject == null || subject.isBlank()) {
-            throw invalidSubject();
-        }
-
-        try {
-            return Long.valueOf(subject);
-        } catch (NumberFormatException exception) {
-            throw invalidSubject();
-        }
-    }
-
-    private ResponseStatusException invalidSubject() {
-        return new ResponseStatusException(
-            HttpStatus.UNAUTHORIZED,
-            "Access Token 的使用者資訊無效"
-        );
     }
 
     private CurrentUserResponse toResponse(

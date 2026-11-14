@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +25,7 @@ import com.williamhsieh.financeapp.identity.authorization.dto.RevokeUserRoleRequ
 import com.williamhsieh.financeapp.identity.authorization.dto.RoleSummaryResponse;
 import com.williamhsieh.financeapp.identity.authorization.dto.UserRoleAssignmentLogResponse;
 import com.williamhsieh.financeapp.identity.authorization.service.UserRoleManagementService;
+import com.williamhsieh.financeapp.identity.authentication.security.AuthenticatedUserIdResolver;
 
 @RestController
 @RequestMapping(
@@ -35,12 +35,19 @@ public class UserRoleManagementController {
 
     private final UserRoleManagementService
         userRoleManagementService;
+    private final AuthenticatedUserIdResolver
+        authenticatedUserIdResolver;
 
     public UserRoleManagementController(
-        UserRoleManagementService userRoleManagementService
+        UserRoleManagementService
+            userRoleManagementService,
+        AuthenticatedUserIdResolver
+            authenticatedUserIdResolver
     ) {
         this.userRoleManagementService =
             userRoleManagementService;
+        this.authenticatedUserIdResolver =
+            authenticatedUserIdResolver;
     }
 
     @GetMapping
@@ -56,7 +63,7 @@ public class UserRoleManagementController {
         Jwt jwt
     ) {
         Long authenticatedUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         return userRoleManagementService
             .getUserRoles(
@@ -82,7 +89,7 @@ public class UserRoleManagementController {
         Jwt jwt
     ) {
         Long authenticatedUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         return userRoleManagementService
             .assignRole(
@@ -113,7 +120,7 @@ public class UserRoleManagementController {
         Jwt jwt
     ) {
         Long authenticatedUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         userRoleManagementService.revokeRole(
             authenticatedUserId,
@@ -143,7 +150,7 @@ public class UserRoleManagementController {
             Jwt jwt
         ) {
             Long authenticatedUserId =
-                parseAuthenticatedUserId(jwt);
+                authenticatedUserIdResolver.resolve(jwt);
 
             return userRoleManagementService
                 .getUserRoleAssignmentHistory(
@@ -153,31 +160,4 @@ public class UserRoleManagementController {
                     size
                 );
         }
-
-    private Long parseAuthenticatedUserId(
-        Jwt jwt
-    ) {
-        if (
-            jwt == null ||
-            jwt.getSubject() == null ||
-            jwt.getSubject().isBlank()
-        ) {
-            throw new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Access Token 的使用者資訊無效"
-            );
-        }
-
-        try {
-            return Long.valueOf(
-                jwt.getSubject()
-            );
-        } catch (NumberFormatException exception) {
-            throw new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Access Token 的使用者資訊無效",
-                exception
-            );
-        }
-    }
 }

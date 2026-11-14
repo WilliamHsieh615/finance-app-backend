@@ -1,17 +1,17 @@
 package com.williamhsieh.financeapp.identity.user.controller;
 
+import jakarta.validation.Valid;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +25,7 @@ import com.williamhsieh.financeapp.identity.user.dto.UserDetailResponse;
 import com.williamhsieh.financeapp.identity.user.dto.UserSummaryResponse;
 import com.williamhsieh.financeapp.identity.user.service.UserManagementService;
 import com.williamhsieh.financeapp.shared.dto.PageResponse;
-
-import jakarta.validation.Valid;
+import com.williamhsieh.financeapp.identity.authentication.security.AuthenticatedUserIdResolver;
 
 @RestController
 @RequestMapping("/api/v1/admin/users")
@@ -34,12 +33,18 @@ public class UserManagementController {
 
     private final UserManagementService
         userManagementService;
+    private final AuthenticatedUserIdResolver
+        authenticatedUserIdResolver;
 
     public UserManagementController(
-        UserManagementService userManagementService
+        UserManagementService userManagementService,
+        AuthenticatedUserIdResolver
+            authenticatedUserIdResolver
     ) {
         this.userManagementService =
             userManagementService;
+        this.authenticatedUserIdResolver =
+            authenticatedUserIdResolver;
     }
 
     @GetMapping("/{userId}")
@@ -55,7 +60,7 @@ public class UserManagementController {
         Jwt jwt
     ) {
         Long authenticatedUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         return userManagementService
             .getUserById(
@@ -84,7 +89,7 @@ public class UserManagementController {
             Jwt jwt
         ) {
             Long authenticatedUserId =
-                parseAuthenticatedUserId(jwt);
+                authenticatedUserIdResolver.resolve(jwt);
 
             return userManagementService
                 .getUserAccountStatusHistory(
@@ -112,7 +117,7 @@ public class UserManagementController {
         Jwt jwt
     ) {
         Long changedByUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         return userManagementService
             .updateUserAccountStatus(
@@ -139,7 +144,7 @@ public class UserManagementController {
         Jwt jwt
     ) {
         Long changedByUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         userManagementService.softDeleteUser(
             userId,
@@ -175,7 +180,7 @@ public class UserManagementController {
         Jwt jwt
     ) {
         Long authenticatedUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         return userManagementService.getUsers(
             authenticatedUserId,
@@ -207,7 +212,7 @@ public class UserManagementController {
             Jwt jwt
         ) {
             Long authenticatedUserId =
-                parseAuthenticatedUserId(jwt);
+                authenticatedUserIdResolver.resolve(jwt);
 
             return userManagementService
                 .getDeletedUsers(
@@ -231,7 +236,7 @@ public class UserManagementController {
         Jwt jwt
     ) {
         Long authenticatedUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         return userManagementService
             .getDeletedUserById(
@@ -262,7 +267,7 @@ public class UserManagementController {
             Jwt jwt
         ) {
             Long authenticatedUserId =
-                parseAuthenticatedUserId(jwt);
+                authenticatedUserIdResolver.resolve(jwt);
 
             return userManagementService
                 .getDeletedUserAccountStatusHistory(
@@ -292,7 +297,7 @@ public class UserManagementController {
         Jwt jwt
     ) {
         Long changedByUserId =
-            parseAuthenticatedUserId(jwt);
+            authenticatedUserIdResolver.resolve(jwt);
 
         return userManagementService
             .restoreUser(
@@ -300,32 +305,5 @@ public class UserManagementController {
                 changedByUserId,
                 request
             );
-    }
-    
-    private Long parseAuthenticatedUserId(
-        Jwt jwt
-    ) {
-        if (
-            jwt == null ||
-            jwt.getSubject() == null ||
-            jwt.getSubject().isBlank()
-        ) {
-            throw new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Access Token 的使用者資訊無效"
-            );
-        }
-
-        try {
-            return Long.valueOf(
-                jwt.getSubject()
-            );
-        } catch (NumberFormatException exception) {
-            throw new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Access Token 的使用者資訊無效",
-                exception
-            );
-        }
     }
 }

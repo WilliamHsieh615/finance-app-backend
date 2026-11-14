@@ -10,23 +10,34 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.williamhsieh.financeapp.identity.authentication.dto.CurrentUserResponse;
 import com.williamhsieh.financeapp.identity.authentication.service.CurrentUserService;
+import com.williamhsieh.financeapp.identity.authentication.security.AuthenticatedUserIdResolver;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class CurrentUserController {
 
     private final CurrentUserService currentUserService;
+    private final AuthenticatedUserIdResolver
+        authenticatedUserIdResolver;
 
     public CurrentUserController(
-        CurrentUserService currentUserService
+        CurrentUserService currentUserService,
+        AuthenticatedUserIdResolver
+            authenticatedUserIdResolver
     ) {
-        this.currentUserService = currentUserService;
+        this.currentUserService =
+            currentUserService;
+        this.authenticatedUserIdResolver =
+            authenticatedUserIdResolver;
     }
 
     @GetMapping("/me")
     public CurrentUserResponse getCurrentUser(
         @AuthenticationPrincipal Jwt jwt
     ) {
+        Long authenticatedUserId =
+            authenticatedUserIdResolver.resolve(jwt);
+
         List<String> roles =
             getStringListClaim(
                 jwt,
@@ -40,7 +51,7 @@ public class CurrentUserController {
             );
 
         return currentUserService.getCurrentUser(
-            jwt.getSubject(),
+            authenticatedUserId,
             roles,
             permissions
         );
