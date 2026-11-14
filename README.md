@@ -609,6 +609,39 @@
         FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
+    -- (V1 DB AP)角色異動類型表
+    CREATE TABLE user_role_assignment_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)角色異動歷程表
+    CREATE TABLE user_role_assignment_logs (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        role_id                          BIGINT         NOT NULL,
+        user_role_assignment_type_id     BIGINT         NOT NULL,
+        changed_by_user_id               BIGINT         NULL,
+        reason                           VARCHAR(255)   NOT NULL,
+        changed_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+        INDEX (user_id, changed_date),
+        INDEX (role_id),
+        INDEX (user_role_assignment_type_id),
+        INDEX (changed_by_user_id),
+        
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (user_role_assignment_type_id) REFERENCES user_role_assignment_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+    );
+
     -- 推薦碼類型表
     CREATE TABLE referral_code_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
