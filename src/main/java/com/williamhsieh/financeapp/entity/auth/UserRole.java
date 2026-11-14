@@ -122,4 +122,18 @@ public class UserRole {
     public void setDeletedDate(LocalDateTime deletedDate) {
         this.deletedDate = deletedDate;
     }
+
+    public boolean isAvailable() {
+        return active && deletedDate == null;
+    }
+
+    public void activate() {
+        this.active = true;
+        this.deletedDate = null;
+    }
+
+    public void revoke() {
+        this.active = false;
+        this.deletedDate = LocalDateTime.now();
+    }
 }

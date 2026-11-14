@@ -31,4 +31,13 @@ public final class PermissionCodes {
 
     public static final String USER_RESTORE =
         "USER_RESTORE";
+
+    /*
+     * AUTHORIZATION
+     */
+    public static final String ROLE_READ =
+        "ROLE_READ";
+
+    public static final String ROLE_ASSIGN =
+        "ROLE_ASSIGN";
 }

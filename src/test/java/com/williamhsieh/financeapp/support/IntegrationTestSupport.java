@@ -49,12 +49,21 @@ public abstract class IntegrationTestSupport {
         insertAuthEventTypes();
         insertLanguage();
         insertAuthorizationData();
+        insertUserRoleAssignmentTypes();
         insertUserAccountStatuses();
         insertUser();
         insertUserRole();
     }
 
     protected void clearTestData() {
+        jdbcTemplate.update(
+            "DELETE FROM user_role_assignment_logs"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM user_role_assignment_types"
+        );
+
         jdbcTemplate.update(
             "DELETE FROM user_auth_event_logs"
         );
@@ -808,6 +817,150 @@ public abstract class IntegrationTestSupport {
                 CURRENT_TIMESTAMP,
                 CURRENT_TIMESTAMP
             )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permission_types (
+                id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                3,
+                'AUTHORIZATION',
+                '角色與授權',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                7,
+                3,
+                'ROLE_READ',
+                '查看角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                13,
+                3,
+                7,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                8,
+                3,
+                'ROLE_ASSIGN',
+                '指派會員角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                14,
+                3,
+                8,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+    }
+
+    protected void insertUserRoleAssignmentTypes() {
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_role_assignment_types (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES
+                (
+                    1,
+                    'ASSIGNED',
+                    '指派角色',
+                    '將角色指派給會員',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    2,
+                    'REVOKED',
+                    '撤銷角色',
+                    '撤銷會員目前擁有的角色',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
             """
         );
     }
