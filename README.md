@@ -628,7 +628,7 @@
         role_id                          BIGINT         NOT NULL,
         user_role_assignment_type_id     BIGINT         NOT NULL,
         changed_by_user_id               BIGINT         NULL,
-        reason                           VARCHAR(255)   NOT NULL,
+        note                             VARCHAR(255)   NOT NULL,
         changed_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
         INDEX (user_id, changed_date),
