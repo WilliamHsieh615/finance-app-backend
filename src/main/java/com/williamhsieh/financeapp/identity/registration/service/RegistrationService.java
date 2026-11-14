@@ -1,0 +1,330 @@
+package com.williamhsieh.financeapp.identity.registration.service;
+
+import java.security.SecureRandom;
+import java.util.Locale;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import com.williamhsieh.financeapp.shared.exception.BusinessException;
+import com.williamhsieh.financeapp.identity.authorization.constant.RoleCodes;
+import com.williamhsieh.financeapp.identity.authorization.entity.Role;
+import com.williamhsieh.financeapp.identity.authorization.entity.UserRole;
+import com.williamhsieh.financeapp.identity.authorization.repository.RoleRepository;
+import com.williamhsieh.financeapp.identity.authorization.repository.UserRoleRepository;
+import com.williamhsieh.financeapp.identity.registration.dto.RegisterUserRequest;
+import com.williamhsieh.financeapp.identity.registration.dto.RegisterUserResponse;
+import com.williamhsieh.financeapp.identity.user.constant.UserAccountStatusCodes;
+import com.williamhsieh.financeapp.identity.user.entity.User;
+import com.williamhsieh.financeapp.identity.user.entity.UserAccountStatus;
+import com.williamhsieh.financeapp.identity.user.entity.UserAccountStatusLog;
+import com.williamhsieh.financeapp.identity.user.repository.UserAccountStatusLogRepository;
+import com.williamhsieh.financeapp.identity.user.repository.UserAccountStatusRepository;
+import com.williamhsieh.financeapp.identity.user.repository.UserRepository;
+import com.williamhsieh.financeapp.reference.geography.entity.Country;
+import com.williamhsieh.financeapp.reference.geography.entity.Language;
+import com.williamhsieh.financeapp.reference.geography.entity.Timezone;
+import com.williamhsieh.financeapp.reference.geography.repository.CountryRepository;
+import com.williamhsieh.financeapp.reference.geography.repository.CountryTimezoneRepository;
+import com.williamhsieh.financeapp.reference.geography.repository.LanguageRepository;
+import com.williamhsieh.financeapp.reference.geography.repository.TimezoneRepository;
+
+@Service
+public class RegistrationService {
+
+    private static final String USER_NUMBER_CHARACTERS =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    private static final int USER_NUMBER_LENGTH = 10;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private final UserRepository userRepository;
+    private final CountryRepository countryRepository;
+    private final TimezoneRepository timezoneRepository;
+    private final LanguageRepository languageRepository;
+    private final CountryTimezoneRepository countryTimezoneRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final UserAccountStatusRepository
+        userAccountStatusRepository;
+    private final UserAccountStatusLogRepository
+        userAccountStatusLogRepository;
+
+    public RegistrationService(
+        UserRepository userRepository,
+        CountryRepository countryRepository,
+        TimezoneRepository timezoneRepository,
+        LanguageRepository languageRepository,
+        CountryTimezoneRepository countryTimezoneRepository,
+        RoleRepository roleRepository,
+        UserRoleRepository userRoleRepository,
+        PasswordEncoder passwordEncoder,
+        UserAccountStatusRepository userAccountStatusRepository,
+        UserAccountStatusLogRepository userAccountStatusLogRepository
+    ) {
+        this.userRepository = userRepository;
+        this.countryRepository = countryRepository;
+        this.timezoneRepository = timezoneRepository;
+        this.languageRepository = languageRepository;
+        this.countryTimezoneRepository =
+            countryTimezoneRepository;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userAccountStatusRepository =
+            userAccountStatusRepository;
+        this.userAccountStatusLogRepository =
+            userAccountStatusLogRepository;
+    }
+
+    @Transactional
+    public RegisterUserResponse register(RegisterUserRequest request) {
+        String normalizedEmail = request.email()
+            .trim()
+            .toLowerCase(Locale.ROOT);
+
+        String normalizedPhone = request.phone().trim();
+
+        validateUniqueUserData(normalizedEmail, normalizedPhone);
+
+        Country country = findCountry(request.countryId());
+        Timezone timezone = findTimezone(request.timezoneId());
+        Language language = findLanguage(request.languageId());
+
+        validateCountryTimezone(
+            request.countryId(),
+            request.timezoneId()
+        );
+
+        UserAccountStatus pendingStatus =
+            userAccountStatusRepository
+                .findByCodeAndActiveTrueAndDeletedDateIsNull(
+                    UserAccountStatusCodes
+                        .PENDING_EMAIL_VERIFICATION
+                )
+                .orElseThrow(() ->
+                    new IllegalStateException(
+                        "找不到使用者初始帳號狀態"
+                    )
+                );
+
+        User user = new User();
+
+        user.setCountry(country);
+        user.setTimezone(timezone);
+        user.setLanguage(language);
+        user.setUserNumber(generateUniqueUserNumber());
+        user.setName(request.name().trim());
+        user.setNickname(request.nickname().trim());
+        user.setEmail(normalizedEmail);
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setBirthday(request.birthday());
+        user.setPhone(normalizedPhone);
+
+        // 新註冊使用者尚未完成驗證
+        user.setEmailVerified(false);
+        user.setSmsVerified(false);
+        user.changeAccountStatus(pendingStatus);
+
+        User savedUser;
+
+        try {
+            /*
+            * 使用 saveAndFlush() 立即執行 INSERT，
+            * 讓 UNIQUE 衝突在這個 try 區塊內發生。
+            */
+            savedUser =
+                userRepository.saveAndFlush(user);
+        } catch (
+            DataIntegrityViolationException exception
+        ) {
+            throw new BusinessException(
+                HttpStatus.CONFLICT,
+                "REGISTRATION_DATA_CONFLICT",
+                "Email、手機號碼或使用者編號已被使用，請重新確認"
+            );
+        }
+
+        UserAccountStatusLog statusLog =
+            new UserAccountStatusLog(
+                savedUser,
+                null,
+                pendingStatus,
+                null,
+                "使用者完成註冊，等待 Email 驗證"
+            );
+
+        userAccountStatusLogRepository.save(statusLog);
+        
+        assignDefaultUserRole(savedUser);
+
+        return new RegisterUserResponse(
+            savedUser.getId(),
+            savedUser.getUserNumber(),
+            savedUser.getEmail(),
+            savedUser.isEmailVerified(),
+            savedUser.isSmsVerified(),
+            savedUser.isActive(),
+            "註冊資料建立成功，請完成電子郵件驗證"
+        );
+    }
+
+    private void assignDefaultUserRole(User user) {
+        Role role = roleRepository
+            .findByCodeIgnoreCaseAndActiveTrueAndDeletedDateIsNull(
+                RoleCodes.USER
+            )
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "系統預設 USER 角色不存在或已停用"
+                )
+            );
+
+        UserRole userRole = new UserRole(
+            user,
+            role
+        );
+
+        userRoleRepository.save(userRole);
+    }
+
+    private void validateUniqueUserData(
+        String email,
+        String phone
+    ) {
+        Optional<User> existingEmailUser =
+            userRepository.findByEmailIgnoreCase(email);
+
+        if (existingEmailUser.isPresent()) {
+            User user = existingEmailUser.get();
+
+            if (isDeletedAccount(user)) {
+                throw new BusinessException(
+                    HttpStatus.CONFLICT,
+                    "DELETED_ACCOUNT_EXISTS",
+                    "此 Email 所屬帳號已被刪除，請聯絡客服申請恢復"
+                );
+            }
+
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "此 Email 已被註冊"
+            );
+        }
+
+        if (userRepository.existsByPhone(phone)) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "此手機號碼已被註冊"
+            );
+        }
+    }
+
+    private Country findCountry(Long countryId) {
+        if (countryId == null) {
+            return null;
+        }
+
+        return countryRepository
+            .findByIdAndDeletedDateIsNull(countryId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "選擇的國家不存在"
+            ));
+    }
+
+    private Timezone findTimezone(Long timezoneId) {
+        if (timezoneId == null) {
+            return null;
+        }
+
+        return timezoneRepository
+            .findByIdAndDeletedDateIsNull(timezoneId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "選擇的時區不存在"
+            ));
+    }
+
+    private Language findLanguage(Long languageId) {
+        return languageRepository
+            .findByIdAndActiveTrueAndDeletedDateIsNull(languageId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "選擇的語言不存在或已停用"
+            ));
+    }
+
+    private void validateCountryTimezone(
+        Long countryId,
+        Long timezoneId
+    ) {
+        if (countryId == null && timezoneId == null) {
+            return;
+        }
+
+        if (countryId == null || timezoneId == null) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "國家與時區必須同時選擇"
+            );
+        }
+
+        boolean validMapping =
+            countryTimezoneRepository
+                .existsByCountry_IdAndTimezone_IdAndDeletedDateIsNull(
+                    countryId,
+                    timezoneId
+                );
+
+        if (!validMapping) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "選擇的時區不屬於該國家"
+            );
+        }
+    }
+
+    private String generateUniqueUserNumber() {
+        String userNumber;
+
+        do {
+            userNumber = generateRandomUserNumber();
+        } while (userRepository.existsByUserNumber(userNumber));
+
+        return userNumber;
+    }
+
+    private String generateRandomUserNumber() {
+        StringBuilder result =
+            new StringBuilder(USER_NUMBER_LENGTH);
+
+        for (int i = 0; i < USER_NUMBER_LENGTH; i++) {
+            int index = SECURE_RANDOM.nextInt(
+                USER_NUMBER_CHARACTERS.length()
+            );
+
+            result.append(
+                USER_NUMBER_CHARACTERS.charAt(index)
+            );
+        }
+
+        return result.toString();
+    }
+
+    private boolean isDeletedAccount(
+        User user
+    ) {
+        return user.getDeletedDate() != null ||
+            UserAccountStatusCodes.DELETED.equals(
+                user.getAccountStatus().getCode()
+            );
+    }
+}

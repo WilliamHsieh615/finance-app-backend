@@ -11,10 +11,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.williamhsieh.financeapp.notification.port.EmailSender;
+import com.williamhsieh.financeapp.notification.port.SmsSender;
 
-import com.williamhsieh.financeapp.service.notification.EmailSender;
-import com.williamhsieh.financeapp.service.notification.SmsSender;
+import org.junit.jupiter.api.BeforeEach;
 
 @SpringBootTest
 @AutoConfigureMockMvc

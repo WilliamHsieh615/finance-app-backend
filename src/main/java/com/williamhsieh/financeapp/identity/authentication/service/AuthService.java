@@ -1,0 +1,339 @@
+package com.williamhsieh.financeapp.identity.authentication.service;
+
+import java.util.Locale;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.williamhsieh.financeapp.identity.authentication.constant.AuthEventCodes;
+import com.williamhsieh.financeapp.identity.authentication.constant.LoginStatusCodes;
+import com.williamhsieh.financeapp.identity.authentication.dto.LoginRequest;
+import com.williamhsieh.financeapp.identity.authentication.dto.LoginResponse;
+import com.williamhsieh.financeapp.identity.authentication.dto.LoginUserResponse;
+import com.williamhsieh.financeapp.identity.authentication.dto.LogoutRequest;
+import com.williamhsieh.financeapp.identity.authentication.dto.RefreshTokenRequest;
+import com.williamhsieh.financeapp.identity.authentication.dto.TokenRefreshResponse;
+import com.williamhsieh.financeapp.identity.authorization.service.UserAuthorities;
+import com.williamhsieh.financeapp.identity.authorization.service.UserAuthorityService;
+import com.williamhsieh.financeapp.identity.user.constant.UserAccountStatusCodes;
+import com.williamhsieh.financeapp.identity.user.entity.User;
+import com.williamhsieh.financeapp.identity.user.repository.UserRepository;
+import com.williamhsieh.financeapp.identity.user.service.UserAccountAccessPolicy;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final LoginAuditService loginAuditService;
+    private final AuthEventAuditService authEventAuditService;
+    private final UserAuthorityService userAuthorityService;
+    private final UserAccountAccessPolicy
+        userAccountAccessPolicy;
+
+    public AuthService(
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        JwtService jwtService,
+        RefreshTokenService refreshTokenService,
+        LoginAuditService loginAuditService,
+        AuthEventAuditService authEventAuditService,
+        UserAuthorityService userAuthorityService,
+        UserAccountAccessPolicy userAccountAccessPolicy
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
+        this.loginAuditService = loginAuditService;
+        this.authEventAuditService = authEventAuditService;
+        this.userAuthorityService = userAuthorityService;
+        this.userAccountAccessPolicy =
+            userAccountAccessPolicy;
+    }
+
+    @Transactional
+    public LoginResponse login(
+        LoginRequest request,
+        LoginRequestMetadata metadata
+    ) {
+        String normalizedEmail = request.email()
+            .trim()
+            .toLowerCase(Locale.ROOT);
+
+        User user = userRepository
+            .findByEmailIgnoreCaseAndDeletedDateIsNull(
+                normalizedEmail
+            )
+            .orElse(null);
+
+        if (user == null) {
+            loginAuditService.recordFailure(
+                null,
+                normalizedEmail,
+                LoginStatusCodes.INVALID_CREDENTIALS,
+                metadata
+            );
+
+            throw invalidCredentials();
+        }
+
+        boolean passwordMatched = passwordEncoder.matches(
+            request.password(),
+            user.getPassword()
+        );
+
+        if (!passwordMatched) {
+            loginAuditService.recordFailure(
+                user,
+                normalizedEmail,
+                LoginStatusCodes.INVALID_CREDENTIALS,
+                metadata
+            );
+
+            throw invalidCredentials();
+        }
+
+        if (!user.isEmailVerified()) {
+            loginAuditService.recordFailure(
+                user,
+                normalizedEmail,
+                LoginStatusCodes.EMAIL_NOT_VERIFIED,
+                metadata
+            );
+
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "請先完成 Email 驗證"
+            );
+        }
+
+        String accountStatusCode =
+            user.getAccountStatus().getCode();
+
+        boolean accountAvailable =
+            userAccountAccessPolicy
+                .isAvailable(user);
+
+        if (!accountAvailable) {
+            loginAuditService.recordFailure(
+                user,
+                normalizedEmail,
+                LoginStatusCodes.ACCOUNT_DISABLED,
+                metadata
+            );
+
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                accountUnavailableMessage(
+                    accountStatusCode
+                )   
+            );
+        }
+
+        String sessionId = UUID.randomUUID().toString();
+
+        RefreshTokenResult refreshToken =
+            refreshTokenService.create(user);
+
+        UserAuthorities authorities =
+            userAuthorityService.getUserAuthorities(
+            user.getId()
+        );
+
+        AccessTokenResult accessToken =
+            jwtService.generateAccessToken(
+                user,
+                sessionId,
+                authorities
+        );
+
+        loginAuditService.recordSuccess(
+            user,
+            normalizedEmail,
+            refreshToken.id(),
+            sessionId,
+            metadata
+        );
+
+        LoginUserResponse loginUser =
+            new LoginUserResponse(
+                user.getId(),
+                user.getUserNumber(),
+                user.getName(),
+                user.getNickname(),
+                user.getEmail()
+            );
+
+        return new LoginResponse(
+            accessToken.token(),
+            refreshToken.token(),
+            "Bearer",
+            accessToken.expiresIn(),
+            refreshToken.expiresIn(),
+            loginUser
+        );
+    }
+    
+    public TokenRefreshResponse refresh(
+        RefreshTokenRequest request,
+        LoginRequestMetadata metadata
+    ) {
+        RefreshTokenRotationResult rotationResult;
+
+        try {
+            rotationResult = refreshTokenService.rotate(
+                request.refreshToken()
+            );
+        } catch (RefreshTokenException exception) {
+            authEventAuditService.recordFailure(
+                exception.getEventCode(),
+                exception.getUserId(),
+                exception.getRefreshTokenId(),
+                exception.getMessage(),
+                exception.getEmail(),
+                exception.getSessionId(),
+                metadata
+            );
+
+            throw new ResponseStatusException(
+                exception.getStatus(),
+                "Refresh Token 無效或已過期",
+                exception
+            );
+        }
+
+        String sessionId = loginAuditService.updateRefreshToken(
+            rotationResult.oldRefreshTokenId(),
+            rotationResult.newRefreshTokenId()
+        );
+
+        UserAuthorities authorities =
+            userAuthorityService.getUserAuthorities(
+                rotationResult.user().getId()
+        );
+
+        AccessTokenResult accessTokenResult =
+            jwtService.generateAccessToken(
+                rotationResult.user(),
+                sessionId,
+                authorities
+        );
+
+        authEventAuditService.recordSuccess(
+            AuthEventCodes.TOKEN_REFRESH_SUCCESS,
+            rotationResult.user().getId(),
+            rotationResult.oldRefreshTokenId(),
+            rotationResult.user().getEmail(),
+            sessionId,
+            metadata
+        );
+
+        return new TokenRefreshResponse(
+            accessTokenResult.token(),
+            rotationResult.refreshToken(),
+            "Bearer",
+            accessTokenResult.expiresIn(),
+            rotationResult.refreshTokenExpiresIn()
+        );
+    }
+    
+    public void logout(
+        LogoutRequest request,
+        LoginRequestMetadata metadata
+    ) {
+        RefreshTokenRevocationResult result =
+            refreshTokenService.revoke(
+                request.refreshToken()
+            );
+
+        if (result.newlyRevoked()) {
+            String sessionId =
+                loginAuditService.recordLogout(
+                    result.refreshTokenId()
+                );
+
+            authEventAuditService.recordSuccess(
+                AuthEventCodes.LOGOUT_SUCCESS,
+                result.userId(),
+                result.refreshTokenId(),
+                result.email(),
+                sessionId,
+                metadata
+            );
+
+            return;
+        }
+
+        String failureDetail;
+
+        if (result.found()) {
+            failureDetail =
+                "登出使用的 Refresh Token 已經被撤銷";
+        } else {
+            failureDetail =
+                "找不到登出使用的 Refresh Token";
+        }
+
+        authEventAuditService.recordFailure(
+            AuthEventCodes.LOGOUT_INVALID_TOKEN,
+            result.userId(),
+            result.refreshTokenId(),
+            failureDetail,
+            result.email(),
+            null,
+            metadata
+        );
+    }
+
+    private ResponseStatusException invalidCredentials() {
+        return new ResponseStatusException(
+            HttpStatus.UNAUTHORIZED,
+            "Email 或密碼錯誤"
+        );
+    }
+
+    private String accountUnavailableMessage(
+        String accountStatusCode
+    ) {
+        if (
+            UserAccountStatusCodes
+                .PENDING_EMAIL_VERIFICATION
+                .equals(accountStatusCode)
+        ) {
+            return "請先完成 Email 驗證";
+        }
+
+        if (
+            UserAccountStatusCodes.SUSPENDED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被停權";
+        }
+
+        if (
+            UserAccountStatusCodes.LOCKED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被鎖定";
+        }
+
+        if (
+            UserAccountStatusCodes.DELETED.equals(
+                accountStatusCode
+            )
+        ) {
+            return "此帳號已被刪除";
+        }
+
+        return "此帳號目前無法使用";
+    }
+}

@@ -9,10 +9,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 
-import com.williamhsieh.financeapp.security.RestAuthenticationEntryPoint;
-import com.williamhsieh.financeapp.security.RestAccessDeniedHandler;
-import com.williamhsieh.financeapp.security.JwtAuthorityConverter;
-import com.williamhsieh.financeapp.security.ActiveAccountFilter;
+import com.williamhsieh.financeapp.identity.authentication.security.ActiveAccountFilter;
+import com.williamhsieh.financeapp.identity.authentication.security.JwtAuthorityConverter;
+import com.williamhsieh.financeapp.identity.authentication.security.RestAccessDeniedHandler;
+import com.williamhsieh.financeapp.identity.authentication.security.RestAuthenticationEntryPoint;
 
 @Configuration
 @EnableMethodSecurity

@@ -1,0 +1,19 @@
+package com.williamhsieh.financeapp.identity.user.dto;
+
+import java.time.LocalDateTime;
+
+public record UserSummaryResponse(
+    Long id,
+    String userNumber,
+    String name,
+    String nickname,
+    String email,
+    boolean emailVerified,
+    boolean smsVerified,
+    boolean active,
+    UserAccountStatusResponse accountStatus,
+    LocalDateTime createdDate,
+    LocalDateTime updatedDate,
+    LocalDateTime deletedDate
+) {
+}
