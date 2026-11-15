@@ -642,6 +642,39 @@
         FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
+    -- (V1 DB AP)角色權限異動類型表
+    CREATE TABLE role_permission_assignment_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)角色權限異動歷程表
+    CREATE TABLE role_permission_assignment_logs (
+        id                                  BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        role_id                             BIGINT         NOT NULL,
+        permission_id                       BIGINT         NOT NULL,
+        role_permission_assignment_type_id  BIGINT         NOT NULL,
+        changed_by_user_id                  BIGINT         NULL,
+        note                                VARCHAR(255)   NOT NULL,
+        changed_date                        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+        INDEX (role_id, changed_date),
+        INDEX (permission_id),
+        INDEX (role_permission_assignment_type_id),
+        INDEX (changed_by_user_id),
+    
+        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (role_permission_assignment_type_id) REFERENCES role_permission_assignment_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+    );
+
     -- 推薦碼類型表
     CREATE TABLE referral_code_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
