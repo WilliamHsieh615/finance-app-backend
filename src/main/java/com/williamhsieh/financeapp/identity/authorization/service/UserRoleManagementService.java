@@ -29,25 +29,23 @@ import com.williamhsieh.financeapp.identity.authorization.repository.UserRoleAss
 import com.williamhsieh.financeapp.identity.authorization.repository.UserRoleRepository;
 import com.williamhsieh.financeapp.identity.user.entity.User;
 import com.williamhsieh.financeapp.identity.user.repository.UserRepository;
+import com.williamhsieh.financeapp.identity.authorization.mapper.RoleResponseMapper;
 
 @Service
 public class UserRoleManagementService {
 
     private final UserRepository userRepository;
-
     private final UserRoleRepository
         userRoleRepository;
-
     private final PermissionAccessPolicy
         permissionAccessPolicy;
-
     private final RoleRepository roleRepository;
-
     private final UserRoleAssignmentTypeRepository
         userRoleAssignmentTypeRepository;
-
     private final UserRoleAssignmentLogRepository
         userRoleAssignmentLogRepository;
+    private final RoleResponseMapper
+        roleResponseMapper;
 
     public UserRoleManagementService(
         UserRepository userRepository,
@@ -57,25 +55,23 @@ public class UserRoleManagementService {
             userRoleAssignmentTypeRepository,
         UserRoleAssignmentLogRepository
             userRoleAssignmentLogRepository,
-        PermissionAccessPolicy permissionAccessPolicy
+        PermissionAccessPolicy permissionAccessPolicy,
+        RoleResponseMapper roleResponseMapper
     ) {
         this.userRepository =
             userRepository;
-
         this.userRoleRepository =
             userRoleRepository;
-
         this.roleRepository =
             roleRepository;
-
         this.userRoleAssignmentTypeRepository =
             userRoleAssignmentTypeRepository;
-
         this.userRoleAssignmentLogRepository =
             userRoleAssignmentLogRepository;
-
         this.permissionAccessPolicy =
             permissionAccessPolicy;
+        this.roleResponseMapper =
+            roleResponseMapper;
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +105,9 @@ public class UserRoleManagementService {
                     targetUserId
                 )
                 .stream()
-                .map(this::toResponse)
+                .map(
+                    roleResponseMapper::toSummary
+                )
                 .toList();
 
         return List.copyOf(roles);
@@ -288,7 +286,8 @@ public class UserRoleManagementService {
             assignmentLog
         );
 
-        return toResponse(role);
+        return roleResponseMapper
+            .toSummary(role);
     }
 
     @Transactional
@@ -446,17 +445,6 @@ public class UserRoleManagementService {
             .contains(roleCode);
     }
 
-    private RoleSummaryResponse toResponse(
-        Role role
-    ) {
-        return new RoleSummaryResponse(
-            role.getId(),
-            role.getCode(),
-            role.getName(),
-            role.getNote()
-        );
-    }
-
     private void validatePagination(
         int page,
         int size
@@ -505,7 +493,7 @@ public class UserRoleManagementService {
 
             return new UserRoleAssignmentLogResponse(
                 assignmentLog.getId(),
-                toResponse(
+                roleResponseMapper.toSummary(
                     assignmentLog.getRole()
                 ),
                 assignmentTypeInfo,

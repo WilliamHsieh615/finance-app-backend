@@ -14,6 +14,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 @Table(
     name = "role_permissions",
@@ -71,6 +73,7 @@ public class RolePermission {
     )
     private boolean active = true;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "created_date",
         nullable = false,
@@ -79,6 +82,7 @@ public class RolePermission {
     )
     private LocalDateTime createdDate;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "updated_date",
         nullable = false,
@@ -139,5 +143,27 @@ public class RolePermission {
         LocalDateTime deletedDate
     ) {
         this.deletedDate = deletedDate;
+    }
+
+    public boolean isAvailable() {
+        return active && deletedDate == null;
+    }
+
+    public void activate() {
+        this.active = true;
+        this.deletedDate = null;
+    }
+
+    public void revoke() {
+        this.active = false;
+        this.deletedDate = LocalDateTime.now();
+    }
+
+    public RolePermission(
+        Role role,
+        Permission permission
+    ) {
+        this.role = role;
+        this.permission = permission;
     }
 }

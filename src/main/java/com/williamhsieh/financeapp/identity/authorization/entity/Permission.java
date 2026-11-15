@@ -13,6 +13,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 @Table(
     name = "permissions",
@@ -68,6 +70,7 @@ public class Permission {
     )
     private boolean active = true;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "created_date",
         nullable = false,
@@ -76,6 +79,7 @@ public class Permission {
     )
     private LocalDateTime createdDate;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "updated_date",
         nullable = false,
@@ -152,5 +156,42 @@ public class Permission {
         LocalDateTime deletedDate
     ) {
         this.deletedDate = deletedDate;
+    }
+
+    public Permission(
+        PermissionType permissionType,
+        String code,
+        String name,
+        String note
+    ) {
+        this.permissionType = permissionType;
+        this.code = code;
+        this.name = name;
+        this.note = note;
+        this.active = true;
+    }
+
+    public boolean isAvailable() {
+        return active && deletedDate == null;
+    }
+
+    public void activate() {
+        this.active = true;
+        this.deletedDate = null;
+    }
+
+    public void deactivate() {
+        this.active = false;
+        this.deletedDate = LocalDateTime.now();
+    }
+
+    public void updateDetails(
+        PermissionType permissionType,
+        String name,
+        String note
+    ) {
+        this.permissionType = permissionType;
+        this.name = name;
+        this.note = note;
     }
 }

@@ -50,12 +50,21 @@ public abstract class IntegrationTestSupport {
         insertLanguage();
         insertAuthorizationData();
         insertUserRoleAssignmentTypes();
+        insertRolePermissionAssignmentTypes();
         insertUserAccountStatuses();
         insertUser();
         insertUserRole();
     }
 
     protected void clearTestData() {
+        jdbcTemplate.update(
+            "DELETE FROM role_permission_assignment_logs"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM role_permission_assignment_types"
+        );
+
         jdbcTemplate.update(
             "DELETE FROM user_role_assignment_logs"
         );
@@ -928,6 +937,94 @@ public abstract class IntegrationTestSupport {
             )
             """
         );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                9,
+                3,
+                'PERMISSION_READ',
+                '查看權限',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                15,
+                3,
+                9,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                20,
+                3,
+                'ROLE_PERMISSION_MANAGE',
+                '管理角色權限',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                20,
+                3,
+                20,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
     }
 
     protected void insertUserRoleAssignmentTypes() {
@@ -957,6 +1054,43 @@ public abstract class IntegrationTestSupport {
                     'REVOKED',
                     '撤銷角色',
                     '撤銷會員目前擁有的角色',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
+            """
+        );
+    }
+
+    protected void
+        insertRolePermissionAssignmentTypes() {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permission_assignment_types (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES
+                (
+                    1,
+                    'GRANTED',
+                    '授予權限',
+                    '將權限授予指定角色',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    2,
+                    'REVOKED',
+                    '撤銷權限',
+                    '撤銷指定角色目前擁有的權限',
                     TRUE,
                     CURRENT_TIMESTAMP,
                     CURRENT_TIMESTAMP

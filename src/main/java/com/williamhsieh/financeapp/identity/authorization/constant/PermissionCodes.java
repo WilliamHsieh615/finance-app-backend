@@ -40,4 +40,22 @@ public final class PermissionCodes {
 
     public static final String ROLE_ASSIGN =
         "ROLE_ASSIGN";
+
+    public static final String ROLE_CREATE =
+        "ROLE_CREATE";
+
+    public static final String ROLE_UPDATE =
+        "ROLE_UPDATE";
+
+    public static final String ROLE_DELETE =
+        "ROLE_DELETE";
+
+    public static final String PERMISSION_READ =
+        "PERMISSION_READ";
+
+    public static final String ROLE_PERMISSION_MANAGE =
+        "ROLE_PERMISSION_MANAGE";
+
+    public static final String PERMISSION_MANAGE =
+        "PERMISSION_MANAGE";
 }
