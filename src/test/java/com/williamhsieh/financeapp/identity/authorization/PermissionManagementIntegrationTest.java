@@ -14,18 +14,29 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jayway.jsonpath.JsonPath;
+
 import com.williamhsieh.financeapp.support.IntegrationTestSupport;
+import com.williamhsieh.financeapp.identity.authorization.constant.PermissionChangeTypeCodes;
+import com.williamhsieh.financeapp.identity.authorization.entity.Permission;
+import com.williamhsieh.financeapp.identity.authorization.repository.PermissionRepository;
+import com.williamhsieh.financeapp.identity.authorization.service.PermissionChangeAuditService;
 
 class PermissionManagementIntegrationTest
     extends IntegrationTestSupport {
+
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
+    private PermissionChangeAuditService permissionChangeAuditService;
 
     @Test
     void adminWithPermissionReadCanGetActivePermissions()
@@ -4023,6 +4034,44 @@ class PermissionManagementIntegrationTest
 
         assertThat(createdPermissionCount)
             .isEqualTo(1);
+
+        Integer createdLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM permission_change_logs log
+                JOIN permissions permission
+                    ON permission.id =
+                        log.permission_id
+                JOIN permission_change_types type
+                    ON type.id =
+                        log.permission_change_type_id
+                WHERE permission.code = ?
+                AND type.code = ?
+                AND log.changed_by_user_id = ?
+                AND log.previous_permission_type_id IS NULL
+                AND log.previous_name IS NULL
+                AND log.previous_note IS NULL
+                AND log.previous_is_active IS NULL
+                AND log.previous_deleted_date IS NULL
+                AND log.new_permission_type_id = ?
+                AND log.new_name = ?
+                AND log.new_note = ?
+                AND log.new_is_active = TRUE
+                AND log.new_deleted_date IS NULL
+                AND log.changed_date IS NOT NULL
+                """,
+                Integer.class,
+                "USER_EMAIL_UPDATE",
+                "CREATED",
+                100L,
+                2L,
+                "變更會員電子郵件",
+                "允許後台變更會員電子郵件"
+            );
+
+        assertThat(createdLogCount)
+            .isEqualTo(1);
     }
 
     @Test
@@ -4717,6 +4766,44 @@ class PermissionManagementIntegrationTest
             );
 
         assertThat(updatedPermissionCount)
+            .isEqualTo(1);
+
+        Integer updatedLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM permission_change_logs log
+                JOIN permission_change_types type
+                    ON type.id =
+                        log.permission_change_type_id
+                WHERE log.permission_id = ?
+                AND type.code = ?
+                AND log.changed_by_user_id = ?
+                AND log.previous_permission_type_id = ?
+                AND log.new_permission_type_id = ?
+                AND log.previous_name = ?
+                AND log.new_name = ?
+                AND log.previous_note = ?
+                AND log.new_note = ?
+                AND log.previous_is_active = TRUE
+                AND log.new_is_active = TRUE
+                AND log.previous_deleted_date IS NULL
+                AND log.new_deleted_date IS NULL
+                AND log.changed_date IS NOT NULL
+                """,
+                Integer.class,
+                22L,
+                "UPDATED",
+                100L,
+                3L,
+                2L,
+                "原本的權限名稱",
+                "管理會員電子郵件",
+                "原本的備註",
+                "允許後台更新會員電子郵件"
+            );
+
+        assertThat(updatedLogCount)
             .isEqualTo(1);
     }
 
@@ -5450,6 +5537,44 @@ class PermissionManagementIntegrationTest
 
         assertThat(retainedRolePermissionCount)
             .isEqualTo(1);
+
+        Integer deactivatedLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM permission_change_logs log
+                JOIN permission_change_types type
+                    ON type.id =
+                        log.permission_change_type_id
+                WHERE log.permission_id = ?
+                AND type.code = ?
+                AND log.changed_by_user_id = ?
+                AND log.previous_permission_type_id = ?
+                AND log.new_permission_type_id = ?
+                AND log.previous_name = ?
+                AND log.new_name = ?
+                AND log.previous_note = ?
+                AND log.new_note = ?
+                AND log.previous_is_active = TRUE
+                AND log.new_is_active = FALSE
+                AND log.previous_deleted_date IS NULL
+                AND log.new_deleted_date IS NOT NULL
+                AND log.changed_date IS NOT NULL
+                """,
+                Integer.class,
+                22L,
+                "DEACTIVATED",
+                100L,
+                2L,
+                2L,
+                "管理會員電子郵件",
+                "管理會員電子郵件",
+                "允許後台更新會員電子郵件",
+                "允許後台更新會員電子郵件"
+            );
+
+        assertThat(deactivatedLogCount)
+            .isEqualTo(1);
     }
 
     @Test
@@ -5802,6 +5927,44 @@ class PermissionManagementIntegrationTest
 
         assertThat(effectiveRolePermissionCount)
             .isEqualTo(1);
+
+        Integer restoredLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM permission_change_logs log
+                JOIN permission_change_types type
+                    ON type.id =
+                        log.permission_change_type_id
+                WHERE log.permission_id = ?
+                AND type.code = ?
+                AND log.changed_by_user_id = ?
+                AND log.previous_permission_type_id = ?
+                AND log.new_permission_type_id = ?
+                AND log.previous_name = ?
+                AND log.new_name = ?
+                AND log.previous_note = ?
+                AND log.new_note = ?
+                AND log.previous_is_active = FALSE
+                AND log.new_is_active = TRUE
+                AND log.previous_deleted_date IS NOT NULL
+                AND log.new_deleted_date IS NULL
+                AND log.changed_date IS NOT NULL
+                """,
+                Integer.class,
+                22L,
+                "RESTORED",
+                100L,
+                2L,
+                2L,
+                "管理會員電子郵件",
+                "管理會員電子郵件",
+                "允許後台更新會員電子郵件",
+                "允許後台更新會員電子郵件"
+            );
+
+        assertThat(restoredLogCount)
+            .isEqualTo(1);
     }
 
     @Test
@@ -6131,6 +6294,1527 @@ class PermissionManagementIntegrationTest
 
         assertThat(deletedPermissionCount)
             .isEqualTo(1);
+    }
+
+    @Test
+    void permissionManagerCanGetDeactivatedPermissions()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date,
+                deleted_date
+            )
+            VALUES
+                (
+                    22,
+                    2,
+                    'USER_Z_PERMISSION',
+                    '會員 Z 權限',
+                    '只有停用，沒有刪除時間',
+                    FALSE,
+                    TIMESTAMP '2026-11-21 09:00:00',
+                    TIMESTAMP '2026-11-21 10:00:00',
+                    NULL
+                ),
+                (
+                    23,
+                    2,
+                    'USER_A_PERMISSION',
+                    '會員 A 權限',
+                    '具有刪除時間',
+                    TRUE,
+                    TIMESTAMP '2026-11-21 09:00:00',
+                    TIMESTAMP '2026-11-21 11:00:00',
+                    TIMESTAMP '2026-11-21 11:00:00'
+                ),
+                (
+                    24,
+                    3,
+                    'ROLE_Z_PERMISSION',
+                    '角色 Z 權限',
+                    '授權類型的停用權限',
+                    FALSE,
+                    TIMESTAMP '2026-11-21 09:00:00',
+                    TIMESTAMP '2026-11-21 12:00:00',
+                    TIMESTAMP '2026-11-21 12:00:00'
+                )
+            """
+        );
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/permissions/deactivated"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.length()")
+                    .value(3)
+            )
+            /*
+            * 先依 PermissionType code 排序：
+            * AUTHORIZATION 在 USER_MANAGEMENT 前面。
+            */
+            .andExpect(
+                jsonPath("$[0].id")
+                    .value(24)
+            )
+            .andExpect(
+                jsonPath("$[0].code")
+                    .value("ROLE_Z_PERMISSION")
+            )
+            .andExpect(
+                jsonPath(
+                    "$[0].permissionType.code"
+                )
+                    .value("AUTHORIZATION")
+            )
+            .andExpect(
+                jsonPath("$[0].active")
+                    .value(false)
+            )
+            /*
+            * 同一個 USER_MANAGEMENT 中，
+            * 再依 Permission code 排序。
+            */
+            .andExpect(
+                jsonPath("$[1].id")
+                    .value(23)
+            )
+            .andExpect(
+                jsonPath("$[1].code")
+                    .value("USER_A_PERMISSION")
+            )
+            .andExpect(
+                jsonPath(
+                    "$[1].permissionType.code"
+                )
+                    .value("USER_MANAGEMENT")
+            )
+            .andExpect(
+                jsonPath("$[1].active")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$[1].deletedDate")
+                    .value("2026-11-21T11:00:00")
+            )
+            .andExpect(
+                jsonPath("$[2].id")
+                    .value(22)
+            )
+            .andExpect(
+                jsonPath("$[2].code")
+                    .value("USER_Z_PERMISSION")
+            )
+            .andExpect(
+                jsonPath("$[2].name")
+                    .value("會員 Z 權限")
+            )
+            .andExpect(
+                jsonPath("$[2].note")
+                    .value(
+                        "只有停用，沒有刪除時間"
+                    )
+            )
+            .andExpect(
+                jsonPath("$[2].active")
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath("$[2].deletedDate")
+                    .doesNotExist()
+            );
+    }
+
+    @Test
+    void adminWithoutPermissionManageCannotGetDeactivatedPermissions()
+        throws Exception {
+
+        String accessToken =
+            loginAsAdmin();
+
+        String requestPath =
+            "/api/v1/admin/permissions/deactivated";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void revokedPermissionManageBlocksDeactivatedPermissionListWithOldToken()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        /*
+        * JWT 發出後，即時撤銷資料庫中的
+        * PERMISSION_MANAGE。
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 21
+            """
+        );
+
+        String requestPath =
+            "/api/v1/admin/permissions/deactivated";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void noDeactivatedPermissionsReturnsEmptyList()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/permissions/deactivated"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$")
+                    .isArray()
+            )
+            .andExpect(
+                jsonPath("$")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void permissionManagerCanGetCompletePermissionChangeHistory()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        String createRequest = """
+            {
+            "permissionTypeCode": "USER_MANAGEMENT",
+            "code": "USER_EMAIL_UPDATE",
+            "name": "原本的權限名稱",
+            "note": "原本的備註"
+            }
+            """;
+
+        mockMvc.perform(
+                post("/api/v1/admin/permissions")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(createRequest)
+            )
+            .andExpect(status().isCreated());
+
+        String updateRequest = """
+            {
+            "permissionTypeCode": "AUTHORIZATION",
+            "name": "修改後的權限名稱",
+            "note": "修改後的備註"
+            }
+            """;
+
+        mockMvc.perform(
+                put(
+                    "/api/v1/admin/permissions/USER_EMAIL_UPDATE"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(updateRequest)
+            )
+            .andExpect(status().isOk());
+
+        mockMvc.perform(
+                delete(
+                    "/api/v1/admin/permissions/USER_EMAIL_UPDATE"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isNoContent());
+
+        mockMvc.perform(
+                post(
+                    "/api/v1/admin/permissions/USER_EMAIL_UPDATE/restore"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isOk());
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/permissions/USER_EMAIL_UPDATE/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(4)
+            )
+            /*
+            * 最新：RESTORED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.code"
+                )
+                    .value("RESTORED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.permissionType.code"
+                )
+                    .value("AUTHORIZATION")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.name"
+                )
+                    .value("修改後的權限名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.active"
+                )
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.deletedDate"
+                )
+                    .exists()
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.active"
+                )
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.deletedDate"
+                )
+                    .doesNotExist()
+            )
+            /*
+            * 第二筆：DEACTIVATED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[1].changeType.code"
+                )
+                    .value("DEACTIVATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].previousState.active"
+                )
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].newState.active"
+                )
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].newState.deletedDate"
+                )
+                    .exists()
+            )
+            /*
+            * 第三筆：UPDATED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[2].changeType.code"
+                )
+                    .value("UPDATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].previousState.permissionType.code"
+                )
+                    .value("USER_MANAGEMENT")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].newState.permissionType.code"
+                )
+                    .value("AUTHORIZATION")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].previousState.name"
+                )
+                    .value("原本的權限名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].newState.name"
+                )
+                    .value("修改後的權限名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].previousState.note"
+                )
+                    .value("原本的備註")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].newState.note"
+                )
+                    .value("修改後的備註")
+            )
+            /*
+            * 最舊：CREATED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[3].changeType.code"
+                )
+                    .value("CREATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[3].previousState"
+                )
+                    .doesNotExist()
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[3].newState.permissionType.code"
+                )
+                    .value("USER_MANAGEMENT")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[3].newState.name"
+                )
+                    .value("原本的權限名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[3].newState.active"
+                )
+                    .value(true)
+            )
+            /*
+            * 操作者與分頁資料。
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser.id"
+                )
+                    .value(100)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser.userNumber"
+                )
+                    .value("TESTUSER01")
+            )
+            .andExpect(
+                jsonPath("$.page")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.size")
+                    .value(20)
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(4)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @Test
+    void adminWithoutPermissionManageCannotGetPermissionChangeHistory()
+        throws Exception {
+
+        String accessToken =
+            loginAsAdmin();
+
+        String requestPath =
+            "/api/v1/admin/permissions/USER_READ/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void revokedPermissionManageBlocksPermissionHistoryWithOldToken()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        /*
+        * JWT 發出後，立即撤銷資料庫中的
+        * PERMISSION_MANAGE。
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 21
+            """
+        );
+
+        String requestPath =
+            "/api/v1/admin/permissions/USER_READ/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void getHistoryForMissingPermissionReturnsNotFound()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        String requestPath =
+            "/api/v1/admin/permissions/UNKNOWN_PERMISSION/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(404)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Not Found")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("RESOURCE_NOT_FOUND")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("找不到指定的權限")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void permissionWithoutChangeHistoryReturnsEmptyPage()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        /*
+        * USER_READ 存在於 fixture，
+        * 但沒有 permission_change_logs。
+        */
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/permissions/USER_READ/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content")
+                    .isArray()
+            )
+            .andExpect(
+                jsonPath("$.content")
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath("$.page")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.size")
+                    .value(20)
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource(
+        "invalidPermissionChangeHistoryPagination"
+    )
+    void invalidPermissionChangeHistoryPaginationReturnsBadRequest(
+        int page,
+        int size,
+        String expectedMessage
+    ) throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        String requestPath =
+            "/api/v1/admin/permissions/USER_READ/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .param(
+                        "page",
+                        String.valueOf(page)
+                    )
+                    .param(
+                        "size",
+                        String.valueOf(size)
+                    )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(400)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Bad Request")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("BAD_REQUEST")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(expectedMessage)
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource(
+        "invalidPermissionChangeHistoryParameterTypes"
+    )
+    void invalidPermissionChangeHistoryParameterTypeReturnsBadRequest(
+        String parameterName,
+        String parameterValue,
+        String expectedMessage
+    ) throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        String requestPath =
+            "/api/v1/admin/permissions/USER_READ/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .param(
+                        parameterName,
+                        parameterValue
+                    )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(400)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Bad Request")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("BAD_REQUEST")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(expectedMessage)
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void permissionChangeHistorySupportsPagination()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permission_change_logs (
+                id,
+                permission_id,
+                permission_change_type_id,
+                changed_by_user_id,
+                previous_permission_type_id,
+                new_permission_type_id,
+                previous_name,
+                new_name,
+                previous_is_active,
+                new_is_active,
+                changed_date
+            )
+            VALUES
+                (
+                    1,
+                    2,
+                    2,
+                    100,
+                    2,
+                    2,
+                    '第一版名稱',
+                    '第二版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-21 10:00:00'
+                ),
+                (
+                    2,
+                    2,
+                    2,
+                    100,
+                    2,
+                    2,
+                    '第二版名稱',
+                    '第三版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-21 11:00:00'
+                ),
+                (
+                    3,
+                    2,
+                    2,
+                    100,
+                    2,
+                    2,
+                    '第三版名稱',
+                    '第四版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-21 12:00:00'
+                )
+            """
+        );
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/permissions/USER_READ/history"
+                )
+                    .param("page", "1")
+                    .param("size", "2")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            /*
+            * 排序為 id=3、2、1。
+            * 第二頁只剩 id=1。
+            */
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.code"
+                )
+                    .value("UPDATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.name"
+                )
+                    .value("第一版名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.name"
+                )
+                    .value("第二版名稱")
+            )
+            .andExpect(
+                jsonPath("$.page")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.size")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(3)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @Test
+    void permissionChangeHistorySupportsNullChangedByUser()
+        throws Exception {
+
+        /*
+        * 模擬系統自動異動。
+        * 因為不是由會員操作，
+        * changed_by_user_id 為 NULL。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO permission_change_logs (
+                id,
+                permission_id,
+                permission_change_type_id,
+                changed_by_user_id,
+                previous_permission_type_id,
+                new_permission_type_id,
+                previous_name,
+                new_name,
+                previous_note,
+                new_note,
+                previous_is_active,
+                new_is_active,
+                changed_date
+            )
+            VALUES (
+                1,
+                2,
+                2,
+                NULL,
+                2,
+                2,
+                '原本名稱',
+                '系統更新後名稱',
+                '原本備註',
+                '系統更新',
+                TRUE,
+                TRUE,
+                TIMESTAMP '2026-11-21 14:00:00'
+            )
+            """
+        );
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/permissions/USER_READ/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.code"
+                )
+                    .value("UPDATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser"
+                )
+                    .doesNotExist()
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.name"
+                )
+                    .value("原本名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.name"
+                )
+                    .value("系統更新後名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.note"
+                )
+                    .value("原本備註")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.note"
+                )
+                    .value("系統更新")
+            )
+            .andExpect(
+                jsonPath("$.content[0].changedDate")
+                    .value("2026-11-21T14:00:00")
+            );
+    }
+
+    @Test
+    void permissionChangeHistoryUsesIdAsSecondarySort()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permission_change_logs (
+                id,
+                permission_id,
+                permission_change_type_id,
+                changed_by_user_id,
+                previous_permission_type_id,
+                new_permission_type_id,
+                previous_name,
+                new_name,
+                previous_is_active,
+                new_is_active,
+                changed_date
+            )
+            VALUES
+                (
+                    1,
+                    2,
+                    2,
+                    100,
+                    2,
+                    2,
+                    '第一版',
+                    '第二版',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-21 13:00:00'
+                ),
+                (
+                    2,
+                    2,
+                    2,
+                    100,
+                    2,
+                    2,
+                    '第二版',
+                    '第三版',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-21 13:00:00'
+                )
+            """
+        );
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/permissions/USER_READ/history"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.name"
+                )
+                    .value("第三版")
+            )
+            .andExpect(
+                jsonPath("$.content[1].id")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].newState.name"
+                )
+                    .value("第二版")
+            );
+    }
+
+    @Test
+    void updatePermissionRollsBackWhenAuditLogCannotBeCreated()
+        throws Exception {
+
+        String accessToken =
+            loginAsPermissionManager();
+
+        /*
+        * 模擬系統設定錯誤：
+        * UPDATED 異動類型被停用，
+        * 因此稽核紀錄無法建立。
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE permission_change_types
+            SET is_active = FALSE
+            WHERE code = 'UPDATED'
+            """
+        );
+
+        String requestBody = """
+            {
+            "permissionTypeCode": "AUTHORIZATION",
+            "name": "不應儲存的新名稱",
+            "note": "這次修改應該完整回滾"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/permissions/USER_READ";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(
+                status().isInternalServerError()
+            )
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(500)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Internal Server Error")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("INTERNAL_ERROR")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("系統發生未預期的錯誤")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        /*
+        * Permission 的名稱必須維持原值，
+        * 證明 update 已經回滾。
+        */
+        String permissionName =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT name
+                FROM permissions
+                WHERE code = 'USER_READ'
+                """,
+                String.class
+            );
+
+        assertThat(permissionName)
+            .isEqualTo("查詢會員資料");
+
+        /*
+        * PermissionType 也不能被修改。
+        * USER_MANAGEMENT 的測試資料 ID 是 2。
+        */
+        Long permissionTypeId =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT permission_type_id
+                FROM permissions
+                WHERE code = 'USER_READ'
+                """,
+                Long.class
+            );
+
+        assertThat(permissionTypeId)
+            .isEqualTo(2L);
+
+        /*
+        * 失敗操作不應留下不完整的歷程。
+        */
+        Long changeLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM permission_change_logs
+                WHERE permission_id = 2
+                """,
+                Long.class
+            );
+
+        assertThat(changeLogCount)
+            .isZero();
+    }
+
+    @Test
+    void permissionChangeAuditServiceSupportsSystemChangeWithoutUser() {
+
+        Permission permission =
+            permissionRepository
+                .findByCodeIgnoreCase("USER_READ")
+                .orElseThrow();
+
+        var previousState =
+            permissionChangeAuditService.capture(
+                permission
+            );
+
+        /*
+        * 模擬系統自動修改後的狀態。
+        * 這裡不需要儲存 Permission，
+        * 只是在測試稽核 Service 擷取的新快照。
+        */
+        permission.updateDetails(
+            permission.getPermissionType(),
+            "系統更新後名稱",
+            "由系統自動更新"
+        );
+
+        permissionChangeAuditService.recordChanged(
+            permission,
+            null,
+            PermissionChangeTypeCodes.UPDATED,
+            previousState
+        );
+
+        Long logCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM permission_change_logs
+                WHERE permission_id = 2
+                AND changed_by_user_id IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(logCount)
+            .isEqualTo(1L);
+
+        String previousName =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT previous_name
+                FROM permission_change_logs
+                WHERE permission_id = 2
+                """,
+                String.class
+            );
+
+        assertThat(previousName)
+            .isEqualTo("查詢會員資料");
+
+        String newName =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT new_name
+                FROM permission_change_logs
+                WHERE permission_id = 2
+                """,
+                String.class
+            );
+
+        assertThat(newName)
+            .isEqualTo("系統更新後名稱");
+
+        String newNote =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT new_note
+                FROM permission_change_logs
+                WHERE permission_id = 2
+                """,
+                String.class
+            );
+
+        assertThat(newNote)
+            .isEqualTo("由系統自動更新");
     }
 
     private String loginAsAdmin()
@@ -6503,6 +8187,45 @@ class PermissionManagementIntegrationTest
                 oversizedNote,
                 "note",
                 "權限備註長度不得超過 255"
+            )
+        );
+    }
+
+    private static Stream<Arguments>
+        invalidPermissionChangeHistoryPagination() {
+
+        return Stream.of(
+            Arguments.of(
+                -1,
+                20,
+                "page 不得小於 0"
+            ),
+            Arguments.of(
+                0,
+                0,
+                "size 必須介於 1 到 100"
+            ),
+            Arguments.of(
+                0,
+                101,
+                "size 必須介於 1 到 100"
+            )
+        );
+    }
+
+    private static Stream<Arguments>
+        invalidPermissionChangeHistoryParameterTypes() {
+
+        return Stream.of(
+            Arguments.of(
+                "page",
+                "abc",
+                "請求參數 page 格式不正確"
+            ),
+            Arguments.of(
+                "size",
+                "large",
+                "請求參數 size 格式不正確"
             )
         );
     }

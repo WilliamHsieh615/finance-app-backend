@@ -67,4 +67,23 @@ public interface PermissionRepository
     )
     List<Permission>
         findAllActiveOrderByTypeAndCode();
+
+    @EntityGraph(
+        attributePaths = {
+            "permissionType"
+        }
+    )
+    @Query(
+        """
+        SELECT permission
+        FROM Permission permission
+        WHERE permission.active = false
+        OR permission.deletedDate IS NOT NULL
+        ORDER BY
+            permission.permissionType.code ASC,
+            permission.code ASC
+        """
+    )
+    List<Permission>
+        findAllDeactivatedOrderByTypeAndCode();
 }

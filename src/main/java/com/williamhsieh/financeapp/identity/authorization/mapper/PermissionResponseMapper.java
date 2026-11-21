@@ -6,6 +6,7 @@ import com.williamhsieh.financeapp.identity.authorization.dto.PermissionSummaryR
 import com.williamhsieh.financeapp.identity.authorization.dto.PermissionSummaryResponse.PermissionTypeInfo;
 import com.williamhsieh.financeapp.identity.authorization.entity.Permission;
 import com.williamhsieh.financeapp.identity.authorization.entity.PermissionType;
+import com.williamhsieh.financeapp.identity.authorization.dto.PermissionDetailResponse;
 
 @Component
 public class PermissionResponseMapper {
@@ -29,6 +30,34 @@ public class PermissionResponseMapper {
             permission.getCode(),
             permission.getName(),
             permission.getNote()
+        );
+    }
+
+    public PermissionDetailResponse toDetail(
+        Permission permission
+    ) {
+        PermissionType permissionType =
+            permission.getPermissionType();
+
+        PermissionDetailResponse.PermissionTypeInfo
+            permissionTypeInfo =
+                new PermissionDetailResponse
+                    .PermissionTypeInfo(
+                        permissionType.getId(),
+                        permissionType.getCode(),
+                        permissionType.getName()
+                    );
+
+        return new PermissionDetailResponse(
+            permission.getId(),
+            permissionTypeInfo,
+            permission.getCode(),
+            permission.getName(),
+            permission.getNote(),
+            permission.isActive(),
+            permission.getCreatedDate(),
+            permission.getUpdatedDate(),
+            permission.getDeletedDate()
         );
     }
 }

@@ -51,12 +51,21 @@ public abstract class IntegrationTestSupport {
         insertAuthorizationData();
         insertUserRoleAssignmentTypes();
         insertRolePermissionAssignmentTypes();
+        insertPermissionChangeTypes();
         insertUserAccountStatuses();
         insertUser();
         insertUserRole();
     }
 
     protected void clearTestData() {
+        jdbcTemplate.update(
+            "DELETE FROM permission_change_logs"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM permission_change_types"
+        );
+
         jdbcTemplate.update(
             "DELETE FROM role_permission_assignment_logs"
         );
@@ -1223,6 +1232,59 @@ public abstract class IntegrationTestSupport {
                 CURRENT_TIMESTAMP,
                 CURRENT_TIMESTAMP
             )
+            """
+        );
+    }
+
+    protected void insertPermissionChangeTypes() {
+        jdbcTemplate.update(
+            """
+            INSERT INTO permission_change_types (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES
+                (
+                    1,
+                    'CREATED',
+                    '建立權限',
+                    '建立新的 Permission 定義',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    2,
+                    'UPDATED',
+                    '修改權限',
+                    '修改 Permission 定義',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    3,
+                    'DEACTIVATED',
+                    '停用權限',
+                    '停用 Permission',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    4,
+                    'RESTORED',
+                    '恢復權限',
+                    '恢復 Permission',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
             """
         );
     }

@@ -1,5 +1,6 @@
 package com.williamhsieh.financeapp.identity.authorization.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,7 @@ public interface PermissionTypeRepository
         findByCodeIgnoreCaseAndActiveTrueAndDeletedDateIsNull(
             String code
         );
+
+    List<PermissionType>
+        findAllByActiveTrueAndDeletedDateIsNullOrderByCodeAsc();
 }

@@ -16,17 +16,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.williamhsieh.financeapp.identity.authentication.security.AuthenticatedUserIdResolver;
 import com.williamhsieh.financeapp.identity.authorization.constant.PermissionCodes;
 import com.williamhsieh.financeapp.identity.authorization.dto.PermissionSummaryResponse;
 import com.williamhsieh.financeapp.identity.authorization.service.PermissionManagementService;
-import com.williamhsieh.financeapp
-    .identity.authorization.dto
-    .CreatePermissionRequest;
-import com.williamhsieh.financeapp
-    .identity.authorization.dto
-    .UpdatePermissionRequest;
+import com.williamhsieh.financeapp.identity.authorization.dto.CreatePermissionRequest;
+import com.williamhsieh.financeapp.identity.authorization.dto.UpdatePermissionRequest;
+import com.williamhsieh.financeapp.identity.authorization.dto.PermissionDetailResponse;
+import com.williamhsieh.financeapp.identity.authorization.dto.PermissionChangeLogResponse;
+import com.williamhsieh.financeapp.shared.dto.PageResponse;
 
 @RestController
 @RequestMapping("/api/v1/admin/permissions")
@@ -41,13 +41,11 @@ public class PermissionManagementController {
     public PermissionManagementController(
         PermissionManagementService
             permissionManagementService,
-
         AuthenticatedUserIdResolver
             authenticatedUserIdResolver
     ) {
         this.permissionManagementService =
             permissionManagementService;
-
         this.authenticatedUserIdResolver =
             authenticatedUserIdResolver;
     }
@@ -173,4 +171,57 @@ public class PermissionManagementController {
                 permissionCode
             );
     }
+
+    @GetMapping("/deactivated")
+    @PreAuthorize(
+        "hasAuthority('" +
+            PermissionCodes.PERMISSION_MANAGE +
+        "')"
+    )
+    public List<PermissionDetailResponse>
+        getDeactivatedPermissions(
+            @AuthenticationPrincipal
+            Jwt jwt
+        ) {
+            Long authenticatedUserId =
+                authenticatedUserIdResolver
+                    .resolve(jwt);
+
+            return permissionManagementService
+                .getDeactivatedPermissions(
+                    authenticatedUserId
+                );
+    }
+
+    @GetMapping("/{permissionCode}/history")
+    @PreAuthorize(
+        "hasAuthority('" +
+            PermissionCodes.PERMISSION_MANAGE +
+        "')"
+    )
+    public PageResponse<PermissionChangeLogResponse>
+        getPermissionChangeHistory(
+            @PathVariable String permissionCode,
+
+            @RequestParam(defaultValue = "0")
+            int page,
+
+            @RequestParam(defaultValue = "20")
+            int size,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+        ) {
+            Long authenticatedUserId =
+                authenticatedUserIdResolver
+                    .resolve(jwt);
+
+            return permissionManagementService
+                .getPermissionChangeHistory(
+                    authenticatedUserId,
+                    permissionCode,
+                    page,
+                    size
+                );
+        }
 }
