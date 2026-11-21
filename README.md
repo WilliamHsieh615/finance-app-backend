@@ -552,6 +552,48 @@
         deleted_date                     DATETIME       NULL                             -- 刪除時間 (由後端寫入)
     );
 
+    -- (V1 DB AP)角色定義異動類型表
+    CREATE TABLE role_change_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)角色定義異動歷程表
+    CREATE TABLE role_change_logs (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        role_id                          BIGINT         NOT NULL,
+        role_change_type_id              BIGINT         NOT NULL,
+        changed_by_user_id               BIGINT         NULL,
+    
+        previous_name                    VARCHAR(100)   NULL,
+        new_name                         VARCHAR(100)   NULL,
+    
+        previous_note                    VARCHAR(255)   NULL,
+        new_note                         VARCHAR(255)   NULL,
+    
+        previous_is_active               BOOLEAN        NULL,
+        new_is_active                    BOOLEAN        NULL,
+    
+        previous_deleted_date            DATETIME       NULL,
+        new_deleted_date                 DATETIME       NULL,
+    
+        changed_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+        INDEX (role_id, changed_date),
+        INDEX (role_change_type_id),
+        INDEX (changed_by_user_id),
+    
+        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (role_change_type_id) REFERENCES role_change_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+    );
+
     -- (V1 DB AP)使用者與角色關聯表
     CREATE TABLE user_roles (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
