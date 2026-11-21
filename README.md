@@ -478,18 +478,6 @@
         FOREIGN KEY (base_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (quote_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
-
-    -- (V1 DB AP)使用者帳戶狀態表
-    CREATE TABLE user_account_statuses (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        code                             VARCHAR(50)    NOT NULL UNIQUE,
-        name                             VARCHAR(100)   NOT NULL,
-        note                             VARCHAR(255)   NULL,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
-        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL
-    );
     
     -- (V1 DB AP)使用者表
     CREATE TABLE users (
@@ -518,6 +506,18 @@
         FOREIGN KEY (timezone_id) REFERENCES timezones(id) ON DELETE SET NULL ON UPDATE CASCADE,
         FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (user_account_status_id) REFERENCES user_account_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
+    -- (V1 DB AP)使用者帳戶狀態表
+    CREATE TABLE user_account_statuses (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
     );
 
     -- (V1 DB AP)使用者狀態異動歷程表
@@ -591,6 +591,53 @@
         deleted_date                     DATETIME       NULL,
         INDEX (permission_type_id),
         FOREIGN KEY (permission_type_id) REFERENCES permission_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
+    -- (V1 DB AP)權限定義異動類型表
+    CREATE TABLE permission_change_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)權限定義異動歷程表
+    CREATE TABLE permission_change_logs (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        permission_id                    BIGINT         NOT NULL,
+        permission_change_type_id        BIGINT         NOT NULL,
+        changed_by_user_id               BIGINT         NULL,
+    
+        previous_permission_type_id      BIGINT         NULL,
+        new_permission_type_id           BIGINT         NULL,
+    
+        previous_name                    VARCHAR(100)   NULL,
+        new_name                         VARCHAR(100)   NULL,
+    
+        previous_note                    VARCHAR(255)   NULL,
+        new_note                         VARCHAR(255)   NULL,
+    
+        previous_is_active               BOOLEAN        NULL,
+        new_is_active                    BOOLEAN        NULL,
+    
+        previous_deleted_date            DATETIME       NULL,
+        new_deleted_date                 DATETIME       NULL,
+    
+        changed_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+        INDEX (permission_id, changed_date),
+        INDEX (permission_change_type_id),
+        INDEX (changed_by_user_id),
+    
+        FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (permission_change_type_id) REFERENCES permission_change_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (changed_by_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (previous_permission_type_id) REFERENCES permission_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (new_permission_type_id) REFERENCES permission_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (V1 DB AP)角色與權限關聯表
