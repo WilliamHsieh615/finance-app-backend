@@ -2400,6 +2400,37 @@
         deleted_date                     DATETIME       NULL
     );
 
+    -- (V1 DB AP)會計分錄表
+    CREATE TABLE journal_entries (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        user_id                          BIGINT         NOT NULL,
+        transaction_source_id            BIGINT         NOT NULL,
+        transaction_status_id            BIGINT         NOT NULL,
+        currency_id                      BIGINT         NOT NULL,
+    
+        journal_number                   VARCHAR(30)    NOT NULL,
+        transaction_date                 DATETIME       NOT NULL,
+        posted_date                      DATETIME       NULL,
+        note                             VARCHAR(255)   NULL,
+    
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
+    
+        UNIQUE (user_id, journal_number),
+    
+        INDEX (user_id, transaction_date),
+        INDEX (transaction_source_id),
+        INDEX (transaction_status_id),
+        INDEX (currency_id),
+        INDEX (transaction_date),
+    
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
     -- (V1 DB AP)交易表
     CREATE TABLE transactions (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
