@@ -2431,142 +2431,147 @@
         FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
-    -- (V1 DB AP)交易表
-    CREATE TABLE transactions (
+    -- (V1 DB AP)分錄交易明細表
+    CREATE TABLE transaction_entries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        ledger_id                        BIGINT         NOT NULL,
+        journal_entry_id                 BIGINT         NOT NULL,
+        line_number                      INT            NOT NULL,
+    
         account_id                       BIGINT         NOT NULL,
-        transaction_source_id            BIGINT         NOT NULL,
         transaction_type_id              BIGINT         NOT NULL,
-        
-        price                            DECIMAL(18,8)  NULL,                            -- 價格
-        quantity                         DECIMAL(18,8)  NULL,                            -- 數量
-        amount                           DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 合計 (實際影響帳戶餘額的金額)
-
-        original_currency_id             BIGINT         NULL,                            -- 原始交易幣別 (外幣交易使用)
-        original_amount                  DECIMAL(18,8)  NULL,                            -- 原始交易金額 (外幣交易使用)
-        exchange_rate_used               DECIMAL(18,8)  NULL,                            -- 當下換算匯率 (外幣交易使用)
-
-        transaction_date                 DATETIME       NOT NULL,                        -- 交易日
-        note                             VARCHAR(255),
-        transaction_status_id            BIGINT         NOT NULL,                        -- 交易狀態
-
+    
+        price                            DECIMAL(18,8)  NULL,
+        quantity                         DECIMAL(18,8)  NULL,
+    
+        debit_amount                     DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        credit_amount                    DECIMAL(18,8)  NOT NULL DEFAULT 0,
+    
+        original_currency_id             BIGINT         NULL,
+        original_amount                  DECIMAL(18,8)  NULL,
+        exchange_rate_used               DECIMAL(18,8)  NULL,
+    
+        note                             VARCHAR(255)   NULL,
+    
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-        
-        INDEX (account_id, transaction_date),
-        INDEX (ledger_id, transaction_date),
+        deleted_date                     DATETIME       NULL,
+    
+        UNIQUE (journal_entry_id, line_number),
+    
+        CHECK ((debit_amount > 0 AND credit_amount = 0) OR (credit_amount > 0 AND debit_amount = 0)),
+    
+        INDEX (journal_entry_id),
+        INDEX (account_id),
         INDEX (transaction_type_id),
-        INDEX (transaction_date),
-        
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    
+        FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
-    -- (V1 DB AP)交易關聯表 (不同交易之間的關聯)
-    CREATE TABLE transaction_links (
-        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        transaction_id                   BIGINT         NOT NULL,
-        related_transaction_id           BIGINT         NOT NULL,
-
-        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE(transaction_id, related_transaction_id),
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (related_transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
-    -- (V1 DB AP)交易表子表 (收支)
+    -- (V1 DB AP)分錄交易明細子表 (收支)
     CREATE TABLE cashflow_transaction_details (
-        transaction_id                   BIGINT        PRIMARY KEY,
+        transaction_entry_id             BIGINT        PRIMARY KEY,
         category_id                      BIGINT        NOT NULL,
         merchant_id                      BIGINT        NULL,
         INDEX(category_id),
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_entry_id) REFERENCES transaction_entries(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
     );
     
-    -- 交易表子表 (存貨)
+    -- 分錄交易明細子表 (存貨)
     CREATE TABLE inventory_transaction_details (
-        transaction_id                   BIGINT        PRIMARY KEY,
+        transaction_entry_id             BIGINT        PRIMARY KEY,
         expiry_date                      DATE,                                          -- 這批存貨的到期日
-        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (transaction_entry_id) REFERENCES transaction_entries(id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
-    -- (V1 DB AP)重複交易表
-    CREATE TABLE recurring_transactions (
+    -- (V1 DB AP)週期性會計分錄表
+    CREATE TABLE recurring_journal_entries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        ledger_id                        BIGINT         NOT NULL,
-        account_id                       BIGINT         NOT NULL,
+        user_id                          BIGINT         NOT NULL,
         transaction_source_id            BIGINT         NOT NULL,
-        transaction_type_id              BIGINT         NOT NULL,
-
-        price                            DECIMAL(18,8)  NULL,                            -- 價格
-        quantity                         DECIMAL(18,8)  NULL,                            -- 數量
-        amount                           DECIMAL(18,8)  NOT NULL DEFAULT 0,              -- 合計 (實際影響帳戶餘額的金額)
-
-        original_currency_id             BIGINT         NULL,                            -- 原始交易幣別 (外幣交易使用)
-        original_amount                  DECIMAL(18,8)  NULL,                            -- 原始交易金額 (外幣交易使用)
-        exchange_rate_used               DECIMAL(18,8)  NULL,                            -- 當下換算匯率 (外幣交易使用)
-
-        recurrence_frequency_id          BIGINT         NOT NULL,                        -- 週期規則(如 一月一次、每日一次 等等，應由後端設定)
-        next_run_date                    DATE           NULL,                            -- 下次執行日期
-        last_run_date                    DATE           NULL,                            -- 上次執行日期
+        generated_transaction_status_id  BIGINT         NOT NULL,
+        currency_id                      BIGINT         NOT NULL,
+        recurrence_frequency_id          BIGINT         NOT NULL,
+    
+        name                             VARCHAR(100)   NOT NULL,
+    
+        next_run_date                    DATE           NULL,
+        last_run_date                    DATE           NULL,
         start_date                       DATE           NOT NULL,
         end_date                         DATE           NULL,
-        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
-
-        note                             VARCHAR(255),
-        transaction_status_id            BIGINT         NOT NULL,
-
+    
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        note                             VARCHAR(255)   NULL,
+    
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-
-        INDEX(start_date),
-        INDEX(account_id),
-        INDEX(ledger_id),
-        INDEX(recurrence_frequency_id),
-        INDEX(next_run_date, is_active),
-        
-        FOREIGN KEY (ledger_id) REFERENCES ledgers(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        deleted_date                     DATETIME       NULL,
+    
+        INDEX (user_id),
+        INDEX (transaction_source_id),
+        INDEX (generated_transaction_status_id),
+        INDEX (currency_id),
+        INDEX (recurrence_frequency_id),
+        INDEX (start_date),
+        INDEX (next_run_date, is_active),
+    
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (transaction_source_id) REFERENCES transaction_sources(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (recurrence_frequency_id) REFERENCES flow_frequencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE
+        FOREIGN KEY (generated_transaction_status_id) REFERENCES transaction_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (recurrence_frequency_id) REFERENCES flow_frequencies(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
-    -- (V1 DB AP)重複交易關聯表 (不同交易之間的關聯)
-    CREATE TABLE recurring_transaction_links (
+    -- (V1 DB AP)週期性分錄交易明細表
+    CREATE TABLE recurring_transaction_entries (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
-        recurring_transaction_id         BIGINT         NOT NULL,
-        related_recurring_transaction_id BIGINT         NOT NULL,
-
+        recurring_journal_entry_id       BIGINT         NOT NULL,
+        line_number                      INT            NOT NULL,
+    
+        account_id                       BIGINT         NOT NULL,
+        transaction_type_id              BIGINT         NOT NULL,
+    
+        price                            DECIMAL(18,8)  NULL,
+        quantity                         DECIMAL(18,8)  NULL,
+    
+        debit_amount                     DECIMAL(18,8)  NOT NULL DEFAULT 0,
+        credit_amount                    DECIMAL(18,8)  NOT NULL DEFAULT 0,
+    
+        original_currency_id             BIGINT         NULL,
+        original_amount                  DECIMAL(18,8)  NULL,
+        exchange_rate_used               DECIMAL(18,8)  NULL,
+    
+        note                             VARCHAR(255)   NULL,
+    
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
-
-        UNIQUE(recurring_transaction_id, related_recurring_transaction_id),
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (related_recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE
+        deleted_date                     DATETIME       NULL,
+    
+        UNIQUE (recurring_journal_entry_id, line_number),
+    
+        CHECK (( debit_amount > 0 AND credit_amount = 0 ) OR ( credit_amount > 0 AND debit_amount = 0 )),
+    
+        INDEX (recurring_journal_entry_id),
+        INDEX (account_id),
+        INDEX (transaction_type_id),
+    
+        FOREIGN KEY (recurring_journal_entry_id) REFERENCES recurring_journal_entries(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (original_currency_id) REFERENCES currencies(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
-    -- (V1 DB AP)重複交易子表 (收支)
+    -- (V1 DB AP)週期性分錄交易明細子表 (收支)
     CREATE TABLE cashflow_recurring_transaction_details (
-        recurring_transaction_id         BIGINT        PRIMARY KEY,
+        recurring_transaction_entry_id   BIGINT        PRIMARY KEY,
         category_id                      BIGINT        NOT NULL,
         merchant_id                      BIGINT        NULL,
-        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        INDEX (category_id),
+        FOREIGN KEY (recurring_transaction_entry_id) REFERENCES recurring_transaction_entries(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
