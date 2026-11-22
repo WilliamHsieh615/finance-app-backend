@@ -1,13 +1,12 @@
 package com.williamhsieh.financeapp.identity.authorization.service;
 
 import java.util.Locale;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import com.williamhsieh.financeapp.identity.authorization.constant.PermissionCodes;
 import com.williamhsieh.financeapp.identity.authorization.constant.RoleCodes;
@@ -28,102 +27,61 @@ import com.williamhsieh.financeapp.identity.authorization.repository.UserRoleRep
 import com.williamhsieh.financeapp.identity.user.entity.User;
 import com.williamhsieh.financeapp.identity.user.repository.UserRepository;
 import com.williamhsieh.financeapp.shared.exception.BusinessException;
-import com.williamhsieh.financeapp
-    .identity.authorization.dto
-    .RolePermissionAssignmentLogResponse;
-import com.williamhsieh.financeapp
-    .identity.authorization.dto
-    .RolePermissionAssignmentLogResponse
-    .AssignmentTypeInfo;
-import com.williamhsieh.financeapp
-    .identity.authorization.dto
-    .RolePermissionAssignmentLogResponse
-    .ChangedByUserInfo;
-import com.williamhsieh.financeapp.shared.dto.PageResponse;
 
 @Service
 public class RolePermissionManagementService {
 
     private final RoleRepository roleRepository;
-
-    private final PermissionRepository
-        permissionRepository;
-
-    private final RolePermissionRepository
-        rolePermissionRepository;
-
-    private final RolePermissionAssignmentTypeRepository
-        assignmentTypeRepository;
-
-    private final RolePermissionAssignmentLogRepository
-        assignmentLogRepository;
-
-    private final UserRoleRepository
-        userRoleRepository;
-
+    private final PermissionRepository permissionRepository;
+    private final RolePermissionRepository rolePermissionRepository;
+    private final RolePermissionAssignmentTypeRepository assignmentTypeRepository;
+    private final RolePermissionAssignmentLogRepository assignmentLogRepository;
+    private final UserRoleRepository userRoleRepository;
     private final UserRepository userRepository;
-
-    private final PermissionAccessPolicy
-        permissionAccessPolicy;
-
-    private final PermissionResponseMapper
-        permissionResponseMapper;
+    private final PermissionAccessPolicy permissionAccessPolicy;
+    private final PermissionResponseMapper permissionResponseMapper;
 
     public RolePermissionManagementService(
         RoleRepository roleRepository,
         PermissionRepository permissionRepository,
         RolePermissionRepository rolePermissionRepository,
-        RolePermissionAssignmentTypeRepository
-            assignmentTypeRepository,
-        RolePermissionAssignmentLogRepository
-            assignmentLogRepository,
+        RolePermissionAssignmentTypeRepository assignmentTypeRepository,
+        RolePermissionAssignmentLogRepository assignmentLogRepository,
         UserRoleRepository userRoleRepository,
         UserRepository userRepository,
         PermissionAccessPolicy permissionAccessPolicy,
-        PermissionResponseMapper
-            permissionResponseMapper
+        PermissionResponseMapper permissionResponseMapper
     ) {
-        this.roleRepository =
-            roleRepository;
-        this.permissionRepository =
-            permissionRepository;
-        this.rolePermissionRepository =
-            rolePermissionRepository;
-        this.assignmentTypeRepository =
-            assignmentTypeRepository;
-        this.assignmentLogRepository =
-            assignmentLogRepository;
-        this.userRoleRepository =
-            userRoleRepository;
-        this.userRepository =
-            userRepository;
-        this.permissionAccessPolicy =
-            permissionAccessPolicy;
-        this.permissionResponseMapper =
-            permissionResponseMapper;
+        this.roleRepository = roleRepository;
+        this.permissionRepository = permissionRepository;
+        this.rolePermissionRepository = rolePermissionRepository;
+        this.assignmentTypeRepository = assignmentTypeRepository;
+        this.assignmentLogRepository = assignmentLogRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.userRepository = userRepository;
+        this.permissionAccessPolicy = permissionAccessPolicy;
+        this.permissionResponseMapper = permissionResponseMapper;
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<RolePermissionAssignmentLogResponse>
-        getRolePermissionAssignmentHistory(
+    public List<PermissionSummaryResponse>
+        getRolePermissions(
             Long authenticatedUserId,
-            String roleCode,
-            int page,
-            int size
+            String roleCode
         ) {
-            permissionAccessPolicy.requirePermission(
-                authenticatedUserId,
-                PermissionCodes.PERMISSION_READ
-            );
 
-            validatePagination(page, size);
+        permissionAccessPolicy.requirePermission(
+            authenticatedUserId,
+            PermissionCodes.PERMISSION_READ
+        );
 
-            String normalizedRoleCode =
-                roleCode
-                    .trim()
-                    .toUpperCase(Locale.ROOT);
+        String normalizedRoleCode =
+            roleCode
+                .trim()
+                .toUpperCase(Locale.ROOT);
 
-            Role role = roleRepository
+        Role role =
+            roleRepository
                 .findByCodeIgnoreCaseAndActiveTrueAndDeletedDateIsNull(
                     normalizedRoleCode
                 )
@@ -134,26 +92,19 @@ public class RolePermissionManagementService {
                     )
                 );
 
-            PageRequest pageRequest =
-                PageRequest.of(
-                    page,
-                    size
-                );
+        List<PermissionSummaryResponse> permissions =
+            rolePermissionRepository
+                .findActivePermissionsByRoleCode(
+                    role.getCode()
+                )
+                .stream()
+                .map(
+                    permissionResponseMapper::toSummary
+                )
+                .toList();
 
-            Page<RolePermissionAssignmentLog> logs =
-                assignmentLogRepository
-                    .findAllByRole_IdOrderByChangedDateDescIdDesc(
-                        role.getId(),
-                        pageRequest
-                    );
-
-            Page<RolePermissionAssignmentLogResponse>
-                result = logs.map(
-                    this::toAssignmentLogResponse
-                );
-
-            return PageResponse.from(result);
-        }
+        return List.copyOf(permissions);
+    }
 
     @Transactional
     public PermissionSummaryResponse grantPermission(
@@ -444,63 +395,5 @@ public class RolePermissionManagementService {
         return userRoleRepository
             .findActiveRoleCodesByUserId(userId)
             .contains(roleCode);
-    }
-
-    private void validatePagination(
-        int page,
-        int size
-    ) {
-        if (page < 0) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "page 不得小於 0"
-            );
-        }
-
-        if (size < 1 || size > 100) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "size 必須介於 1 到 100"
-            );
-        }
-}
-
-    private RolePermissionAssignmentLogResponse
-        toAssignmentLogResponse(
-            RolePermissionAssignmentLog assignmentLog
-        ) {
-            User changedByUser =
-                assignmentLog.getChangedByUser();
-
-            ChangedByUserInfo changedByUserInfo =
-                changedByUser == null
-                    ? null
-                    : new ChangedByUserInfo(
-                        changedByUser.getId(),
-                        changedByUser.getUserNumber(),
-                        changedByUser.getName(),
-                        changedByUser.getNickname()
-                    );
-
-            RolePermissionAssignmentType assignmentType =
-                assignmentLog.getAssignmentType();
-
-            AssignmentTypeInfo assignmentTypeInfo =
-                new AssignmentTypeInfo(
-                    assignmentType.getId(),
-                    assignmentType.getCode(),
-                    assignmentType.getName()
-                );
-
-            return new RolePermissionAssignmentLogResponse(
-                assignmentLog.getId(),
-                permissionResponseMapper.toSummary(
-                    assignmentLog.getPermission()
-                ),
-                assignmentTypeInfo,
-                changedByUserInfo,
-                assignmentLog.getNote(),
-                assignmentLog.getChangedDate()
-            );
     }
 }

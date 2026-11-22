@@ -24,6 +24,7 @@ import com.williamhsieh.financeapp.identity.authorization.dto.AssignUserRoleRequ
 import com.williamhsieh.financeapp.identity.authorization.dto.RevokeUserRoleRequest;
 import com.williamhsieh.financeapp.identity.authorization.dto.RoleSummaryResponse;
 import com.williamhsieh.financeapp.identity.authorization.dto.UserRoleAssignmentLogResponse;
+import com.williamhsieh.financeapp.identity.authorization.service.UserRoleAssignmentHistoryService;
 import com.williamhsieh.financeapp.identity.authorization.service.UserRoleManagementService;
 import com.williamhsieh.financeapp.identity.authentication.security.AuthenticatedUserIdResolver;
 
@@ -33,21 +34,18 @@ import com.williamhsieh.financeapp.identity.authentication.security.Authenticate
 )
 public class UserRoleManagementController {
 
-    private final UserRoleManagementService
-        userRoleManagementService;
-    private final AuthenticatedUserIdResolver
-        authenticatedUserIdResolver;
+    private final UserRoleManagementService userRoleManagementService;
+    private final AuthenticatedUserIdResolver authenticatedUserIdResolver;
+    private final UserRoleAssignmentHistoryService assignmentHistoryService;
 
     public UserRoleManagementController(
-        UserRoleManagementService
-            userRoleManagementService,
-        AuthenticatedUserIdResolver
-            authenticatedUserIdResolver
+        UserRoleManagementService userRoleManagementService,
+        AuthenticatedUserIdResolver authenticatedUserIdResolver,
+        UserRoleAssignmentHistoryService assignmentHistoryService
     ) {
-        this.userRoleManagementService =
-            userRoleManagementService;
-        this.authenticatedUserIdResolver =
-            authenticatedUserIdResolver;
+        this.userRoleManagementService = userRoleManagementService;
+        this.authenticatedUserIdResolver = authenticatedUserIdResolver;
+        this.assignmentHistoryService = assignmentHistoryService;
     }
 
     @GetMapping
@@ -152,7 +150,7 @@ public class UserRoleManagementController {
             Long authenticatedUserId =
                 authenticatedUserIdResolver.resolve(jwt);
 
-            return userRoleManagementService
+            return assignmentHistoryService
                 .getUserRoleAssignmentHistory(
                     authenticatedUserId,
                     userId,

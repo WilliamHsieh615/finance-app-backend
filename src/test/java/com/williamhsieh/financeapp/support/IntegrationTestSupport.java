@@ -52,12 +52,21 @@ public abstract class IntegrationTestSupport {
         insertUserRoleAssignmentTypes();
         insertRolePermissionAssignmentTypes();
         insertPermissionChangeTypes();
+        insertRoleChangeTypes();
         insertUserAccountStatuses();
         insertUser();
         insertUserRole();
     }
 
     protected void clearTestData() {
+        jdbcTemplate.update(
+            "DELETE FROM role_change_logs"
+        );
+
+        jdbcTemplate.update(
+            "DELETE FROM role_change_types"
+        );
+
         jdbcTemplate.update(
             "DELETE FROM permission_change_logs"
         );
@@ -1281,6 +1290,60 @@ public abstract class IntegrationTestSupport {
                     'RESTORED',
                     '恢復權限',
                     '恢復 Permission',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
+            """
+        );
+    }
+
+    protected void insertRoleChangeTypes() {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_change_types (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES
+                (
+                    1,
+                    'CREATED',
+                    '建立角色',
+                    '建立新的角色定義',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    2,
+                    'UPDATED',
+                    '修改角色',
+                    '修改角色名稱或備註',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    3,
+                    'DEACTIVATED',
+                    '停用角色',
+                    '停用角色定義',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    4,
+                    'RESTORED',
+                    '恢復角色',
+                    '恢復已停用的角色定義',
                     TRUE,
                     CURRENT_TIMESTAMP,
                     CURRENT_TIMESTAMP

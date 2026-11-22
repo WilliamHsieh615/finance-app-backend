@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.williamhsieh.financeapp.identity.authentication.security.AuthenticatedUserIdResolver;
 import com.williamhsieh.financeapp.identity.authorization.constant.PermissionCodes;
 import com.williamhsieh.financeapp.identity.authorization.dto.PermissionSummaryResponse;
+import com.williamhsieh.financeapp.identity.authorization.service.PermissionChangeHistoryService;
 import com.williamhsieh.financeapp.identity.authorization.service.PermissionManagementService;
 import com.williamhsieh.financeapp.identity.authorization.dto.CreatePermissionRequest;
 import com.williamhsieh.financeapp.identity.authorization.dto.UpdatePermissionRequest;
@@ -32,22 +33,18 @@ import com.williamhsieh.financeapp.shared.dto.PageResponse;
 @RequestMapping("/api/v1/admin/permissions")
 public class PermissionManagementController {
 
-    private final PermissionManagementService
-        permissionManagementService;
-
-    private final AuthenticatedUserIdResolver
-        authenticatedUserIdResolver;
+    private final PermissionManagementService permissionManagementService;
+    private final AuthenticatedUserIdResolver authenticatedUserIdResolver;
+    private final PermissionChangeHistoryService permissionChangeHistoryService;
 
     public PermissionManagementController(
-        PermissionManagementService
-            permissionManagementService,
-        AuthenticatedUserIdResolver
-            authenticatedUserIdResolver
+        PermissionManagementService permissionManagementService,
+        AuthenticatedUserIdResolver authenticatedUserIdResolver,
+        PermissionChangeHistoryService permissionChangeHistoryService
     ) {
-        this.permissionManagementService =
-            permissionManagementService;
-        this.authenticatedUserIdResolver =
-            authenticatedUserIdResolver;
+        this.permissionManagementService = permissionManagementService;
+        this.authenticatedUserIdResolver = authenticatedUserIdResolver;
+        this.permissionChangeHistoryService = permissionChangeHistoryService;
     }
 
     @GetMapping
@@ -216,7 +213,7 @@ public class PermissionManagementController {
                 authenticatedUserIdResolver
                     .resolve(jwt);
 
-            return permissionManagementService
+            return permissionChangeHistoryService
                 .getPermissionChangeHistory(
                     authenticatedUserId,
                     permissionCode,

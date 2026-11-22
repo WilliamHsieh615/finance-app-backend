@@ -12,8 +12,11 @@ import org.springframework.data.repository.query.Param;
 
 import com.williamhsieh.financeapp.identity.authorization.entity.Role;
 
-public interface RoleRepository
-    extends JpaRepository<Role, Long> {
+public interface RoleRepository extends JpaRepository<Role, Long> {
+
+    Optional<Role> findByCodeIgnoreCase(
+        String code
+    );
 
     Optional<Role>
         findByCodeIgnoreCaseAndActiveTrueAndDeletedDateIsNull(
@@ -22,6 +25,9 @@ public interface RoleRepository
 
     List<Role>
         findAllByActiveTrueAndDeletedDateIsNullOrderByCodeAsc();
+
+    List<Role>
+        findAllByActiveFalseOrDeletedDateIsNotNullOrderByCodeAsc();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(

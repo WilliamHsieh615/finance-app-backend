@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,13 +21,24 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jayway.jsonpath.JsonPath;
 
 import com.williamhsieh.financeapp.support.IntegrationTestSupport;
+import com.williamhsieh.financeapp.identity.authorization.constant.RoleChangeTypeCodes;
+import com.williamhsieh.financeapp.identity.authorization.entity.Role;
+import com.williamhsieh.financeapp.identity.authorization.repository.RoleRepository;
+import com.williamhsieh.financeapp.identity.authorization.service.RoleChangeAuditService;
 
 class RoleManagementIntegrationTest
     extends IntegrationTestSupport {
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private RoleChangeAuditService roleChangeAuditService;
 
     @Test
     void adminWithRoleReadPermissionCanGetAssignableRoles()
@@ -4514,6 +4526,3715 @@ class RoleManagementIntegrationTest
             );
     }
 
+    @Test
+    void roleCreatorCanCreateRole()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleCreator();
+
+        String requestBody = """
+            {
+            "code": "finance_manager",
+            "name": "  財務管理人員  ",
+            "note": "   "
+            }
+            """;
+
+        mockMvc.perform(
+                post("/api/v1/admin/roles")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(requestBody)
+            )
+            .andExpect(status().isCreated())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.id")
+                    .isNumber()
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("FINANCE_MANAGER")
+            )
+            .andExpect(
+                jsonPath("$.name")
+                    .value("財務管理人員")
+            )
+            .andExpect(
+                jsonPath("$.note")
+                    .doesNotExist()
+            );
+
+        /*
+        * 驗證資料庫中的正規化結果。
+        */
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE code = 'FINANCE_MANAGER'
+                AND name = '財務管理人員'
+                AND note IS NULL
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isEqualTo(1L);
+
+        Long createdLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_change_logs role_log
+                JOIN roles role
+                ON role.id = role_log.role_id
+                JOIN role_change_types change_type
+                ON change_type.id =
+                    role_log.role_change_type_id
+                WHERE role.code = 'FINANCE_MANAGER'
+                AND change_type.code = 'CREATED'
+                AND role_log.changed_by_user_id = 100
+
+                AND role_log.previous_name IS NULL
+                AND role_log.previous_note IS NULL
+                AND role_log.previous_is_active IS NULL
+                AND role_log.previous_deleted_date IS NULL
+
+                AND role_log.new_name =
+                    '財務管理人員'
+                AND role_log.new_note IS NULL
+                AND role_log.new_is_active = TRUE
+                AND role_log.new_deleted_date IS NULL
+
+                AND role_log.changed_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(createdLogCount)
+            .isEqualTo(1L);
+    }
+
+    @Test
+    void duplicateActiveRoleCodeReturnsConflict()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleCreator();
+
+        /*
+        * USER 已存在。
+        * 使用小寫確認重複檢查不區分大小寫。
+        */
+        String requestBody = """
+            {
+            "code": "user",
+            "name": "另一個一般使用者",
+            "note": "不應建立成功"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isConflict())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(409)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Conflict")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value(
+                        "ROLE_CODE_ALREADY_EXISTS"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("角色代碼已存在")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE UPPER(code) = 'USER'
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void duplicateDeactivatedRoleCodeReturnsConflict()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO roles (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date,
+                deleted_date
+            )
+            VALUES (
+                4,
+                'AUDITOR',
+                '已停用稽核人員',
+                '應使用恢復功能',
+                FALSE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        String accessToken =
+            loginAsRoleCreator();
+
+        String requestBody = """
+            {
+            "code": "auditor",
+            "name": "新的稽核人員",
+            "note": "不應重新建立"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isConflict())
+            .andExpect(
+                jsonPath("$.status")
+                    .value(409)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value(
+                        "ROLE_CODE_ALREADY_EXISTS"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("角色代碼已存在")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE UPPER(code) = 'AUDITOR'
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void userWithoutRoleCreateCannotCreateRole()
+        throws Exception {
+
+        String accessToken =
+            loginAsDefaultUser();
+
+        String requestBody = """
+            {
+            "code": "FINANCE_MANAGER",
+            "name": "財務管理人員",
+            "note": "不應建立成功"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE code = 'FINANCE_MANAGER'
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isZero();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void revokedRoleCreateBlocksExistingAccessToken()
+        throws Exception {
+
+        /*
+        * 登入時 JWT 會包含 ROLE_CREATE。
+        */
+        String accessToken =
+            loginAsRoleCreator();
+
+        /*
+        * 登入後即時撤銷資料庫權限。
+        *
+        * ADMIN role_id = 3
+        * ROLE_CREATE permission_id = 21
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 21
+            """
+        );
+
+        String requestBody = """
+            {
+            "code": "FINANCE_MANAGER",
+            "name": "財務管理人員",
+            "note": "不應建立成功"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE code = 'FINANCE_MANAGER'
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isZero();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidCreateRoleRequests")
+    void invalidCreateRoleRequestReturnsBadRequest(
+        String requestBody,
+        String expectedField,
+        String expectedMessage
+    ) throws Exception {
+
+        String accessToken =
+            loginAsRoleCreator();
+
+        String requestPath =
+            "/api/v1/admin/roles";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(400)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Bad Request")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("VALIDATION_FAILED")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors[0].field")
+                    .value(expectedField)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors[0].message")
+                    .value(expectedMessage)
+            );
+
+        /*
+        * 測試基底只有 USER、SUPPORT、ADMIN，
+        * 驗證失敗不能新增任何角色。
+        */
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isEqualTo(3L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void roleUpdaterCanUpdateRole()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        String requestBody = """
+            {
+            "name": "  進階客服人員  ",
+            "note": "  處理會員帳號與驗證問題  "
+            }
+            """;
+
+        mockMvc.perform(
+                put("/api/v1/admin/roles/support")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .accept(
+                        MediaType.APPLICATION_JSON
+                    )
+                    .content(requestBody)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.id")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("SUPPORT")
+            )
+            .andExpect(
+                jsonPath("$.name")
+                    .value("進階客服人員")
+            )
+            .andExpect(
+                jsonPath("$.note")
+                    .value(
+                        "處理會員帳號與驗證問題"
+                    )
+            );
+
+        /*
+        * code 必須維持 SUPPORT，
+        * 只有 name、note 被修改。
+        */
+        Long updatedRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 2
+                AND code = 'SUPPORT'
+                AND name = '進階客服人員'
+                AND note = '處理會員帳號與驗證問題'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(updatedRoleCount)
+            .isEqualTo(1L);
+
+        Long updatedLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_change_logs role_log
+                JOIN roles role
+                ON role.id = role_log.role_id
+                JOIN role_change_types change_type
+                ON change_type.id =
+                    role_log.role_change_type_id
+                WHERE role.id = 2
+                AND role.code = 'SUPPORT'
+                AND change_type.code = 'UPDATED'
+                AND role_log.changed_by_user_id = 100
+
+                AND role_log.previous_name =
+                    '客服人員'
+                AND role_log.previous_note IS NULL
+                AND role_log.previous_is_active = TRUE
+                AND role_log.previous_deleted_date IS NULL
+
+                AND role_log.new_name =
+                    '進階客服人員'
+                AND role_log.new_note =
+                    '處理會員帳號與驗證問題'
+                AND role_log.new_is_active = TRUE
+                AND role_log.new_deleted_date IS NULL
+
+                AND role_log.changed_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(updatedLogCount)
+            .isEqualTo(1L);
+    }
+
+    @Test
+    void updateUnknownRoleReturnsNotFound()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        String requestBody = """
+            {
+            "name": "新的角色名稱",
+            "note": "不應寫入"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles/UNKNOWN_ROLE";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(404)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Not Found")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("RESOURCE_NOT_FOUND")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("找不到指定的角色")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void updateDeactivatedRoleReturnsNotFound()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO roles (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date,
+                deleted_date
+            )
+            VALUES (
+                4,
+                'AUDITOR',
+                '原本的稽核人員',
+                '原本的備註',
+                FALSE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        String requestBody = """
+            {
+            "name": "不應寫入的新名稱",
+            "note": "不應寫入的新備註"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles/AUDITOR";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(
+                jsonPath("$.status")
+                    .value(404)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("RESOURCE_NOT_FOUND")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("找不到指定的角色")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        /*
+        * 確認停用資料完全沒有被修改。
+        */
+        Long unchangedRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 4
+                AND code = 'AUDITOR'
+                AND name = '原本的稽核人員'
+                AND note = '原本的備註'
+                AND is_active = FALSE
+                AND deleted_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(unchangedRoleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateRoleRequests")
+    void invalidUpdateRoleRequestReturnsBadRequest(
+        String requestBody,
+        String expectedField,
+        String expectedMessage
+    ) throws Exception {
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(400)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Bad Request")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("VALIDATION_FAILED")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors[0].field")
+                    .value(expectedField)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors[0].message")
+                    .value(expectedMessage)
+            );
+
+        /*
+        * 驗證失敗不能修改原本角色。
+        */
+        Long unchangedRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 2
+                AND code = 'SUPPORT'
+                AND name = '客服人員'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(unchangedRoleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void userWithoutRoleUpdateCannotUpdateRole()
+        throws Exception {
+
+        String accessToken =
+            loginAsDefaultUser();
+
+        String requestBody = """
+            {
+            "name": "不應寫入的新名稱",
+            "note": "不應寫入"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertSupportRoleUnchanged();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void revokedRoleUpdateBlocksExistingAccessToken()
+        throws Exception {
+
+        /*
+        * 登入時 JWT 包含 ROLE_UPDATE。
+        */
+        String accessToken =
+            loginAsRoleUpdater();
+
+        /*
+        * 登入完成後，再從資料庫撤銷。
+        *
+        * ADMIN role_id = 3
+        * ROLE_UPDATE permission_id = 22
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 22
+            """
+        );
+
+        String requestBody = """
+            {
+            "name": "不應寫入的新名稱",
+            "note": "不應寫入"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        assertSupportRoleUnchanged();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void adminCannotUpdateSuperAdminRole()
+        throws Exception {
+
+        insertSuperAdminRole();
+
+        /*
+        * ADMIN 擁有 ROLE_UPDATE，
+        * 但本身不是 SUPER_ADMIN。
+        */
+        String accessToken =
+            loginAsRoleUpdater();
+
+        String requestBody = """
+            {
+            "name": "不應修改的名稱",
+            "note": "不應修改"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPER_ADMIN";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("SUPER_ADMIN_REQUIRED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "只有最高系統管理員可以修改 SUPER_ADMIN 角色"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        Long unchangedRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 6
+                AND code = 'SUPER_ADMIN'
+                AND name = '最高系統管理員'
+                AND note = '系統最高權限角色'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(unchangedRoleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void superAdminCanUpdateSuperAdminRole()
+        throws Exception {
+
+        String accessToken =
+            loginAsSuperAdminRoleUpdater();
+
+        String requestBody = """
+            {
+            "name": "  最高權限管理員  ",
+            "note": "  管理最高風險系統設定  "
+            }
+            """;
+
+        mockMvc.perform(
+                put(
+                    "/api/v1/admin/roles/super_admin"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.id")
+                    .value(6)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("SUPER_ADMIN")
+            )
+            .andExpect(
+                jsonPath("$.name")
+                    .value("最高權限管理員")
+            )
+            .andExpect(
+                jsonPath("$.note")
+                    .value(
+                        "管理最高風險系統設定"
+                    )
+            );
+
+        Long updatedRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 6
+                AND code = 'SUPER_ADMIN'
+                AND name = '最高權限管理員'
+                AND note = '管理最高風險系統設定'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(updatedRoleCount)
+            .isEqualTo(1L);
+    }
+
+    @Test
+    void roleDeleterCanDeactivateRole()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleDeleter();
+
+        Long rolePermissionCountBefore =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_permissions
+                WHERE role_id = 2
+                """,
+                Long.class
+            );
+
+        mockMvc.perform(
+                delete(
+                    "/api/v1/admin/roles/support"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isNoContent())
+            .andExpect(
+                content().string("")
+            );
+
+        Long deactivatedRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 2
+                AND code = 'SUPPORT'
+                AND is_active = FALSE
+                AND deleted_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(deactivatedRoleCount)
+            .isEqualTo(1L);
+
+        /*
+        * 軟刪除角色不能清除原本的權限關聯。
+        */
+        Long rolePermissionCountAfter =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_permissions
+                WHERE role_id = 2
+                """,
+                Long.class
+            );
+
+        assertThat(rolePermissionCountAfter)
+            .isEqualTo(rolePermissionCountBefore);
+
+        Long deactivatedLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_change_logs role_log
+                JOIN roles role
+                ON role.id = role_log.role_id
+                JOIN role_change_types change_type
+                ON change_type.id =
+                    role_log.role_change_type_id
+                WHERE role.id = 2
+                AND role.code = 'SUPPORT'
+                AND change_type.code = 'DEACTIVATED'
+                AND role_log.changed_by_user_id = 100
+
+                AND role_log.previous_name =
+                    '客服人員'
+                AND role_log.new_name =
+                    '客服人員'
+
+                AND role_log.previous_note IS NULL
+                AND role_log.new_note IS NULL
+
+                AND role_log.previous_is_active = TRUE
+                AND role_log.new_is_active = FALSE
+
+                AND role_log.previous_deleted_date IS NULL
+                AND role_log.new_deleted_date IS NOT NULL
+
+                AND role_log.changed_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(deactivatedLogCount)
+            .isEqualTo(1L);
+    }
+
+    @Test
+    void deactivateUnknownRoleReturnsNotFound()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleDeleter();
+
+        String requestPath =
+            "/api/v1/admin/roles/UNKNOWN_ROLE";
+
+        mockMvc.perform(
+                delete(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(404)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Not Found")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("RESOURCE_NOT_FOUND")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("找不到指定的角色")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void deactivateAlreadyDeactivatedRoleReturnsNotFound()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            UPDATE roles
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE code = 'SUPPORT'
+            """
+        );
+
+        String accessToken =
+            loginAsRoleDeleter();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT";
+
+        mockMvc.perform(
+                delete(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(404)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Not Found")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("RESOURCE_NOT_FOUND")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("找不到指定的角色")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE code = 'SUPPORT'
+                AND is_active = FALSE
+                AND deleted_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void userRoleCannotBeDeactivated()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleDeleter();
+
+        String requestPath =
+            "/api/v1/admin/roles/USER";
+
+        mockMvc.perform(
+                delete(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isConflict())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(409)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Conflict")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value(
+                        "SYSTEM_ROLE_CANNOT_BE_DEACTIVATED"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "不可停用系統核心角色 USER"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        Long activeUserRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE code = 'USER'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(activeUserRoleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void superAdminRoleCannotBeDeactivated()
+        throws Exception {
+
+        /*
+        * 操作者本身就是 SUPER_ADMIN，
+        * 並且擁有 ROLE_DELETE。
+        */
+        String accessToken =
+            loginAsSuperAdminRoleDeleter();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPER_ADMIN";
+
+        mockMvc.perform(
+                delete(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isConflict())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(409)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Conflict")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value(
+                        "SYSTEM_ROLE_CANNOT_BE_DEACTIVATED"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "不可停用系統核心角色 SUPER_ADMIN"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        Long activeSuperAdminRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE code = 'SUPER_ADMIN'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(activeSuperAdminRoleCount)
+            .isEqualTo(1L);
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void userWithoutRoleDeleteCannotDeactivateRole()
+        throws Exception {
+
+        String accessToken =
+            loginAsDefaultUser();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT";
+
+        mockMvc.perform(
+                delete(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertSupportRoleUnchanged();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void revokedRoleDeleteBlocksExistingAccessToken()
+        throws Exception {
+
+        /*
+        * 登入時 JWT 包含 ROLE_DELETE。
+        */
+        String accessToken =
+            loginAsRoleDeleter();
+
+        /*
+        * 登入後才撤銷資料庫中的 ROLE_DELETE。
+        *
+        * ADMIN role_id = 3
+        * ROLE_DELETE permission_id = 23
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 23
+            """
+        );
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT";
+
+        mockMvc.perform(
+                delete(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertSupportRoleUnchanged();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void roleUpdaterCanRestoreDeactivatedRole()
+        throws Exception {
+
+        /*
+        * 先將 SUPPORT 模擬成已停用狀態。
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE roles
+            SET
+                is_active = FALSE,
+                deleted_date =
+                    TIMESTAMP '2026-11-21 10:00:00'
+            WHERE code = 'SUPPORT'
+            """
+        );
+
+        Long rolePermissionCountBefore =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_permissions
+                WHERE role_id = 2
+                """,
+                Long.class
+            );
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        mockMvc.perform(
+                post(
+                    "/api/v1/admin/roles/support/restore"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.id")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("SUPPORT")
+            )
+            .andExpect(
+                jsonPath("$.name")
+                    .value("客服人員")
+            );
+
+        Long restoredRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 2
+                AND code = 'SUPPORT'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(restoredRoleCount)
+            .isEqualTo(1L);
+
+        /*
+        * 恢復角色不應重建或刪除權限關聯。
+        */
+        Long rolePermissionCountAfter =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_permissions
+                WHERE role_id = 2
+                """,
+                Long.class
+            );
+
+        assertThat(rolePermissionCountAfter)
+            .isEqualTo(rolePermissionCountBefore);
+
+        Long restoredLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_change_logs role_log
+                JOIN roles role
+                ON role.id = role_log.role_id
+                JOIN role_change_types change_type
+                ON change_type.id =
+                    role_log.role_change_type_id
+                WHERE role.id = 2
+                AND role.code = 'SUPPORT'
+                AND change_type.code = 'RESTORED'
+                AND role_log.changed_by_user_id = 100
+
+                AND role_log.previous_name =
+                    '客服人員'
+                AND role_log.new_name =
+                    '客服人員'
+
+                AND role_log.previous_note IS NULL
+                AND role_log.new_note IS NULL
+
+                AND role_log.previous_is_active = FALSE
+                AND role_log.new_is_active = TRUE
+
+                AND role_log.previous_deleted_date =
+                    TIMESTAMP '2026-11-21 10:00:00'
+                AND role_log.new_deleted_date IS NULL
+
+                AND role_log.changed_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(restoredLogCount)
+            .isEqualTo(1L);
+    }
+
+    @Test
+    void restoreUnknownRoleReturnsNotFound()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        String requestPath =
+            "/api/v1/admin/roles/UNKNOWN_ROLE/restore";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(404)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Not Found")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("RESOURCE_NOT_FOUND")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("找不到指定的角色")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void restoreActiveRoleReturnsConflict()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT/restore";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isConflict())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(409)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Conflict")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ROLE_ALREADY_ACTIVE")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "角色目前已經是啟用狀態"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertSupportRoleUnchanged();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void userWithoutRoleUpdateCannotRestoreRole()
+        throws Exception {
+
+        deactivateSupportRoleForTest();
+
+        String accessToken =
+            loginAsDefaultUser();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT/restore";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        assertSupportRoleDeactivated();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void revokedRoleUpdateBlocksExistingTokenFromRestoringRole()
+        throws Exception {
+
+        deactivateSupportRoleForTest();
+
+        /*
+        * JWT 發出時仍包含 ROLE_UPDATE。
+        */
+        String accessToken =
+            loginAsRoleUpdater();
+
+        /*
+        * ADMIN role_id = 3
+        * ROLE_UPDATE permission_id = 22
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 22
+            """
+        );
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT/restore";
+
+        mockMvc.perform(
+                post(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            );
+
+        assertSupportRoleDeactivated();
+
+        assertNoRoleChangeLogs();
+    }
+
+    @Test
+    void roleUpdaterCanGetDeactivatedRoles()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO roles (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date,
+                deleted_date
+            )
+            VALUES
+                (
+                    4,
+                    'OPERATIONS',
+                    '營運人員',
+                    '營運角色暫停使用',
+                    FALSE,
+                    TIMESTAMP '2026-11-21 09:00:00',
+                    TIMESTAMP '2026-11-21 11:00:00',
+                    TIMESTAMP '2026-11-21 11:00:00'
+                ),
+                (
+                    5,
+                    'AUDITOR',
+                    '稽核人員',
+                    '稽核角色暫停使用',
+                    FALSE,
+                    TIMESTAMP '2026-11-21 08:00:00',
+                    TIMESTAMP '2026-11-21 10:00:00',
+                    TIMESTAMP '2026-11-21 10:00:00'
+                )
+            """
+        );
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/deactivated"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.length()")
+                    .value(2)
+            )
+            /*
+            * 必須依 code ASC 排序，
+            * 不是依資料庫 ID。
+            */
+            .andExpect(
+                jsonPath("$[0].id")
+                    .value(5)
+            )
+            .andExpect(
+                jsonPath("$[0].code")
+                    .value("AUDITOR")
+            )
+            .andExpect(
+                jsonPath("$[0].name")
+                    .value("稽核人員")
+            )
+            .andExpect(
+                jsonPath("$[0].note")
+                    .value("稽核角色暫停使用")
+            )
+            .andExpect(
+                jsonPath("$[0].active")
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath("$[0].createdDate")
+                    .value("2026-11-21T08:00:00")
+            )
+            .andExpect(
+                jsonPath("$[0].updatedDate")
+                    .value("2026-11-21T10:00:00")
+            )
+            .andExpect(
+                jsonPath("$[0].deletedDate")
+                    .value("2026-11-21T10:00:00")
+            )
+            .andExpect(
+                jsonPath("$[1].id")
+                    .value(4)
+            )
+            .andExpect(
+                jsonPath("$[1].code")
+                    .value("OPERATIONS")
+            )
+            .andExpect(
+                jsonPath("$[1].active")
+                    .value(false)
+            )
+            /*
+            * 有效角色不可出現在停用清單。
+            */
+            .andExpect(
+                jsonPath(
+                    "$[?(@.code == 'USER')]"
+                )
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath(
+                    "$[?(@.code == 'SUPPORT')]"
+                )
+                    .isEmpty()
+            )
+            .andExpect(
+                jsonPath(
+                    "$[?(@.code == 'ADMIN')]"
+                )
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void deactivatedRoleListReturnsEmptyArrayWhenNoneExist()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/deactivated"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$")
+                    .isArray()
+            )
+            .andExpect(
+                jsonPath("$.length()")
+                    .value(0)
+            );
+    }
+
+    @Test
+    void userWithoutRoleUpdateCannotGetDeactivatedRoles()
+        throws Exception {
+
+        String accessToken =
+            loginAsDefaultUser();
+
+        String requestPath =
+            "/api/v1/admin/roles/deactivated";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void revokedRoleUpdateBlocksExistingTokenFromGettingDeactivatedRoles()
+        throws Exception {
+
+        /*
+        * JWT 發出時包含 ROLE_UPDATE。
+        */
+        String accessToken =
+            loginAsRoleUpdater();
+
+        /*
+        * ADMIN role_id = 3
+        * ROLE_UPDATE permission_id = 22
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 22
+            """
+        );
+
+        String requestPath =
+            "/api/v1/admin/roles/deactivated";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void updateRoleRollsBackWhenAuditLogCannotBeCreated()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleUpdater();
+
+        /*
+        * 模擬系統設定錯誤：
+        * UPDATED 異動類型不可使用。
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_change_types
+            SET is_active = FALSE
+            WHERE code = 'UPDATED'
+            """
+        );
+
+        String requestBody = """
+            {
+            "name": "不應儲存的新名稱",
+            "note": "這次修改應完整回滾"
+            }
+            """;
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT";
+
+        mockMvc.perform(
+                put(requestPath)
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(
+                status().isInternalServerError()
+            )
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(500)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Internal Server Error")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("INTERNAL_ERROR")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "系統發生未預期的錯誤"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+
+        /*
+        * Role 修改必須完整回滾。
+        */
+        assertSupportRoleUnchanged();
+
+        /*
+        * 失敗操作不能留下不完整歷程。
+        */
+        Long changeLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_change_logs
+                WHERE role_id = 2
+                """,
+                Long.class
+            );
+
+        assertThat(changeLogCount)
+            .isZero();
+    }
+
+    @Test
+    void roleChangeAuditServiceSupportsSystemChangeWithoutUser() {
+
+        Role role =
+            roleRepository
+                .findByCodeIgnoreCase("SUPPORT")
+                .orElseThrow();
+
+        RoleChangeAuditService.RoleState
+            previousState =
+                roleChangeAuditService.capture(
+                    role
+                );
+
+        /*
+        * 模擬系統自動修改後的新狀態。
+        * 這裡不儲存 Role，測試目標只有稽核快照。
+        */
+        role.updateDetails(
+            "系統更新後的客服角色",
+            "由系統自動更新"
+        );
+
+        roleChangeAuditService.recordChanged(
+            role,
+            null,
+            RoleChangeTypeCodes.UPDATED,
+            previousState
+        );
+
+        Long logCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_change_logs
+                WHERE role_id = 2
+                AND changed_by_user_id IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(logCount)
+            .isEqualTo(1L);
+
+        String previousName =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT previous_name
+                FROM role_change_logs
+                WHERE role_id = 2
+                """,
+                String.class
+            );
+
+        assertThat(previousName)
+            .isEqualTo("客服人員");
+
+        String newName =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT new_name
+                FROM role_change_logs
+                WHERE role_id = 2
+                """,
+                String.class
+            );
+
+        assertThat(newName)
+            .isEqualTo(
+                "系統更新後的客服角色"
+            );
+
+        String newNote =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT new_note
+                FROM role_change_logs
+                WHERE role_id = 2
+                """,
+                String.class
+            );
+
+        assertThat(newNote)
+            .isEqualTo("由系統自動更新");
+
+        Boolean previousActive =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT previous_is_active
+                FROM role_change_logs
+                WHERE role_id = 2
+                """,
+                Boolean.class
+            );
+
+        assertThat(previousActive)
+            .isTrue();
+
+        Boolean newActive =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT new_is_active
+                FROM role_change_logs
+                WHERE role_id = 2
+                """,
+                Boolean.class
+            );
+
+        assertThat(newActive)
+            .isTrue();
+    }
+
+    @Test
+    void roleManagerCanGetCompleteRoleChangeHistory()
+        throws Exception {
+
+        String accessToken =
+            loginAsRoleDefinitionManager();
+
+        String createRequest = """
+            {
+            "code": "AUDIT_MANAGER",
+            "name": "原本的稽核管理員",
+            "note": "原本的備註"
+            }
+            """;
+
+        mockMvc.perform(
+                post("/api/v1/admin/roles")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(createRequest)
+            )
+            .andExpect(status().isCreated());
+
+        String updateRequest = """
+            {
+            "name": "修改後的稽核管理員",
+            "note": "修改後的備註"
+            }
+            """;
+
+        mockMvc.perform(
+                put(
+                    "/api/v1/admin/roles/AUDIT_MANAGER"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(updateRequest)
+            )
+            .andExpect(status().isOk());
+
+        mockMvc.perform(
+                delete(
+                    "/api/v1/admin/roles/AUDIT_MANAGER"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isNoContent());
+
+        mockMvc.perform(
+                post(
+                    "/api/v1/admin/roles/AUDIT_MANAGER/restore"
+                )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+            )
+            .andExpect(status().isOk());
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/AUDIT_MANAGER/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(4)
+            )
+
+            /*
+            * 最新：RESTORED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.code"
+                )
+                    .value("RESTORED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.name"
+                )
+                    .value(
+                        "修改後的稽核管理員"
+                    )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.active"
+                )
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.deletedDate"
+                )
+                    .exists()
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.active"
+                )
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.deletedDate"
+                )
+                    .doesNotExist()
+            )
+
+            /*
+            * 第二筆：DEACTIVATED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[1].changeType.code"
+                )
+                    .value("DEACTIVATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].previousState.active"
+                )
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].newState.active"
+                )
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].newState.deletedDate"
+                )
+                    .exists()
+            )
+
+            /*
+            * 第三筆：UPDATED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[2].changeType.code"
+                )
+                    .value("UPDATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].previousState.name"
+                )
+                    .value(
+                        "原本的稽核管理員"
+                    )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].newState.name"
+                )
+                    .value(
+                        "修改後的稽核管理員"
+                    )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].previousState.note"
+                )
+                    .value("原本的備註")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[2].newState.note"
+                )
+                    .value("修改後的備註")
+            )
+
+            /*
+            * 最舊：CREATED
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[3].changeType.code"
+                )
+                    .value("CREATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[3].previousState"
+                )
+                    .doesNotExist()
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[3].newState.name"
+                )
+                    .value(
+                        "原本的稽核管理員"
+                    )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[3].newState.active"
+                )
+                    .value(true)
+            )
+
+            /*
+            * 操作者資訊。
+            */
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser.id"
+                )
+                    .value(100)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser.userNumber"
+                )
+                    .value("TESTUSER01")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser.name"
+                )
+                    .value("Test User")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser.nickname"
+                )
+                    .value("Tester")
+            )
+
+            /*
+            * 分頁資訊。
+            */
+            .andExpect(
+                jsonPath("$.page")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.size")
+                    .value(20)
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(4)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @Test
+    void userWithoutRoleReadCannotGetRoleChangeHistory()
+        throws Exception {
+
+        String accessToken =
+            loginAsDefaultUser();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void revokedRoleReadBlocksExistingTokenFromGettingRoleChangeHistory()
+        throws Exception {
+
+        /*
+        * ADMIN 登入時擁有 ROLE_READ。
+        */
+        String accessToken =
+            loginAsAdmin();
+
+        /*
+        * ADMIN role_id = 3
+        * ROLE_READ permission_id = 7
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE role_permissions
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE role_id = 3
+            AND permission_id = 7
+            """
+        );
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isForbidden())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(403)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Forbidden")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("ACCESS_DENIED")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(
+                        "你沒有執行此操作的權限"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void unknownRoleChangeHistoryReturnsNotFound()
+        throws Exception {
+
+        String accessToken =
+            loginAsAdmin();
+
+        String requestPath =
+            "/api/v1/admin/roles/UNKNOWN_ROLE/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNotFound())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(404)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Not Found")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("RESOURCE_NOT_FOUND")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value("找不到指定的角色")
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void roleWithoutChangeLogsReturnsEmptyPage()
+        throws Exception {
+
+        String accessToken =
+            loginAsAdmin();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/SUPPORT/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content")
+                    .isArray()
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.page")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.size")
+                    .value(20)
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(0)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @Test
+    void deactivatedRoleChangeHistoryCanStillBeRead()
+        throws Exception {
+
+        /*
+        * 模擬 SUPPORT 已被停用。
+        */
+        jdbcTemplate.update(
+            """
+            UPDATE roles
+            SET
+                is_active = FALSE,
+                deleted_date =
+                    TIMESTAMP '2026-11-22 10:00:00'
+            WHERE id = 2
+            """
+        );
+
+        /*
+        * 建立一筆對應的 DEACTIVATED 歷程。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_change_logs (
+                id,
+                role_id,
+                role_change_type_id,
+                changed_by_user_id,
+                previous_name,
+                new_name,
+                previous_note,
+                new_note,
+                previous_is_active,
+                new_is_active,
+                previous_deleted_date,
+                new_deleted_date,
+                changed_date
+            )
+            VALUES (
+                1,
+                2,
+                3,
+                100,
+                '客服人員',
+                '客服人員',
+                NULL,
+                NULL,
+                TRUE,
+                FALSE,
+                NULL,
+                TIMESTAMP '2026-11-22 10:00:00',
+                TIMESTAMP '2026-11-22 10:00:00'
+            )
+            """
+        );
+
+        String accessToken =
+            loginAsAdmin();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/support/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.code"
+                )
+                    .value("DEACTIVATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.name"
+                )
+                    .value("停用角色")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser.id"
+                )
+                    .value(100)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.active"
+                )
+                    .value(true)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.deletedDate"
+                )
+                    .doesNotExist()
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.active"
+                )
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.deletedDate"
+                )
+                    .value(
+                        "2026-11-22T10:00:00"
+                    )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedDate"
+                )
+                    .value(
+                        "2026-11-22T10:00:00"
+                    )
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(1)
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource(
+        "invalidRoleChangeHistoryPagination"
+    )
+    void invalidRoleChangeHistoryPaginationReturnsBadRequest(
+        int page,
+        int size,
+        String expectedMessage
+    ) throws Exception {
+
+        String accessToken =
+            loginAsAdmin();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .param(
+                        "page",
+                        String.valueOf(page)
+                    )
+                    .param(
+                        "size",
+                        String.valueOf(size)
+                    )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(400)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Bad Request")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("BAD_REQUEST")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(expectedMessage)
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource(
+        "invalidRoleChangeHistoryParameterTypes"
+    )
+    void invalidRoleChangeHistoryParameterTypeReturnsBadRequest(
+        String parameterName,
+        String parameterValue,
+        String expectedMessage
+    ) throws Exception {
+
+        String accessToken =
+            loginAsAdmin();
+
+        String requestPath =
+            "/api/v1/admin/roles/SUPPORT/history";
+
+        mockMvc.perform(
+                get(requestPath)
+                    .param(
+                        parameterName,
+                        parameterValue
+                    )
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.status")
+                    .value(400)
+            )
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Bad Request")
+            )
+            .andExpect(
+                jsonPath("$.code")
+                    .value("BAD_REQUEST")
+            )
+            .andExpect(
+                jsonPath("$.message")
+                    .value(expectedMessage)
+            )
+            .andExpect(
+                jsonPath("$.path")
+                    .value(requestPath)
+            )
+            .andExpect(
+                jsonPath("$.fieldErrors")
+                    .isEmpty()
+            );
+    }
+
+    @Test
+    void roleChangeHistorySupportsPagination()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_change_logs (
+                id,
+                role_id,
+                role_change_type_id,
+                changed_by_user_id,
+                previous_name,
+                new_name,
+                previous_is_active,
+                new_is_active,
+                changed_date
+            )
+            VALUES
+                (
+                    1,
+                    2,
+                    2,
+                    100,
+                    '第一版名稱',
+                    '第二版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-22 10:00:00'
+                ),
+                (
+                    2,
+                    2,
+                    2,
+                    100,
+                    '第二版名稱',
+                    '第三版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-22 11:00:00'
+                ),
+                (
+                    3,
+                    2,
+                    2,
+                    100,
+                    '第三版名稱',
+                    '第四版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-22 12:00:00'
+                )
+            """
+        );
+
+        String accessToken =
+            loginAsAdmin();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/SUPPORT/history"
+                )
+                    .param("page", "1")
+                    .param("size", "2")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            /*
+            * 完整排序為 id=3、2、1。
+            * page=1、size=2 只會剩下 id=1。
+            */
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.code"
+                )
+                    .value("UPDATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.name"
+                )
+                    .value("第一版名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.name"
+                )
+                    .value("第二版名稱")
+            )
+            .andExpect(
+                jsonPath("$.page")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.size")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.totalElements")
+                    .value(3)
+            )
+            .andExpect(
+                jsonPath("$.totalPages")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath("$.first")
+                    .value(false)
+            )
+            .andExpect(
+                jsonPath("$.last")
+                    .value(true)
+            );
+    }
+
+    @Test
+    void roleChangeHistoryUsesIdAsSecondarySort()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_change_logs (
+                id,
+                role_id,
+                role_change_type_id,
+                changed_by_user_id,
+                previous_name,
+                new_name,
+                previous_is_active,
+                new_is_active,
+                changed_date
+            )
+            VALUES
+                (
+                    1,
+                    2,
+                    2,
+                    100,
+                    '第一版名稱',
+                    '第二版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-22 13:00:00'
+                ),
+                (
+                    2,
+                    2,
+                    2,
+                    100,
+                    '第二版名稱',
+                    '第三版名稱',
+                    TRUE,
+                    TRUE,
+                    TIMESTAMP '2026-11-22 13:00:00'
+                )
+            """
+        );
+
+        String accessToken =
+            loginAsAdmin();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/SUPPORT/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(2)
+            )
+            /*
+            * changedDate 相同時，
+            * id 較大的新紀錄必須排前面。
+            */
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(2)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.name"
+                )
+                    .value("第二版名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.name"
+                )
+                    .value("第三版名稱")
+            )
+            .andExpect(
+                jsonPath("$.content[1].id")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].previousState.name"
+                )
+                    .value("第一版名稱")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[1].newState.name"
+                )
+                    .value("第二版名稱")
+            );
+    }
+
+    @Test
+    void roleChangeHistorySupportsNullChangedByUser()
+        throws Exception {
+
+        /*
+        * 模擬系統自動修改角色，
+        * changed_by_user_id 為 NULL。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_change_logs (
+                id,
+                role_id,
+                role_change_type_id,
+                changed_by_user_id,
+                previous_name,
+                new_name,
+                previous_note,
+                new_note,
+                previous_is_active,
+                new_is_active,
+                previous_deleted_date,
+                new_deleted_date,
+                changed_date
+            )
+            VALUES (
+                1,
+                2,
+                2,
+                NULL,
+                '客服人員',
+                '系統客服人員',
+                NULL,
+                '由系統自動修改',
+                TRUE,
+                TRUE,
+                NULL,
+                NULL,
+                TIMESTAMP '2026-11-22 14:00:00'
+            )
+            """
+        );
+
+        String accessToken =
+            loginAsAdmin();
+
+        mockMvc.perform(
+                get(
+                    "/api/v1/admin/roles/SUPPORT/history"
+                )
+                    .param("page", "0")
+                    .param("size", "20")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        "Bearer " + accessToken
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().contentTypeCompatibleWith(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(
+                jsonPath("$.content.length()")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath("$.content[0].id")
+                    .value(1)
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changeType.code"
+                )
+                    .value("UPDATED")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedByUser"
+                )
+                    .doesNotExist()
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].previousState.name"
+                )
+                    .value("客服人員")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.name"
+                )
+                    .value("系統客服人員")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].newState.note"
+                )
+                    .value("由系統自動修改")
+            )
+            .andExpect(
+                jsonPath(
+                    "$.content[0].changedDate"
+                )
+                    .value(
+                        "2026-11-22T14:00:00"
+                    )
+            );
+    }
+
+    private String loginAsRoleCreator()
+        throws Exception {
+
+        /*
+        * permission_type_id = 3
+        * 代表 AUTHORIZATION。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                21,
+                3,
+                'ROLE_CREATE',
+                '建立角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        /*
+        * 將 ROLE_CREATE 授予 ADMIN。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                21,
+                3,
+                21,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        return loginAsAdmin();
+    }
+
     private String loginAsAdmin()
         throws Exception {
 
@@ -4681,5 +8402,616 @@ class RoleManagementIntegrationTest
                 "請求參數 size 格式不正確"
             )
         );
+    }
+
+    private static Stream<Arguments>
+        invalidCreateRoleRequests() {
+
+        String missingCode = """
+            {
+            "name": "測試角色",
+            "note": "測試"
+            }
+            """;
+
+        String invalidCode = """
+            {
+            "code": "TEST-ROLE",
+            "name": "測試角色",
+            "note": "測試"
+            }
+            """;
+
+        String oversizedCode = """
+            {
+            "code": "%s",
+            "name": "測試角色",
+            "note": "測試"
+            }
+            """.formatted(
+                "A".repeat(51)
+            );
+
+        String missingName = """
+            {
+            "code": "TEST_ROLE",
+            "note": "測試"
+            }
+            """;
+
+        String oversizedName = """
+            {
+            "code": "TEST_ROLE",
+            "name": "%s",
+            "note": "測試"
+            }
+            """.formatted(
+                "A".repeat(101)
+            );
+
+        String oversizedNote = """
+            {
+            "code": "TEST_ROLE",
+            "name": "測試角色",
+            "note": "%s"
+            }
+            """.formatted(
+                "A".repeat(256)
+            );
+
+        return Stream.of(
+            Arguments.of(
+                missingCode,
+                "code",
+                "角色代碼不得為空"
+            ),
+            Arguments.of(
+                invalidCode,
+                "code",
+                "角色代碼格式不正確"
+            ),
+            Arguments.of(
+                oversizedCode,
+                "code",
+                "角色代碼長度不得超過 50"
+            ),
+            Arguments.of(
+                missingName,
+                "name",
+                "角色名稱不得為空"
+            ),
+            Arguments.of(
+                oversizedName,
+                "name",
+                "角色名稱長度不得超過 100"
+            ),
+            Arguments.of(
+                oversizedNote,
+                "note",
+                "角色備註長度不得超過 255"
+            )
+        );
+    }
+
+    private String loginAsRoleUpdater()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                22,
+                3,
+                'ROLE_UPDATE',
+                '修改角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                22,
+                3,
+                22,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        return loginAsAdmin();
+    }
+
+    private static Stream<Arguments>
+        invalidUpdateRoleRequests() {
+
+        String missingName = """
+            {
+            "note": "測試"
+            }
+            """;
+
+        String oversizedName = """
+            {
+            "name": "%s",
+            "note": "測試"
+            }
+            """.formatted(
+                "A".repeat(101)
+            );
+
+        String oversizedNote = """
+            {
+            "name": "新的角色名稱",
+            "note": "%s"
+            }
+            """.formatted(
+                "A".repeat(256)
+            );
+
+        return Stream.of(
+            Arguments.of(
+                missingName,
+                "name",
+                "角色名稱不得為空"
+            ),
+            Arguments.of(
+                oversizedName,
+                "name",
+                "角色名稱長度不得超過 100"
+            ),
+            Arguments.of(
+                oversizedNote,
+                "note",
+                "角色備註長度不得超過 255"
+            )
+        );
+    }
+
+    private void assertSupportRoleUnchanged() {
+
+        Long unchangedRoleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 2
+                AND code = 'SUPPORT'
+                AND name = '客服人員'
+                AND is_active = TRUE
+                AND deleted_date IS NULL
+                """,
+                Long.class
+            );
+
+        assertThat(unchangedRoleCount)
+            .isEqualTo(1L);
+    }
+
+    private void insertSuperAdminRole() {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO roles (
+                id,
+                code,
+                name,
+                note,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                6,
+                'SUPER_ADMIN',
+                '最高系統管理員',
+                '系統最高權限角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+    }
+
+    private String loginAsSuperAdminRoleUpdater()
+        throws Exception {
+
+        insertSuperAdminRole();
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                22,
+                3,
+                'ROLE_UPDATE',
+                '修改角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        /*
+        * ROLE_UPDATE 直接授予 SUPER_ADMIN。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                22,
+                6,
+                22,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        /*
+        * 將登入會員設為 SUPER_ADMIN。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_roles (
+                id,
+                user_id,
+                role_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                100,
+                6,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        return loginAsDefaultUser();
+    }
+
+    private String loginAsRoleDeleter()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                23,
+                3,
+                'ROLE_DELETE',
+                '停用角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                23,
+                3,
+                23,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        return loginAsAdmin();
+    }
+
+    private String loginAsSuperAdminRoleDeleter()
+        throws Exception {
+
+        insertSuperAdminRole();
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                23,
+                3,
+                'ROLE_DELETE',
+                '停用角色',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        /*
+        * ROLE_DELETE 授予 SUPER_ADMIN。
+        */
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                23,
+                6,
+                23,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO user_roles (
+                id,
+                user_id,
+                role_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES (
+                2,
+                100,
+                6,
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """
+        );
+
+        return loginAsDefaultUser();
+    }
+
+    private void deactivateSupportRoleForTest() {
+
+        jdbcTemplate.update(
+            """
+            UPDATE roles
+            SET
+                is_active = FALSE,
+                deleted_date = CURRENT_TIMESTAMP
+            WHERE code = 'SUPPORT'
+            """
+        );
+    }
+
+    private void assertSupportRoleDeactivated() {
+
+        Long roleCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM roles
+                WHERE id = 2
+                AND code = 'SUPPORT'
+                AND is_active = FALSE
+                AND deleted_date IS NOT NULL
+                """,
+                Long.class
+            );
+
+        assertThat(roleCount)
+            .isEqualTo(1L);
+    }
+
+    private String loginAsRoleDefinitionManager()
+        throws Exception {
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO permissions (
+                id,
+                permission_type_id,
+                code,
+                name,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES
+                (
+                    21,
+                    3,
+                    'ROLE_CREATE',
+                    '建立角色',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    22,
+                    3,
+                    'ROLE_UPDATE',
+                    '修改角色',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    23,
+                    3,
+                    'ROLE_DELETE',
+                    '停用角色',
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
+            """
+        );
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO role_permissions (
+                id,
+                role_id,
+                permission_id,
+                is_active,
+                created_date,
+                updated_date
+            )
+            VALUES
+                (
+                    21,
+                    3,
+                    21,
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    22,
+                    3,
+                    22,
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                ),
+                (
+                    23,
+                    3,
+                    23,
+                    TRUE,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                )
+            """
+        );
+
+        /*
+        * ADMIN 原本已有 ROLE_READ。
+        */
+        return loginAsAdmin();
+    }
+
+    private static Stream<Arguments>
+        invalidRoleChangeHistoryPagination() {
+
+        return Stream.of(
+            Arguments.of(
+                -1,
+                20,
+                "page 不得小於 0"
+            ),
+            Arguments.of(
+                0,
+                0,
+                "size 必須介於 1 到 100"
+            ),
+            Arguments.of(
+                0,
+                101,
+                "size 必須介於 1 到 100"
+            )
+        );
+    }
+
+    private static Stream<Arguments>
+        invalidRoleChangeHistoryParameterTypes() {
+
+        return Stream.of(
+            Arguments.of(
+                "page",
+                "abc",
+                "請求參數 page 格式不正確"
+            ),
+            Arguments.of(
+                "size",
+                "large",
+                "請求參數 size 格式不正確"
+            )
+        );
+    }
+
+    private void assertNoRoleChangeLogs() {
+
+        Long changeLogCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM role_change_logs
+                """,
+                Long.class
+            );
+
+        assertThat(changeLogCount)
+            .isZero();
     }
 }

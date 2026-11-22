@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -33,6 +35,7 @@ public class Role {
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "created_date",
         nullable = false,
@@ -41,6 +44,7 @@ public class Role {
     )
     private LocalDateTime createdDate;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(
         name = "updated_date",
         nullable = false,
@@ -55,6 +59,17 @@ public class Role {
     protected Role() {
     }
 
+    public Role(
+        String code,
+        String name,
+        String note
+    ) {
+        this.code = code;
+        this.name = name;
+        this.note = note;
+        this.active = true;
+    }
+
     public Long getId() {
         return id;
     }
@@ -63,32 +78,16 @@ public class Role {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getNote() {
         return note;
     }
 
-    public void setNote(String note) {
-        this.note = note;
-    }
-
     public boolean isActive() {
         return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     public LocalDateTime getCreatedDate() {
@@ -103,7 +102,25 @@ public class Role {
         return deletedDate;
     }
 
-    public void setDeletedDate(LocalDateTime deletedDate) {
-        this.deletedDate = deletedDate;
+    public boolean isAvailable() {
+        return active && deletedDate == null;
+    }
+
+    public void updateDetails(
+        String name,
+        String note
+    ) {
+        this.name = name;
+        this.note = note;
+    }
+
+    public void deactivate() {
+        this.active = false;
+        this.deletedDate = LocalDateTime.now();
+    }
+
+    public void restore() {
+        this.active = true;
+        this.deletedDate = null;
     }
 }

@@ -16,44 +16,35 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import com.williamhsieh.financeapp.identity.authorization.constant.PermissionCodes;
 import com.williamhsieh.financeapp.identity.authorization.dto.RoleSummaryResponse;
+import com.williamhsieh.financeapp.identity.authorization.service.RoleChangeHistoryService;
 import com.williamhsieh.financeapp.identity.authorization.service.RoleManagementService;
 import com.williamhsieh.financeapp.identity.authentication.security. AuthenticatedUserIdResolver;
-import com.williamhsieh.financeapp.identity.authorization.dto.PermissionSummaryResponse;
-import com.williamhsieh.financeapp.identity.authorization.dto.GrantRolePermissionRequest;
-import com.williamhsieh.financeapp.identity.authorization.dto.RevokeRolePermissionRequest;
-import com.williamhsieh.financeapp.identity.authorization.service.RolePermissionManagementService;
-import com.williamhsieh.financeapp
-    .identity.authorization.dto
-    .RolePermissionAssignmentLogResponse;
 import com.williamhsieh.financeapp.shared.dto.PageResponse;
+import com.williamhsieh.financeapp.identity.authorization.dto.CreateRoleRequest;
+import com.williamhsieh.financeapp.identity.authorization.dto.UpdateRoleRequest;
+import com.williamhsieh.financeapp.identity.authorization.dto.RoleDetailResponse;
+import com.williamhsieh.financeapp.identity.authorization.dto.RoleChangeLogResponse;
 
 @RestController
 @RequestMapping("/api/v1/admin/roles")
 public class RoleManagementController {
 
-    private final RoleManagementService
-        roleManagementService;
-    private final AuthenticatedUserIdResolver
-        authenticatedUserIdResolver;
-    private final RolePermissionManagementService
-        rolePermissionManagementService;
+    private final RoleManagementService roleManagementService;
+    private final AuthenticatedUserIdResolver authenticatedUserIdResolver;
+    private final RoleChangeHistoryService roleChangeHistoryService;
 
     public RoleManagementController(
         RoleManagementService roleManagementService,
-        AuthenticatedUserIdResolver
-            authenticatedUserIdResolver,
-        RolePermissionManagementService
-            rolePermissionManagementService
+        AuthenticatedUserIdResolver authenticatedUserIdResolver,
+        RoleChangeHistoryService roleChangeHistoryService
     ) {
-        this.roleManagementService =
-            roleManagementService;
-        this.authenticatedUserIdResolver =
-            authenticatedUserIdResolver;
-        this.rolePermissionManagementService =
-            rolePermissionManagementService;
+        this.roleManagementService = roleManagementService;
+        this.authenticatedUserIdResolver = authenticatedUserIdResolver;
+        this.roleChangeHistoryService = roleChangeHistoryService;
     }
 
     @GetMapping
@@ -76,124 +67,163 @@ public class RoleManagementController {
                 );
         }
 
-    @GetMapping("/{roleCode}/permissions")
+    @GetMapping("/deactivated")
     @PreAuthorize(
         "hasAuthority('" +
-            PermissionCodes.PERMISSION_READ +
+            PermissionCodes.ROLE_UPDATE +
         "')"
     )
-    public List<PermissionSummaryResponse>
-        getRolePermissions(
-            @PathVariable String roleCode,
-
+    public List<RoleDetailResponse>
+        getDeactivatedRoles(
             @AuthenticationPrincipal
             Jwt jwt
         ) {
-            Long authenticatedUserId =
-                authenticatedUserIdResolver
-                    .resolve(jwt);
 
-            return roleManagementService
-                .getRolePermissions(
-                    authenticatedUserId,
-                    roleCode
-                );
-        }
+        Long authenticatedUserId =
+            authenticatedUserIdResolver
+                .resolve(jwt);
 
-    @GetMapping(
-        "/{roleCode}/permissions/history"
-    )
+        return roleManagementService
+            .getDeactivatedRoles(
+                authenticatedUserId
+            );
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize(
         "hasAuthority('" +
-            PermissionCodes.PERMISSION_READ +
+            PermissionCodes.ROLE_CREATE +
         "')"
     )
-    public PageResponse<RolePermissionAssignmentLogResponse>
-        getRolePermissionAssignmentHistory(
-            @PathVariable String roleCode,
+    public RoleSummaryResponse createRole(
+        @Valid
+        @RequestBody
+        CreateRoleRequest request,
 
-            @RequestParam(defaultValue = "0")
+        @AuthenticationPrincipal
+        Jwt jwt
+    ) {
+        Long authenticatedUserId =
+            authenticatedUserIdResolver
+                .resolve(jwt);
+
+        return roleManagementService.createRole(
+            authenticatedUserId,
+            request
+        );
+    }
+
+    @PutMapping("/{roleCode}")
+    @PreAuthorize(
+        "hasAuthority('" +
+            PermissionCodes.ROLE_UPDATE +
+        "')"
+    )
+    public RoleSummaryResponse updateRole(
+        @PathVariable
+        String roleCode,
+
+        @Valid
+        @RequestBody
+        UpdateRoleRequest request,
+
+        @AuthenticationPrincipal
+        Jwt jwt
+    ) {
+        Long authenticatedUserId =
+            authenticatedUserIdResolver
+                .resolve(jwt);
+
+        return roleManagementService.updateRole(
+            authenticatedUserId,
+            roleCode,
+            request
+        );
+    }
+
+    @DeleteMapping("/{roleCode}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize(
+        "hasAuthority('" +
+            PermissionCodes.ROLE_DELETE +
+        "')"
+    )
+    public void deactivateRole(
+        @PathVariable
+        String roleCode,
+
+        @AuthenticationPrincipal
+        Jwt jwt
+    ) {
+        Long authenticatedUserId =
+            authenticatedUserIdResolver
+                .resolve(jwt);
+
+        roleManagementService.deactivateRole(
+            authenticatedUserId,
+            roleCode
+        );
+    }
+
+    @PostMapping("/{roleCode}/restore")
+    @PreAuthorize(
+        "hasAuthority('" +
+            PermissionCodes.ROLE_UPDATE +
+        "')"
+    )
+    public RoleSummaryResponse restoreRole(
+        @PathVariable
+        String roleCode,
+
+        @AuthenticationPrincipal
+        Jwt jwt
+    ) {
+        Long authenticatedUserId =
+            authenticatedUserIdResolver
+                .resolve(jwt);
+
+        return roleManagementService.restoreRole(
+            authenticatedUserId,
+            roleCode
+        );
+    }
+
+    @GetMapping("/{roleCode}/history")
+    @PreAuthorize(
+        "hasAuthority('" +
+            PermissionCodes.ROLE_READ +
+        "')"
+    )
+    public PageResponse<RoleChangeLogResponse>
+        getRoleChangeHistory(
+            @PathVariable
+            String roleCode,
+
+            @RequestParam(
+                defaultValue = "0"
+            )
             int page,
 
-            @RequestParam(defaultValue = "20")
+            @RequestParam(
+                defaultValue = "20"
+            )
             int size,
 
             @AuthenticationPrincipal
             Jwt jwt
         ) {
-            Long authenticatedUserId =
-                authenticatedUserIdResolver
-                    .resolve(jwt);
 
-            return rolePermissionManagementService
-                .getRolePermissionAssignmentHistory(
-                    authenticatedUserId,
-                    roleCode,
-                    page,
-                    size
-                );
-        }
-
-    @PostMapping("/{roleCode}/permissions")
-    @PreAuthorize(
-        "hasAuthority('" +
-            PermissionCodes.ROLE_PERMISSION_MANAGE +
-        "')"
-    )
-    public PermissionSummaryResponse grantPermission(
-        @PathVariable String roleCode,
-
-        @Valid
-        @RequestBody
-        GrantRolePermissionRequest request,
-
-        @AuthenticationPrincipal
-        Jwt jwt
-    ) {
         Long authenticatedUserId =
             authenticatedUserIdResolver
                 .resolve(jwt);
 
-        return rolePermissionManagementService
-            .grantPermission(
+        return roleChangeHistoryService
+            .getRoleChangeHistory(
                 authenticatedUserId,
                 roleCode,
-                request.permissionCode(),
-                request.note()
-            );
-    }
-
-    @DeleteMapping(
-        "/{roleCode}/permissions/{permissionCode}"
-    )
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize(
-        "hasAuthority('" +
-            PermissionCodes.ROLE_PERMISSION_MANAGE +
-        "')"
-    )
-    public void revokePermission(
-        @PathVariable String roleCode,
-
-        @PathVariable String permissionCode,
-
-        @Valid
-        @RequestBody
-        RevokeRolePermissionRequest request,
-
-        @AuthenticationPrincipal
-        Jwt jwt
-    ) {
-        Long authenticatedUserId =
-            authenticatedUserIdResolver
-                .resolve(jwt);
-
-        rolePermissionManagementService
-            .revokePermission(
-                authenticatedUserId,
-                roleCode,
-                permissionCode,
-                request.note()
+                page,
+                size
             );
     }
 }
