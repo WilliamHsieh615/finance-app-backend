@@ -11,6 +11,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -27,6 +28,12 @@ import jakarta.persistence.UniqueConstraint;
                 "code"
             }
         )
+    },
+    indexes = {
+        @Index(
+            name = "idx_account_types_account_class",
+            columnList = "account_class_id"
+        )
     }
 )
 public class AccountType {
@@ -35,27 +42,60 @@ public class AccountType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ledger_type_id", nullable = false)
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
+    @JoinColumn(
+        name = "ledger_type_id",
+        nullable = false
+    )
     private LedgerType ledgerType;
 
-    @Column(name = "code", nullable = false, length = 50)
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
+    @JoinColumn(
+        name = "account_class_id",
+        nullable = false
+    )
+    private AccountClass accountClass;
+
+    @Column(
+        name = "code",
+        nullable = false,
+        length = 50
+    )
     private String code;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(
+        name = "name",
+        nullable = false,
+        length = 100
+    )
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "icon_id")
     private Icon icon;
 
-    @Column(name = "direction", nullable = false)
-    private byte direction;
+    @Column(
+        name = "is_contra",
+        nullable = false
+    )
+    private boolean contra;
 
-    @Column(name = "note", length = 255)
+    @Column(
+        name = "note",
+        length = 255
+    )
     private String note;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(
+        name = "is_active",
+        nullable = false
+    )
     private boolean active = true;
 
     @Column(
@@ -88,15 +128,29 @@ public class AccountType {
         return ledgerType;
     }
 
-    public void setLedgerType(LedgerType ledgerType) {
+    public void setLedgerType(
+        LedgerType ledgerType
+    ) {
         this.ledgerType = ledgerType;
+    }
+
+    public AccountClass getAccountClass() {
+        return accountClass;
+    }
+
+    public void setAccountClass(
+        AccountClass accountClass
+    ) {
+        this.accountClass = accountClass;
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(
+        String code
+    ) {
         this.code = code;
     }
 
@@ -104,7 +158,9 @@ public class AccountType {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(
+        String name
+    ) {
         this.name = name;
     }
 
@@ -112,23 +168,29 @@ public class AccountType {
         return icon;
     }
 
-    public void setIcon(Icon icon) {
+    public void setIcon(
+        Icon icon
+    ) {
         this.icon = icon;
     }
 
-    public byte getDirection() {
-        return direction;
+    public boolean isContra() {
+        return contra;
     }
 
-    public void setDirection(byte direction) {
-        this.direction = direction;
+    public void setContra(
+        boolean contra
+    ) {
+        this.contra = contra;
     }
 
     public String getNote() {
         return note;
     }
 
-    public void setNote(String note) {
+    public void setNote(
+        String note
+    ) {
         this.note = note;
     }
 
@@ -136,7 +198,9 @@ public class AccountType {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(
+        boolean active
+    ) {
         this.active = active;
     }
 
@@ -152,7 +216,20 @@ public class AccountType {
         return deletedDate;
     }
 
-    public void setDeletedDate(LocalDateTime deletedDate) {
+    public void setDeletedDate(
+        LocalDateTime deletedDate
+    ) {
         this.deletedDate = deletedDate;
+    }
+
+    public byte getEffectiveNetWorthDirection() {
+        byte direction =
+            accountClass.getNetWorthDirection();
+
+        if (contra) {
+            return (byte) (direction * -1);
+        }
+
+        return direction;
     }
 }

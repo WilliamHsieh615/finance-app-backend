@@ -26,15 +26,27 @@ import jakarta.persistence.Table;
 public class CashflowTransactionDetail {
 
     @Id
-    private Long transactionId;
+    private Long transactionEntryId;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
     @MapsId
-    @JoinColumn(name = "transaction_id", nullable = false)
-    private TransactionEntry transaction;
+    @JoinColumn(
+        name = "transaction_entry_id",
+        nullable = false
+    )
+    private TransactionEntry transactionEntry;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
+    @JoinColumn(
+        name = "category_id",
+        nullable = false
+    )
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,23 +56,27 @@ public class CashflowTransactionDetail {
     protected CashflowTransactionDetail() {
     }
 
-    public Long getTransactionId() {
-        return transactionId;
+    public Long getTransactionEntryId() {
+        return transactionEntryId;
     }
 
-    public TransactionEntry getTransaction() {
-        return transaction;
+    public TransactionEntry getTransactionEntry() {
+        return transactionEntry;
     }
 
-    public void setTransaction(TransactionEntry transaction) {
-        this.transaction = transaction;
+    public void setTransactionEntry(
+        TransactionEntry transactionEntry
+    ) {
+        this.transactionEntry = transactionEntry;
     }
 
     public Category getCategory() {
         return category;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(
+        Category category
+    ) {
         this.category = category;
     }
 
@@ -68,7 +84,9 @@ public class CashflowTransactionDetail {
         return merchant;
     }
 
-    public void setMerchant(Merchant merchant) {
+    public void setMerchant(
+        Merchant merchant
+    ) {
         this.merchant = merchant;
     }
 }

@@ -6,6 +6,7 @@ import com.williamhsieh.financeapp.finance.merchant.entity.Merchant;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -13,22 +14,39 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "cashflow_recurring_transaction_details")
+@Table(
+    name = "cashflow_recurring_transaction_details",
+    indexes = {
+        @Index(
+            name = "idx_cashflow_recurring_details_category",
+            columnList = "category_id"
+        )
+    }
+)
 public class CashflowRecurringTransactionDetail {
-    
-    @Id
-    private Long recurringTransactionId;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @Id
+    private Long recurringTransactionEntryId;
+
+    @OneToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
     @MapsId
     @JoinColumn(
-        name = "recurring_transaction_id",
+        name = "recurring_transaction_entry_id",
         nullable = false
     )
-    private RecurringTransactionEntry recurringTransaction;
+    private RecurringTransactionEntry recurringTransactionEntry;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
+    @JoinColumn(
+        name = "category_id",
+        nullable = false
+    )
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,25 +56,30 @@ public class CashflowRecurringTransactionDetail {
     protected CashflowRecurringTransactionDetail() {
     }
 
-    public Long getRecurringTransactionId() {
-        return recurringTransactionId;
+    public Long getRecurringTransactionEntryId() {
+        return recurringTransactionEntryId;
     }
 
-    public RecurringTransactionEntry getRecurringTransaction() {
-        return recurringTransaction;
+    public RecurringTransactionEntry
+        getRecurringTransactionEntry() {
+
+        return recurringTransactionEntry;
     }
 
-    public void setRecurringTransaction(
-        RecurringTransactionEntry recurringTransaction
+    public void setRecurringTransactionEntry(
+        RecurringTransactionEntry recurringTransactionEntry
     ) {
-        this.recurringTransaction = recurringTransaction;
+        this.recurringTransactionEntry =
+            recurringTransactionEntry;
     }
 
     public Category getCategory() {
         return category;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(
+        Category category
+    ) {
         this.category = category;
     }
 
@@ -64,7 +87,9 @@ public class CashflowRecurringTransactionDetail {
         return merchant;
     }
 
-    public void setMerchant(Merchant merchant) {
+    public void setMerchant(
+        Merchant merchant
+    ) {
         this.merchant = merchant;
     }
 }
