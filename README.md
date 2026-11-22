@@ -1,5 +1,7 @@
 # FinFun｜讓理財變得更有趣
 
+## 資料庫結構
+
     USE finance_app;
 
     -- (V1 DB AP)資源提供者
@@ -3033,8 +3035,9 @@
         CONSTRAINT fk_login_logs_refresh_token FOREIGN KEY (refresh_token_id) REFERENCES user_refresh_tokens(id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
+## 內部 API
 
-
+## 外部 API
 ##### 國別資料來源
 ###### (1) dr5hn：https://github.com/dr5hn/countries-states-cities-database/tree/master
 ###### (2) REST Countries：https://restcountries.com/
