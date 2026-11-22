@@ -1603,11 +1603,42 @@
         FOREIGN KEY (risk_rating_scale_id) REFERENCES risk_rating_scales(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
+    -- (V1 DB AP)正常餘額方向類型表
+    CREATE TABLE normal_balance_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)會計科目類別表
+    CREATE TABLE account_classes (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        normal_balance_type_id           BIGINT         NOT NULL,
+    
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        net_worth_direction              TINYINT        NOT NULL DEFAULT 0,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
+
+        CHECK (net_worth_direction IN (1, 0, -1)),
+        INDEX (normal_balance_type_id),
+        FOREIGN KEY (normal_balance_type_id) REFERENCES normal_balance_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
     -- (V1 DB AP)帳戶種類表
     CREATE TABLE account_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
         ledger_type_id                   BIGINT         NOT NULL,
-        
+        account_class_id                 BIGINT         NOT NULL,
         code                             VARCHAR(50)    NOT NULL,
         name                             VARCHAR(100)   NOT NULL,                        -- 帳戶性質（如：
                                                                                          -- 收支帳下的現金 cash、銀行 bank、信用卡 credit_card ，
@@ -1619,17 +1650,18 @@
                                                                                          -- 固定資產帳下的房貸產 property、汽車 automobile、機車 motorcycle、家電、3C
                                                                                          -- 存貨帳下的生活用品或是備品
         icon_id                          BIGINT         NULL,
-        direction                        TINYINT        NOT NULL,                        -- 正向 / 負向
+        is_contra                        BOOLEAN        NOT NULL DEFAULT FALSE,          -- 是否為相反 (用於判斷是否為該會計科目類別的負向，如 折舊、呆帳等)
         note                             VARCHAR(255),
         is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,           -- 是否啟用
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL,                            -- 刪除時間 (由後端寫入)
 
-        CHECK (direction IN (1, -1)),
+        INDEX (account_class_id),
         UNIQUE (ledger_type_id, code),
         FOREIGN KEY (ledger_type_id) REFERENCES ledger_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE
+        FOREIGN KEY (account_class_id) REFERENCES account_classes(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (icon_id) REFERENCES icons(id) ON DELETE SET NULL ON UPDATE CASCADE,
     );
 
     -- (V1 DB AP)帳戶表
