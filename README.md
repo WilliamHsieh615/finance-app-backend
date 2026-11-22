@@ -3043,7 +3043,7 @@
 http://localhost:8080/api/v1
 ```
 
-#### 公開 API
+### 公開 API
 
 ```text
 /registration/**
@@ -3053,7 +3053,7 @@ http://localhost:8080/api/v1
 /auth/logout
 ```
 
-#### 受保護 API
+### 受保護 API
 
 Header 必須帶：
 
@@ -3077,7 +3077,7 @@ Authorization
 Content-Type: application/json
 ```
 
-#### 1.註冊 API
+#### 一、註冊 API
 
 | Method | 路徑 | 功能 | 驗證 |
 |---|---|---|---|
@@ -3121,7 +3121,7 @@ GET /api/v1/registration/options
 201 Created
 ```
 
-#### 2.Email 與 SMS 驗證
+#### 二、Email 與 SMS 驗證
 
 | Method | 路徑 | 功能 | 成功狀態 |
 |---|---|---|---|
@@ -3165,7 +3165,7 @@ GET /api/v1/registration/options
 
 Email 驗證完成後帳號會啟用；SMS 驗證不是帳號啟用的必要條件。
 
-#### 3.登入與 Token
+#### 三、登入與 Token
 
 | Method | 路徑 | 功能 | Access Token |
 |---|---|---|---|
@@ -3248,7 +3248,7 @@ Authorization: Bearer <accessToken>
 - 取得 permissions
 - 前端重新整理後恢復登入狀態
 
-#### 4.後台會員管理
+#### 四、後台會員管理
 
 Base path：
 
@@ -3335,7 +3335,7 @@ POST /api/v1/admin/users/deleted/2/restore
 GET /api/v1/admin/users/deleted?page=0&size=20&keyword=william
 ```
 
-#### 5.會員角色指派
+#### 五、會員角色指派
 
 Base path：
 
@@ -3381,7 +3381,7 @@ DELETE /api/v1/admin/users/2/roles/SUPPORT
 GET /api/v1/admin/users/2/roles/history?page=0&size=20
 ```
 
-#### 6.權限類型與 Permission 定義
+#### 六、權限類型與 Permission 定義
 
 ##### 權限類型
 
@@ -3462,7 +3462,7 @@ POST /api/v1/admin/permissions/USER_EMAIL_UPDATE/restore
 GET /api/v1/admin/permissions/USER_EMAIL_UPDATE/history?page=0&size=20
 ```
 
-#### 7.Role 定義管理
+#### 七、Role 定義管理
 
 Base path：
 
@@ -3534,7 +3534,7 @@ SUPER_ADMIN
 GET /api/v1/admin/roles/FINANCE_MANAGER/history?page=0&size=20
 ```
 
-#### 8.角色權限管理
+#### 八、角色權限管理
 
 Base path：
 
@@ -3580,7 +3580,7 @@ DELETE /api/v1/admin/roles/SUPPORT/permissions/USER_STATUS_UPDATE
 GET /api/v1/admin/roles/SUPPORT/permissions/history?page=0&size=20
 ```
 
-#### 9.分頁格式
+#### 九、分頁格式
 
 所有分頁 API 使用：
 
@@ -3603,7 +3603,7 @@ Response：
 }
 ```
 
-#### 10.常見呼叫順序
+#### 十、呼叫順序
 
 前端啟動與登入流程：
 
