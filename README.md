@@ -3037,6 +3037,616 @@
 
 ## 內部 API
 
+### 基底
+
+```text
+http://localhost:8080/api/v1
+```
+
+#### 公開 API
+
+```text
+/registration/**
+/verifications/**
+/auth/login
+/auth/refresh
+/auth/logout
+```
+
+#### 受保護 API
+
+Header 必須帶：
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Postman 選擇：
+
+```text
+Authorization
+→ Bearer Token
+→ 只貼 accessToken 本身
+```
+
+不要在 Token 欄位再輸入 `Bearer `。
+
+有 JSON Body 時加：
+
+```http
+Content-Type: application/json
+```
+
+#### 1.註冊 API
+
+| Method | 路徑 | 功能 | 驗證 |
+|---|---|---|---|
+| GET | `/registration/options` | 國家、時區、語言選項 | 公開 |
+| POST | `/registration` | 註冊會員 | 公開 |
+
+##### GET /registration/options
+
+```http
+GET /api/v1/registration/options
+```
+
+回傳：
+
+```json
+{
+  "countries": [],
+  "languages": []
+}
+```
+
+##### POST /registration
+
+```json
+{
+  "countryId": 216,
+  "timezoneId": 280,
+  "languageId": 154,
+  "name": "王小明",
+  "nickname": "William",
+  "email": "william@example.com",
+  "password": "Password123!",
+  "birthday": "1994-06-15",
+  "phone": "+886912345678"
+}
+```
+
+成功：
+
+```http
+201 Created
+```
+
+#### 2.Email 與 SMS 驗證
+
+| Method | 路徑 | 功能 | 成功狀態 |
+|---|---|---|---|
+| POST | `/verifications/email/send` | 發送 Email 驗證信 | 204 |
+| POST | `/verifications/email/confirm` | 確認 Email Token | 200 |
+| POST | `/verifications/sms/send` | 發送 SMS 驗證碼 | 204 |
+| POST | `/verifications/sms/confirm` | 確認四位數驗證碼 | 200 |
+
+##### 發送 Email
+
+```json
+{
+  "email": "william@example.com"
+}
+```
+
+##### 確認 Email
+
+```json
+{
+  "token": "驗證連結中的-token"
+}
+```
+
+##### 發送 SMS
+
+```json
+{
+  "phone": "+886912345678"
+}
+```
+
+##### 確認 SMS
+
+```json
+{
+  "phone": "+886912345678",
+  "code": "1234"
+}
+```
+
+Email 驗證完成後帳號會啟用；SMS 驗證不是帳號啟用的必要條件。
+
+#### 3.登入與 Token
+
+| Method | 路徑 | 功能 | Access Token |
+|---|---|---|---|
+| POST | `/auth/login` | 登入 | 不需要 |
+| POST | `/auth/refresh` | 輪替 Access／Refresh Token | 不需要 |
+| POST | `/auth/logout` | 撤銷 Refresh Token | 不需要 |
+| GET | `/auth/me` | 取得目前登入會員 | 需要 |
+
+##### POST /auth/login
+
+```json
+{
+  "email": "william@example.com",
+  "password": "Password123!"
+}
+```
+
+成功回傳：
+
+```json
+{
+  "accessToken": "...",
+  "refreshToken": "...",
+  "tokenType": "Bearer",
+  "expiresIn": 900,
+  "refreshTokenExpiresIn": 2592000,
+  "user": {
+    "id": 2,
+    "userNumber": "JUU8XSLLHE",
+    "name": "William",
+    "nickname": "William",
+    "email": "william@example.com"
+  }
+}
+```
+
+##### POST /auth/refresh
+
+```json
+{
+  "refreshToken": "登入或上次刷新取得的-refreshToken"
+}
+```
+
+成功後，前端必須同時替換：
+
+```text
+accessToken
+refreshToken
+```
+
+舊 Refresh Token 已失效。
+
+##### POST /auth/logout
+
+```json
+{
+  "refreshToken": "目前使用中的-refreshToken"
+}
+```
+
+成功：
+
+```http
+204 No Content
+```
+
+##### GET /auth/me
+
+```http
+GET /api/v1/auth/me
+Authorization: Bearer <accessToken>
+```
+
+用途：
+
+- 驗證目前 Access Token
+- 取得會員完整資料
+- 取得 roles
+- 取得 permissions
+- 前端重新整理後恢復登入狀態
+
+#### 4.後台會員管理
+
+Base path：
+
+```text
+/api/v1/admin/users
+```
+
+| Method | 路徑 | 功能 | Permission |
+|---|---|---|---|
+| GET | `/admin/users` | 會員分頁清單 | `USER_READ` |
+| GET | `/admin/users/{userId}` | 會員詳細資料 | `USER_READ` |
+| GET | `/admin/users/{userId}/status-history` | 狀態歷程 | `USER_READ` |
+| PATCH | `/admin/users/{userId}/status` | 修改會員狀態 | `USER_STATUS_UPDATE` |
+| DELETE | `/admin/users/{userId}` | 軟刪除會員 | `USER_DELETE` |
+| GET | `/admin/users/deleted` | 已刪除會員清單 | `USER_READ_DELETED` |
+| GET | `/admin/users/deleted/{userId}` | 已刪除會員詳細資料 | `USER_READ_DELETED` |
+| GET | `/admin/users/deleted/{userId}/status-history` | 已刪除會員狀態歷程 | `USER_READ_DELETED` |
+| POST | `/admin/users/deleted/{userId}/restore` | 恢復會員 | `USER_RESTORE` |
+
+##### 會員清單
+
+```http
+GET /api/v1/admin/users?page=0&size=20
+```
+
+可選條件：
+
+```http
+GET /api/v1/admin/users?page=0&size=20&keyword=william&status=ACTIVE
+```
+
+##### 修改會員狀態
+
+```http
+PATCH /api/v1/admin/users/2/status
+```
+
+```json
+{
+  "status": "SUSPENDED",
+  "note": "違反服務條款"
+}
+```
+
+狀態代碼：
+
+```text
+PENDING_EMAIL_VERIFICATION
+ACTIVE
+SUSPENDED
+LOCKED
+DELETED
+```
+
+##### 軟刪除會員
+
+```http
+DELETE /api/v1/admin/users/2
+```
+
+DELETE 目前需要 JSON Body：
+
+```json
+{
+  "reason": "會員要求刪除帳號"
+}
+```
+
+##### 恢復會員
+
+```http
+POST /api/v1/admin/users/deleted/2/restore
+```
+
+```json
+{
+  "reason": "確認恢復帳號"
+}
+```
+
+##### 已刪除會員清單
+
+```http
+GET /api/v1/admin/users/deleted?page=0&size=20&keyword=william
+```
+
+#### 5.會員角色指派
+
+Base path：
+
+```text
+/api/v1/admin/users/{userId}/roles
+```
+
+| Method | 路徑 | 功能 | Permission |
+|---|---|---|---|
+| GET | `/admin/users/{userId}/roles` | 會員目前角色 | `ROLE_READ` |
+| POST | `/admin/users/{userId}/roles` | 指派角色 | `ROLE_ASSIGN` |
+| DELETE | `/admin/users/{userId}/roles/{roleCode}` | 撤銷角色 | `ROLE_ASSIGN` |
+| GET | `/admin/users/{userId}/roles/history` | 指派／撤銷歷程 | `ROLE_READ` |
+
+##### 指派角色
+
+```http
+POST /api/v1/admin/users/2/roles
+```
+
+```json
+{
+  "roleCode": "SUPPORT",
+  "note": "調整為客服人員"
+}
+```
+
+##### 撤銷角色
+
+```http
+DELETE /api/v1/admin/users/2/roles/SUPPORT
+```
+
+```json
+{
+  "note": "已離開客服部門"
+}
+```
+
+##### 角色指派歷程
+
+```http
+GET /api/v1/admin/users/2/roles/history?page=0&size=20
+```
+
+#### 6.權限類型與 Permission 定義
+
+##### 權限類型
+
+| Method | 路徑 | 功能 | Permission |
+|---|---|---|---|
+| GET | `/admin/permission-types` | 有效權限類型 | `PERMISSION_READ` |
+
+```http
+GET /api/v1/admin/permission-types
+```
+
+供建立或修改 Permission 的下拉選單使用。
+
+##### Permission 管理
+
+Base path：
+
+```text
+/api/v1/admin/permissions
+```
+
+| Method | 路徑 | 功能 | Permission |
+|---|---|---|---|
+| GET | `/admin/permissions` | 有效權限清單 | `PERMISSION_READ` |
+| POST | `/admin/permissions` | 建立權限 | `PERMISSION_MANAGE` |
+| PUT | `/admin/permissions/{code}` | 修改權限 | `PERMISSION_MANAGE` |
+| DELETE | `/admin/permissions/{code}` | 停用權限 | `PERMISSION_MANAGE` |
+| POST | `/admin/permissions/{code}/restore` | 恢復權限 | `PERMISSION_MANAGE` |
+| GET | `/admin/permissions/deactivated` | 停用權限清單 | `PERMISSION_MANAGE` |
+| GET | `/admin/permissions/{code}/history` | 權限定義異動歷程 | `PERMISSION_MANAGE` |
+
+##### 建立 Permission
+
+```json
+{
+  "permissionTypeCode": "USER_MANAGEMENT",
+  "code": "USER_EMAIL_UPDATE",
+  "name": "修改會員電子郵件",
+  "note": "允許後台修改會員 Email"
+}
+```
+
+成功：
+
+```http
+201 Created
+```
+
+##### 修改 Permission
+
+```http
+PUT /api/v1/admin/permissions/USER_EMAIL_UPDATE
+```
+
+```json
+{
+  "permissionTypeCode": "USER_MANAGEMENT",
+  "name": "修改會員 Email",
+  "note": "修改會員登入 Email"
+}
+```
+
+Permission code 不可修改。
+
+##### 停用與恢復
+
+```http
+DELETE /api/v1/admin/permissions/USER_EMAIL_UPDATE
+```
+
+```http
+POST /api/v1/admin/permissions/USER_EMAIL_UPDATE/restore
+```
+
+##### 權限歷程
+
+```http
+GET /api/v1/admin/permissions/USER_EMAIL_UPDATE/history?page=0&size=20
+```
+
+#### 7.Role 定義管理
+
+Base path：
+
+```text
+/api/v1/admin/roles
+```
+
+| Method | 路徑 | 功能 | Permission |
+|---|---|---|---|
+| GET | `/admin/roles` | 有效角色清單 | `ROLE_READ` |
+| POST | `/admin/roles` | 建立角色 | `ROLE_CREATE` |
+| PUT | `/admin/roles/{roleCode}` | 修改角色 | `ROLE_UPDATE` |
+| DELETE | `/admin/roles/{roleCode}` | 停用角色 | `ROLE_DELETE` |
+| POST | `/admin/roles/{roleCode}/restore` | 恢復角色 | `ROLE_UPDATE` |
+| GET | `/admin/roles/deactivated` | 停用角色清單 | `ROLE_UPDATE` |
+| GET | `/admin/roles/{roleCode}/history` | 角色定義異動歷程 | `ROLE_READ` |
+
+##### 建立角色
+
+```json
+{
+  "code": "FINANCE_MANAGER",
+  "name": "財務管理人員",
+  "note": "管理財務後台功能"
+}
+```
+
+成功：
+
+```http
+201 Created
+```
+
+##### 修改角色
+
+```http
+PUT /api/v1/admin/roles/FINANCE_MANAGER
+```
+
+```json
+{
+  "name": "進階財務管理人員",
+  "note": "管理進階財務功能"
+}
+```
+
+Role code 不可修改。
+
+##### 停用與恢復
+
+```http
+DELETE /api/v1/admin/roles/FINANCE_MANAGER
+```
+
+```http
+POST /api/v1/admin/roles/FINANCE_MANAGER/restore
+```
+
+禁止停用：
+
+```text
+USER
+SUPER_ADMIN
+```
+
+##### 角色定義歷程
+
+```http
+GET /api/v1/admin/roles/FINANCE_MANAGER/history?page=0&size=20
+```
+
+#### 8.角色權限管理
+
+Base path：
+
+```text
+/api/v1/admin/roles/{roleCode}/permissions
+```
+
+| Method | 路徑 | 功能 | Permission |
+|---|---|---|---|
+| GET | `/admin/roles/{roleCode}/permissions` | 角色目前權限 | `PERMISSION_READ` |
+| POST | `/admin/roles/{roleCode}/permissions` | 授予權限 | `ROLE_PERMISSION_MANAGE` |
+| DELETE | `/admin/roles/{roleCode}/permissions/{permissionCode}` | 撤銷權限 | `ROLE_PERMISSION_MANAGE` |
+| GET | `/admin/roles/{roleCode}/permissions/history` | 授予／撤銷歷程 | `PERMISSION_READ` |
+
+##### 授予角色權限
+
+```http
+POST /api/v1/admin/roles/SUPPORT/permissions
+```
+
+```json
+{
+  "permissionCode": "USER_STATUS_UPDATE",
+  "note": "客服需要調整會員狀態"
+}
+```
+
+##### 撤銷角色權限
+
+```http
+DELETE /api/v1/admin/roles/SUPPORT/permissions/USER_STATUS_UPDATE
+```
+
+```json
+{
+  "note": "客服不再需要此權限"
+}
+```
+
+##### 角色權限歷程
+
+```http
+GET /api/v1/admin/roles/SUPPORT/permissions/history?page=0&size=20
+```
+
+#### 9.分頁格式
+
+所有分頁 API 使用：
+
+```text
+page：從 0 開始
+size：1～100
+```
+
+Response：
+
+```json
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true
+}
+```
+
+#### 10.常見呼叫順序
+
+前端啟動與登入流程：
+
+```text
+GET registration/options
+    ↓
+POST registration
+    ↓
+POST verifications/email/send
+    ↓
+POST verifications/email/confirm
+    ↓
+POST auth/login
+    ↓
+保存 accessToken、refreshToken
+    ↓
+GET auth/me
+    ↓
+依 roles、permissions 顯示功能
+```
+
+Access Token 過期：
+
+```text
+API 回傳 ACCESS_TOKEN_EXPIRED
+    ↓
+POST auth/refresh
+    ↓
+替換兩個新 Token
+    ↓
+重送原 API
+```
+
+登出：
+
+```text
+POST auth/logout
+    ↓
+清除前端 accessToken
+    ↓
+清除前端 refreshToken
+```
+
 ## 外部 API
 ##### 國別資料來源
 ###### (1) dr5hn：https://github.com/dr5hn/countries-states-cities-database/tree/master
