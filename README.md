@@ -1307,6 +1307,49 @@
         FOREIGN KEY (unit_type_id) REFERENCES unit_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
+    -- (V1 DB AP)工作區類型表
+    CREATE TABLE workspace_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)工作區表
+    CREATE TABLE workspaces (
+        id                  BIGINT       AUTO_INCREMENT PRIMARY KEY,
+        workspace_type_id   BIGINT       NOT NULL,
+        name                VARCHAR(100) NOT NULL,
+        note                VARCHAR(255) NULL,
+        created_by_user_id  BIGINT       NULL,
+        is_active           BOOLEAN      NOT NULL DEFAULT TRUE,
+        created_date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date        DATETIME     NULL,
+    
+        INDEX (workspace_type_id),
+        INDEX (created_by_user_id),
+
+        FOREIGN KEY (workspace_type_id) REFERENCES workspace_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+    );
+
+    -- (V1 DB AP)工作區成員角色表
+    CREATE TABLE workspace_member_roles (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
     -- (V1 DB AP)帳本種類表
     CREATE TABLE ledger_types (
         id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
