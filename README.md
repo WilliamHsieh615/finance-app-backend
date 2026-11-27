@@ -1321,15 +1321,15 @@
 
     -- (V1 DB AP)工作區表
     CREATE TABLE workspaces (
-        id                  BIGINT       AUTO_INCREMENT PRIMARY KEY,
-        workspace_type_id   BIGINT       NOT NULL,
-        name                VARCHAR(100) NOT NULL,
-        note                VARCHAR(255) NULL,
-        created_by_user_id  BIGINT       NULL,
-        is_active           BOOLEAN      NOT NULL DEFAULT TRUE,
-        created_date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_date        DATETIME     NULL,
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        workspace_type_id                BIGINT         NOT NULL,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        created_by_user_id               BIGINT         NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
     
         INDEX (workspace_type_id),
         INDEX (created_by_user_id),
@@ -1348,6 +1348,73 @@
         created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)工作區成員表
+    CREATE TABLE workspace_members (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        workspace_id                     BIGINT         NOT NULL,
+        user_id                          BIGINT         NOT NULL,
+        workspace_member_role_id         BIGINT         NOT NULL,
+    
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        joined_date                      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL,
+    
+        UNIQUE (workspace_id, user_id),
+        INDEX (user_id),
+        INDEX (workspace_member_role_id),
+
+        FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (workspace_member_role_id) REFERENCES workspace_member_roles(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
+    -- (V1 DB AP)工作區權限類型表
+    CREATE TABLE workspace_permission_types (
+        id                               BIGINT         AUTO_INCREMENT PRIMARY KEY,
+        code                             VARCHAR(50)    NOT NULL UNIQUE,
+        name                             VARCHAR(100)   NOT NULL,
+        note                             VARCHAR(255)   NULL,
+        is_active                        BOOLEAN        NOT NULL DEFAULT TRUE,
+        created_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                     DATETIME       NULL
+    );
+
+    -- (V1 DB AP)工作區權限表
+    CREATE TABLE workspace_permissions (
+        id                           BIGINT       AUTO_INCREMENT PRIMARY KEY,
+        workspace_permission_type_id BIGINT      NOT NULL,
+        code                         VARCHAR(50)  NOT NULL UNIQUE,
+        name                         VARCHAR(100) NOT NULL,
+        note                         VARCHAR(255) NULL,
+        is_active                    BOOLEAN      NOT NULL DEFAULT TRUE,
+        created_date                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                 DATETIME     NULL,
+        INDEX (workspace_permission_type_id),
+        FOREIGN KEY (workspace_permission_type_id) REFERENCES workspace_permission_types(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    );
+
+    -- (V1 DB AP)工作區成員角色與權限關聯表
+    CREATE TABLE workspace_member_role_permissions (
+        id                           BIGINT       AUTO_INCREMENT PRIMARY KEY,
+        workspace_member_role_id     BIGINT       NOT NULL,
+        workspace_permission_id      BIGINT       NOT NULL,
+    
+        is_active                    BOOLEAN      NOT NULL DEFAULT TRUE,
+        created_date                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_date                 DATETIME     NULL,
+    
+        UNIQUE (workspace_member_role_id, workspace_permission_id),
+        INDEX (workspace_permission_id),
+
+        FOREIGN KEY (workspace_member_role_id) REFERENCES workspace_member_roles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        FOREIGN KEY (workspace_permission_id) REFERENCES workspace_permissions(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );
 
     -- (V1 DB AP)帳本種類表
